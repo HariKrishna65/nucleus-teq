@@ -1,0 +1,7 @@
+Primitive Data Types:
+- int, float, double, char, boolean
+- Stored directly in memory
+
+Reference Data Types:
+- String, Array, Objects
+- Store memory address of objects
