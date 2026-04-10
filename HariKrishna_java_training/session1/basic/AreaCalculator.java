@@ -28,6 +28,7 @@ public class AreaCalculator {
             default:
                 System.out.println("Invalid choice");
                 return;
+                
         }
 
         System.out.println("Area: " + shape.calculateArea());

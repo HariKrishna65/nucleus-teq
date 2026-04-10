@@ -1,36 +1,14 @@
 package session1.basic;
 
-import java.util.Scanner;
+public class Circle implements Shape {
+    private double radius;
+    private static final double PI = 3.14159;
 
-public class AreaCalculator {
+    public Circle(double radius) {
+        this.radius = radius;
+    }
 
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-
-        System.out.println("1.Circle 2.Rectangle 3.Triangle");
-        int choice = sc.nextInt();
-
-        Shape shape = null;
-
-        switch (choice) {
-            case 1:
-                System.out.print("Enter radius: ");
-                shape = new Circle(sc.nextDouble());
-                break;
-            case 2:
-                System.out.print("Enter length and width: ");
-                shape = new Rectangle(sc.nextDouble(), sc.nextDouble());
-                break;
-            case 3:
-                System.out.print("Enter base and height: ");
-                shape = new Triangle(sc.nextDouble(), sc.nextDouble());
-                break;
-            default:
-                System.out.println("Invalid choice");
-                return;
-        }
-
-        System.out.println("Area: " + shape.calculateArea());
-        sc.close();
+    public double calculateArea() {
+        return PI * radius * radius;
     }
 }
