@@ -1,4 +1,4 @@
-package com.example.app.model;
+package com.example.spring_rest_app.model;
 
 public class User {
 

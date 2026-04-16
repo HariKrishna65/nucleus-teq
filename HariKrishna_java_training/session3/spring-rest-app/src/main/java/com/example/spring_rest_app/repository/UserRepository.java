@@ -2,7 +2,6 @@ package com.example.spring_rest_app.repository;
 
 import com.example.spring_rest_app.model.User;
 import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 
