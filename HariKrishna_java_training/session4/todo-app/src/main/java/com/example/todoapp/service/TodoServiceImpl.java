@@ -28,6 +28,8 @@ public class TodoServiceImpl implements TodoService {
 
         if (dto.getStatus() == null) {
             todo.setStatus(Todo.Status.PENDING);
+        } else {
+            todo.setStatus(parseStatus(dto.getStatus()));
         }
 
         todo.setCreatedAt(LocalDateTime.now());
@@ -57,22 +59,31 @@ public class TodoServiceImpl implements TodoService {
         Todo existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo not found"));
 
-        // Validate transition
+        // Validate status transition
         if (dto.getStatus() != null) {
-            Todo.Status newStatus = Todo.Status.valueOf(dto.getStatus());
+            Todo.Status newStatus = parseStatus(dto.getStatus());
 
-            if (existing.getStatus() == Todo.Status.PENDING && newStatus == Todo.Status.COMPLETED ||
-                existing.getStatus() == Todo.Status.COMPLETED && newStatus == Todo.Status.PENDING) {
+            boolean validTransition =
+                    (existing.getStatus() == Todo.Status.PENDING && newStatus == Todo.Status.COMPLETED) ||
+                    (existing.getStatus() == Todo.Status.COMPLETED && newStatus == Todo.Status.PENDING);
+
+            if (validTransition) {
                 existing.setStatus(newStatus);
             } else {
                 throw new InvalidStatusException("Invalid status transition");
             }
         }
 
-        existing.setTitle(dto.getTitle());
-        existing.setDescription(dto.getDescription());
+        if (dto.getTitle() != null) {
+            existing.setTitle(dto.getTitle());
+        }
 
-        return mapToDTO(repository.save(existing));
+        if (dto.getDescription() != null) {
+            existing.setDescription(dto.getDescription());
+        }
+
+        Todo updated = repository.save(existing);
+        return mapToDTO(updated);
     }
 
     @Override
@@ -90,7 +101,7 @@ public class TodoServiceImpl implements TodoService {
         todo.setDescription(dto.getDescription());
 
         if (dto.getStatus() != null) {
-            todo.setStatus(Todo.Status.valueOf(dto.getStatus()));
+            todo.setStatus(parseStatus(dto.getStatus()));
         }
 
         return todo;
@@ -102,5 +113,14 @@ public class TodoServiceImpl implements TodoService {
         dto.setDescription(todo.getDescription());
         dto.setStatus(todo.getStatus().name());
         return dto;
+    }
+
+    // ✅ Safe Enum Parsing
+    private Todo.Status parseStatus(Object status) {
+        try {
+            return Todo.Status.valueOf(status.toUpperCase());
+        } catch (Exception e) {
+            throw new InvalidStatusException("Invalid status value: " + object);
+        }
     }
 }
