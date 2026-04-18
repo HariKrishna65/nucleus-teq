@@ -17,27 +17,34 @@ public class TodoServiceImpl implements TodoService {
 
     private final TodoRepository repository;
 
-    // Constructor Injection
+    // ✅ Constructor Injection (MANDATORY)
     public TodoServiceImpl(TodoRepository repository) {
         this.repository = repository;
     }
 
+    // ✅ CREATE TODO
     @Override
     public TodoDTO createTodo(TodoDTO dto) {
-        Todo todo = mapToEntity(dto);
 
+        Todo todo = new Todo();
+        todo.setTitle(dto.getTitle());
+        todo.setDescription(dto.getDescription());
+
+        // ✅ Default status
         if (dto.getStatus() == null) {
             todo.setStatus(Todo.Status.PENDING);
         } else {
-            todo.setStatus(parseStatus(dto.getStatus()));
+            todo.setStatus(Todo.Status.valueOf(dto.getStatus()));
         }
 
+        // ✅ Auto timestamp
         todo.setCreatedAt(LocalDateTime.now());
 
         Todo saved = repository.save(todo);
         return mapToDTO(saved);
     }
 
+    // ✅ GET ALL TODOS
     @Override
     public List<TodoDTO> getAllTodos() {
         return repository.findAll()
@@ -46,6 +53,7 @@ public class TodoServiceImpl implements TodoService {
                 .collect(Collectors.toList());
     }
 
+    // ✅ GET TODO BY ID
     @Override
     public TodoDTO getTodoById(Long id) {
         Todo todo = repository.findById(id)
@@ -54,73 +62,54 @@ public class TodoServiceImpl implements TodoService {
         return mapToDTO(todo);
     }
 
+    // ✅ UPDATE TODO
     @Override
     public TodoDTO updateTodo(Long id, TodoDTO dto) {
+
         Todo existing = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Todo not found"));
 
-        // Validate status transition
+        // ✅ Status transition validation
         if (dto.getStatus() != null) {
-            Todo.Status newStatus = parseStatus(dto.getStatus());
+
+            Todo.Status newStatus = Todo.Status.valueOf(dto.getStatus());
 
             boolean validTransition =
                     (existing.getStatus() == Todo.Status.PENDING && newStatus == Todo.Status.COMPLETED) ||
                     (existing.getStatus() == Todo.Status.COMPLETED && newStatus == Todo.Status.PENDING);
 
-            if (validTransition) {
-                existing.setStatus(newStatus);
-            } else {
+            if (!validTransition) {
                 throw new InvalidStatusException("Invalid status transition");
             }
+
+            existing.setStatus(newStatus);
         }
 
-        if (dto.getTitle() != null) {
-            existing.setTitle(dto.getTitle());
-        }
-
-        if (dto.getDescription() != null) {
-            existing.setDescription(dto.getDescription());
-        }
+        // ✅ Update fields
+        existing.setTitle(dto.getTitle());
+        existing.setDescription(dto.getDescription());
 
         Todo updated = repository.save(existing);
         return mapToDTO(updated);
     }
 
+    // ✅ DELETE TODO
     @Override
     public void deleteTodo(Long id) {
+
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Todo not found");
         }
+
         repository.deleteById(id);
     }
 
-    // 🔁 Manual Mapping
-    private Todo mapToEntity(TodoDTO dto) {
-        Todo todo = new Todo();
-        todo.setTitle(dto.getTitle());
-        todo.setDescription(dto.getDescription());
-
-        if (dto.getStatus() != null) {
-            todo.setStatus(parseStatus(dto.getStatus()));
-        }
-
-        return todo;
-    }
-
+    // ✅ Manual DTO Mapping (MANDATORY)
     private TodoDTO mapToDTO(Todo todo) {
         TodoDTO dto = new TodoDTO();
         dto.setTitle(todo.getTitle());
         dto.setDescription(todo.getDescription());
         dto.setStatus(todo.getStatus().name());
         return dto;
-    }
-
-    // ✅ Safe Enum Parsing
-    private Todo.Status parseStatus(Object status) {
-        try {
-            return Todo.Status.valueOf(status.toUpperCase());
-        } catch (Exception e) {
-            throw new InvalidStatusException("Invalid status value: " + object);
-        }
     }
 }

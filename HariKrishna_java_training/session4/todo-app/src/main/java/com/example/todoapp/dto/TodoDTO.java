@@ -13,20 +13,28 @@ public class TodoDTO {
 
     private String status;
 
-    public Object getStatus() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatus'");
+    // Getters and Setters
+    public String getTitle() {
+        return title;
     }
 
-    public void setDescription(Object description2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setDescription'");
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public void setStatus(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setStatus'");
+    public String getDescription() {
+        return description;
     }
 
-    // Getters & Setters
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

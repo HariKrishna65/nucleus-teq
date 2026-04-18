@@ -35,30 +35,44 @@ public class Todo {
         this.createdAt = createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime now) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setCreatedAt'");
+    // Getters and Setters
+    public Long getId() {
+        return id;
     }
 
-    public void setStatus(Status pending) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setStatus'");
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Object getDescription() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDescription'");
+    public String getTitle() {
+        return title;
     }
 
-    public Enum<Status> getStatus() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatus'");
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public Object getTitle() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTitle'");
+    public String getDescription() {
+        return description;
     }
 
-    // Getters & Setters
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
