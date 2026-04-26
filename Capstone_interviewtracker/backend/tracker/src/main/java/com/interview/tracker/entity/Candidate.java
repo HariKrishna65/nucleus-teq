@@ -1,7 +1,7 @@
 package com.interview.tracker.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "candidates")
@@ -11,43 +11,51 @@ public class Candidate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
     private String phone;
+    private Double experience;
+    private Double currentCtc;
+    private Double expectedCtc;
+    private Integer noticePeriod;
+    private String status;
 
-    private String resumeUrl;
+    // 🔗 Link to User (owner of this candidate)
+    @JsonIgnore   // avoid infinite JSON loop
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Enumerated(EnumType.STRING)
-    private Status status = Status.APPLIED;
+    // 🔗 Link to JobDescription
+    @ManyToOne
+    @JoinColumn(name = "jd_id")
+    private JobDescription jd;
 
-    private LocalDateTime appliedDate;
+    public Candidate() {}
 
-    @PrePersist
-    private void init() {
-        appliedDate = LocalDateTime.now();
-    }
-
-    public enum Status {
-        APPLIED, SCREENING, INTERVIEW_SCHEDULED, INTERVIEWED, OFFERED, HIRED, REJECTED
-    }
-
-    // Getters and Setters
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
-    public String getResumeUrl() { return resumeUrl; }
-    public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
-    public LocalDateTime getAppliedDate() { return appliedDate; }
-    public void setAppliedDate(LocalDateTime appliedDate) { this.appliedDate = appliedDate; }
+
+    public Double getExperience() { return experience; }
+    public void setExperience(Double experience) { this.experience = experience; }
+
+    public Double getCurrentCtc() { return currentCtc; }
+    public void setCurrentCtc(Double currentCtc) { this.currentCtc = currentCtc; }
+
+    public Double getExpectedCtc() { return expectedCtc; }
+    public void setExpectedCtc(Double expectedCtc) { this.expectedCtc = expectedCtc; }
+
+    public Integer getNoticePeriod() { return noticePeriod; }
+    public void setNoticePeriod(Integer noticePeriod) { this.noticePeriod = noticePeriod; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
+    public JobDescription getJd() { return jd; }
+    public void setJd(JobDescription jd) { this.jd = jd; }
 }

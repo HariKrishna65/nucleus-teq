@@ -3,7 +3,7 @@ package com.interview.tracker.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")   // already fixed
+@Table(name = "users")
 public class User {
 
     @Id
@@ -11,14 +11,17 @@ public class User {
     private Long id;
 
     private String name;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
+
     private String role;
 
     public User() {}
 
-    // ✅ ADD THESE (VERY IMPORTANT)
-
+    // getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

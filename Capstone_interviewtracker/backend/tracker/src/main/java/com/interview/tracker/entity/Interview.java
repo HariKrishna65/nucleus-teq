@@ -1,7 +1,8 @@
 package com.interview.tracker.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "interviews")
@@ -11,57 +12,33 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String stage;   // L1, L2, HR
+    private String status;  // SCHEDULED, COMPLETED
+
+    private LocalDate date;
+    private LocalTime time;
+
     @ManyToOne
-    @JoinColumn(name = "candidate_id", nullable = false)
+    @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 
-    @Column(nullable = false)
-    private String interviewerName;
+    public Interview() {}
 
-    private String interviewerEmail;
-
-    @Column(nullable = false)
-    private LocalDateTime scheduledTime;
-
-    private Integer durationMinutes = 60;
-
-    @Enumerated(EnumType.STRING)
-    private Round round = Round.PHONE_SCREEN;
-
-    @Enumerated(EnumType.STRING)
-    private Status status = Status.SCHEDULED;
-
-    private String meetingLink;
-
-    private String notes;
-
-    public enum Round {
-        PHONE_SCREEN, TECHNICAL, MANAGER, HR, FINAL
-    }
-
-    public enum Status {
-        SCHEDULED, COMPLETED, CANCELLED, NO_SHOW
-    }
-
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public String getStage() { return stage; }
+    public void setStage(String stage) { this.stage = stage; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
+
+    public LocalTime getTime() { return time; }
+    public void setTime(LocalTime time) { this.time = time; }
+
     public Candidate getCandidate() { return candidate; }
     public void setCandidate(Candidate candidate) { this.candidate = candidate; }
-    public String getInterviewerName() { return interviewerName; }
-    public void setInterviewerName(String interviewerName) { this.interviewerName = interviewerName; }
-    public String getInterviewerEmail() { return interviewerEmail; }
-    public void setInterviewerEmail(String interviewerEmail) { this.interviewerEmail = interviewerEmail; }
-    public LocalDateTime getScheduledTime() { return scheduledTime; }
-    public void setScheduledTime(LocalDateTime scheduledTime) { this.scheduledTime = scheduledTime; }
-    public Integer getDurationMinutes() { return durationMinutes; }
-    public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
-    public Round getRound() { return round; }
-    public void setRound(Round round) { this.round = round; }
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
-    public String getMeetingLink() { return meetingLink; }
-    public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
 }
