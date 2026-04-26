@@ -1,11 +1,16 @@
 package com.interview.tracker.service;
 
 import com.interview.tracker.entity.Candidate;
+import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
+import com.interview.tracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 
 @Service
 public class CandidateService {
@@ -13,28 +18,33 @@ public class CandidateService {
     @Autowired
     private CandidateRepository candidateRepository;
 
-    // ✅ Create
-    public Candidate saveCandidate(Candidate candidate) {
+    @Autowired
+    private UserRepository userRepository;
+
+    private static final String UPLOAD_DIR = "uploads/";
+
+    public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
+
+        // 🔴 Duplicate email check
+        if (candidate.getUser() != null &&
+                userRepository.findByEmail(candidate.getUser().getEmail()).isPresent()) {
+            throw new RuntimeException("Candidate with this email already exists");
+        }
+
+        // 📂 Save resume file
+        if (file != null && !file.isEmpty()) {
+
+            File dir = new File(UPLOAD_DIR);
+            if (!dir.exists()) dir.mkdirs();
+
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String filePath = UPLOAD_DIR + fileName;
+
+            file.transferTo(new File(filePath));
+
+            candidate.setResumeUrl(filePath);
+        }
+
         return candidateRepository.save(candidate);
-    }
-
-    // ✅ Get all
-    public List<Candidate> getAllCandidates() {
-        return candidateRepository.findAll();
-    }
-
-    // ✅ Get by ID
-    public Candidate getCandidateById(Long id) {
-        return candidateRepository.findById(id).orElse(null);
-    }
-
-    // 🔥 FIXED METHOD (your previous error was here)
-    public List<Candidate> searchByEmail(String email) {
-        return candidateRepository.findByUser_EmailContaining(email);
-    }
-
-    // ✅ Delete
-    public void deleteCandidate(Long id) {
-        candidateRepository.deleteById(id);
     }
 }
