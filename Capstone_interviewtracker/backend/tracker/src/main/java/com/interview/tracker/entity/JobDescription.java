@@ -1,6 +1,7 @@
 package com.interview.tracker.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "job_description")
@@ -10,17 +11,25 @@ public class JobDescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is required")
     private String title;
+
+    @NotBlank(message = "Description is required")
     private String description;
+
+    @NotBlank(message = "Skills are required")
     private String skills;
+
+    @NotNull(message = "Experience is required")
     private Integer experience;
+
     private String salary;
     private String location;
     private String jobType;
 
     public JobDescription() {}
 
-    // getters and setters
+    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
