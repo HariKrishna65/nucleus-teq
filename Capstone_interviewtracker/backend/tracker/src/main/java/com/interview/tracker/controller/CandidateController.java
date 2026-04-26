@@ -37,6 +37,7 @@ public class CandidateController {
     public List<Candidate> search(@RequestParam String email) {
         return candidateService.searchByEmail(email);
     }
+    
 
     // ✅ Delete
     @DeleteMapping("/{id}")
