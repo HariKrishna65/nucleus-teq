@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job Descriptions</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Job Descriptions</h2>
+
+  <!-- CREATE JD FORM (HR ONLY) -->
+  <div id="jdForm">
+    <h3>Create JD</h3>
+
+    <input id="title" placeholder="Title">
+    <input id="description" placeholder="Description">
+    <input id="skills" placeholder="Skills">
+    <input id="experience" placeholder="Experience">
+
+    <button onclick="createJD()">Create JD</button>
+  </div>
+
+  <hr>
+
+  <!-- JD LIST -->
+  <div>
+    <h3>All Jobs</h3>
+    <ul id="jdList"></ul>
+  </div>
+</div>
+
+<script src="../js/jd.js"></script>
+</body>
+</html>

@@ -31,3 +31,15 @@ button {
 button:hover {
   background: #0056b3;
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 10px 0;
+  padding: 10px;
+  background: #eee;
+  border-radius: 5px;
+}

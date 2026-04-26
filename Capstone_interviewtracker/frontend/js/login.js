@@ -34,6 +34,7 @@ function login() {
 
     // redirect
     window.location.href = "index.html";
+    window.location.href = "jd.html";
   })
   .catch(err => {
     console.error(err);
