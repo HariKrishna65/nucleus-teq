@@ -6,10 +6,10 @@ import com.interview.tracker.dto.AuthResponse;
 import com.interview.tracker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import static com.interview.tracker.constants.AppConstants.AUTH;
 
 @RestController
-@CrossOrigin(origins = "*")
-@RequestMapping("/auth")
+@RequestMapping(AUTH)
 
 public class AuthController {
 

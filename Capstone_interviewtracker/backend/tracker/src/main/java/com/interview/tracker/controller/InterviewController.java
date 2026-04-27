@@ -9,9 +9,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.interview.tracker.constants.AppConstants.INTERVIEWS;
+
+/**
+ * Controller for panel management and interview scheduling.
+ */
 @RestController
-@RequestMapping("/interviews")
-@CrossOrigin("*")
+@RequestMapping(INTERVIEWS)
 public class InterviewController {
 
     @Autowired
@@ -20,19 +24,25 @@ public class InterviewController {
     @Autowired
     private PanelRepository panelRepository;
 
-    //Create Panel
+    /**
+     * Create a panel (interviewer).
+     */
     @PostMapping("/panel")
     public Panel createPanel(@RequestBody Panel panel) {
         return panelRepository.save(panel);
     }
 
-    // Get Panels
+    /**
+     * Get all panels.
+     */
     @GetMapping("/panel")
     public List<Panel> getPanels() {
         return panelRepository.findAll();
     }
 
-    //Schedule Interview
+    /**
+     * Schedule interview for candidate.
+     */
     @PostMapping
     public Interview scheduleInterview(@RequestBody Interview interview) {
         return interviewService.scheduleInterview(interview);
