@@ -17,7 +17,7 @@ public class JobDescriptionController {
     @Autowired
     private JobDescriptionService service;
 
-    // ✅ CREATE JD (HR only)
+    
     @PostMapping
     public ResponseEntity<?> createJD(@Valid @RequestBody JobDescription jd,
                                       @RequestParam String role) {
@@ -29,13 +29,13 @@ public class JobDescriptionController {
         return ResponseEntity.ok(service.save(jd));
     }
 
-    // ✅ FETCH ALL
+    
     @GetMapping
     public List<JobDescription> getAll() {
         return service.getAll();
     }
 
-    // ✅ FETCH BY ID
+    
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
 
@@ -48,7 +48,7 @@ public class JobDescriptionController {
         return ResponseEntity.ok(jd);
     }
 
-    // ✅ DELETE (HR only)
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id,
                                    @RequestParam String role) {

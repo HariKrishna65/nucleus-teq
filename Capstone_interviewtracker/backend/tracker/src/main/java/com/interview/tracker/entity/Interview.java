@@ -12,18 +12,18 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String round; // L1, L2
+    private String round; 
 
     private LocalDateTime interviewTime;
 
     private String focusArea;
 
-    // 🔗 Candidate
+    
     @ManyToOne
     @JoinColumn(name = "candidate_id")
     private Candidate candidate;
 
-    // 🔗 Panel
+    
     @ManyToOne
     @JoinColumn(name = "panel_id")
     private Panel panel;

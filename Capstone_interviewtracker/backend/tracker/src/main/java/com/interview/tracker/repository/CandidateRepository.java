@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface CandidateRepository extends JpaRepository<Candidate, Long> {
 
-    // 🔹 Get candidates by user (for dashboard)
+    
     List<Candidate> findByUser_Id(Long userId);
 }

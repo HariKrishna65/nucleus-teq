@@ -23,16 +23,16 @@ public class CandidateService {
 
     private static final String UPLOAD_DIR = "uploads/";
 
-    // 🔹 Create candidate (apply job)
+   
     public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
 
-        // ✅ Duplicate check (by email)
+        
         if (candidate.getUser() != null &&
                 userRepository.findByEmail(candidate.getUser().getEmail()).isPresent()) {
             throw new RuntimeException("Candidate with this email already exists");
         }
 
-        // ✅ Save resume file
+        
         if (file != null && !file.isEmpty()) {
 
             File dir = new File(UPLOAD_DIR);
@@ -49,7 +49,7 @@ public class CandidateService {
         return candidateRepository.save(candidate);
     }
 
-    // 🔹 Dashboard: get candidates by user
+   
     public List<Candidate> getByUser(Long userId) {
         return candidateRepository.findByUser_Id(userId);
     }

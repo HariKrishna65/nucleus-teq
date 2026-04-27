@@ -17,14 +17,13 @@ public class Candidate {
     @Column(name = "resume_url")
     private String resumeUrl;
 
-    // 🔗 User relation
+    
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 
     public Candidate() {}
 
-    // getters & setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
