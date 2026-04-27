@@ -1,7 +1,6 @@
 package com.interview.tracker.service;
 
 import com.interview.tracker.entity.Candidate;
-import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
 import com.interview.tracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,15 +23,16 @@ public class CandidateService {
 
     private static final String UPLOAD_DIR = "uploads/";
 
+    // 🔹 Create candidate (apply job)
     public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
 
-        // 🔴 Duplicate email check
+        // ✅ Duplicate check (by email)
         if (candidate.getUser() != null &&
                 userRepository.findByEmail(candidate.getUser().getEmail()).isPresent()) {
             throw new RuntimeException("Candidate with this email already exists");
         }
 
-        // 📂 Save resume file
+        // ✅ Save resume file
         if (file != null && !file.isEmpty()) {
 
             File dir = new File(UPLOAD_DIR);
@@ -46,5 +47,10 @@ public class CandidateService {
         }
 
         return candidateRepository.save(candidate);
+    }
+
+    // 🔹 Dashboard: get candidates by user
+    public List<Candidate> getByUser(Long userId) {
+        return candidateRepository.findByUser_Id(userId);
     }
 }

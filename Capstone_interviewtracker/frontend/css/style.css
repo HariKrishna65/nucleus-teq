@@ -42,4 +42,52 @@ li {
   padding: 10px;
   background: #eee;
   border-radius: 5px;
+}body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+}
+
+.container {
+  width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px gray;
+}
+
+input, select {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: #eee;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+span {
+  font-weight: bold;
+  color: blue;
 }
