@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Feedback</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<div class="container">
+  <h2>Submit Feedback</h2>
+
+  <select id="rating">
+    <option value="1">1 - Poor</option>
+    <option value="2">2 - Average</option>
+    <option value="3">3 - Good</option>
+    <option value="4">4 - Very Good</option>
+    <option value="5">5 - Excellent</option>
+  </select>
+
+  <input id="comments" placeholder="Comments">
+
+  <select id="status">
+    <option value="L2">Move to L2</option>
+    <option value="HR">Move to HR</option>
+    <option value="REJECTED">Reject</option>
+  </select>
+
+  <button onclick="submitFeedback()">Submit</button>
+</div>
+
+<script src="../js/feedback.js"></script>
+</body>
+</html>
