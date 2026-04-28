@@ -12,7 +12,7 @@ import java.util.List;
 import static com.interview.tracker.constants.AppConstants.INTERVIEWS;
 
 /**
- * Controller for panel management and interview scheduling.
+ * Controller for interview scheduling and panel dashboard.
  */
 @RestController
 @RequestMapping(INTERVIEWS)
@@ -25,7 +25,7 @@ public class InterviewController {
     private PanelRepository panelRepository;
 
     /**
-     * Create a panel (interviewer).
+     * Create a new panel.
      */
     @PostMapping("/panel")
     public Panel createPanel(@RequestBody Panel panel) {
@@ -41,10 +41,18 @@ public class InterviewController {
     }
 
     /**
-     * Schedule interview for candidate.
+     * Schedule interview (L1/L2).
      */
     @PostMapping
     public Interview scheduleInterview(@RequestBody Interview interview) {
         return interviewService.scheduleInterview(interview);
+    }
+
+    /**
+     * Fetch interviews assigned to panel (dashboard).
+     */
+    @GetMapping
+    public List<Interview> getByPanel(@RequestParam Long panelId) {
+        return interviewService.getByPanel(panelId);
     }
 }
