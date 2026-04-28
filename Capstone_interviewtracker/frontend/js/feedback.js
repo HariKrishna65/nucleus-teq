@@ -1,5 +1,6 @@
-const user = JSON.parse(localStorage.getItem("user"));
+const user = getStoredUser();
 const interviewId = localStorage.getItem(STORAGE_KEYS.INTERVIEW_ID);
+let interviewStatus = "PENDING";
 
 // Check authentication
 if (!user) {
@@ -13,16 +14,50 @@ if (!interviewId) {
 
 // Load interview details
 function loadInterviewDetails() {
+  if (!user || !user.userId) {
+    showAlert("Session expired. Please login again.", "error");
+    return;
+  }
   interviewActions.getById(interviewId)
     .then(data => {
+      interviewStatus = data.status || "PENDING";
       document.getElementById("candidateName").textContent = 
         data.candidate && data.candidate.user ? data.candidate.user.name : "Unknown";
       document.getElementById("roundInfo").textContent = data.round || "N/A";
       document.getElementById("focusArea").textContent = data.focusArea || "General";
+      if (interviewStatus === "COMPLETED") {
+        loadExistingFeedback();
+      }
     })
     .catch(err => {
       console.error(err);
       document.getElementById("candidateName").textContent = "Error loading";
+    });
+}
+
+function loadExistingFeedback() {
+  feedbackActions.getByInterview(interviewId)
+    .then(existing => {
+      if (!existing) return;
+      if (existing.rating) selectRating(existing.rating);
+      if (existing.status) selectStatus(existing.status);
+      document.getElementById("comments").value = existing.comments || "";
+
+      document.getElementById("comments").setAttribute("readonly", "readonly");
+      document.querySelectorAll(".rating-option").forEach(el => {
+        el.style.pointerEvents = "none";
+      });
+      document.querySelectorAll(".status-option").forEach(el => {
+        el.style.pointerEvents = "none";
+      });
+
+      const submitBtn = document.querySelector(".container > button");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Feedback Already Submitted";
+      showAlert("Existing feedback loaded in view mode.", "success");
+    })
+    .catch(() => {
+      // Keep form enabled if no previous feedback exists.
     });
 }
 
@@ -108,6 +143,10 @@ function showAlert(message, type) {
 
 // Submit feedback
 function submitFeedback() {
+  if (interviewStatus === "COMPLETED") {
+    showAlert("This interview is already completed. Feedback is view-only.", "error");
+    return;
+  }
   if (!validateFeedback()) return;
 
   showLoading(true);

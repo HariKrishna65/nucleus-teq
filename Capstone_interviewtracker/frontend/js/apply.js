@@ -1,4 +1,5 @@
-const user = JSON.parse(localStorage.getItem("user"));
+const user = getStoredUser();
+const preselectedJdId = localStorage.getItem(STORAGE_KEYS.SELECTED_JD_ID);
 
 if (!user) {
   window.location.href = "login.html";
@@ -20,6 +21,14 @@ function loadJDs() {
         option.dataset.skills = jd.skills;
         select.appendChild(option);
       });
+
+      if (preselectedJdId) {
+        const hasOption = data.some(jd => String(jd.id) === String(preselectedJdId));
+        if (hasOption) {
+          select.value = String(preselectedJdId);
+          updateJdInfo();
+        }
+      }
     })
     .catch(err => {
       console.error(err);
@@ -79,6 +88,16 @@ function validateApply() {
   if (!resume.files[0]) {
     showAlert("Please upload your resume", "error");
     isValid = false;
+  } else {
+    const file = resume.files[0];
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      showAlert("Resume must be a PDF file", "error");
+      isValid = false;
+    } else if (file.size > 5 * 1024 * 1024) {
+      showAlert("Resume file size must be 5MB or less", "error");
+      isValid = false;
+    }
   }
 
   return isValid;
@@ -114,6 +133,10 @@ function showAlert(message, type) {
 
 // Apply to job
 function applyJob() {
+  if (!user || !user.userId) {
+    showAlert("Session expired. Please login again.", "error");
+    return;
+  }
   if (!validateApply()) return;
 
   showLoading(true);
@@ -142,6 +165,7 @@ function applyJob() {
   .then(data => {
     showLoading(false);
     showAlert("Application submitted successfully!", "success");
+    localStorage.removeItem(STORAGE_KEYS.SELECTED_JD_ID);
     setTimeout(() => {
       window.location.href = "dashboard.html";
     }, 1500);
@@ -149,7 +173,7 @@ function applyJob() {
   .catch(err => {
     showLoading(false);
     console.error(err);
-    showAlert("Error submitting application. Please try again.", "error");
+    showAlert(err.message || "Error submitting application. Please try again.", "error");
   });
 }
 

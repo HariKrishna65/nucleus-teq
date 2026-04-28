@@ -37,7 +37,6 @@ public class Interview {
     @JoinColumn(name = "panel_id")
     private Panel panel;
 
-    // New: support 1-2 panel members (migration-safe: join table)
     @ManyToMany
     @JoinTable(
             name = "interview_panels",

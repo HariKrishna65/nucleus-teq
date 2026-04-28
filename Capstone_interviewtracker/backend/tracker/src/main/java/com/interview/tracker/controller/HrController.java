@@ -4,38 +4,63 @@ import com.interview.tracker.constants.Stage;
 import com.interview.tracker.constants.StageStatus;
 import com.interview.tracker.dto.CreatePanelRequest;
 import com.interview.tracker.entity.Candidate;
+import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
+import com.interview.tracker.repository.FeedbackRepository;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.repository.UserRepository;
 import com.interview.tracker.service.EmailService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/hr")
 public class HrController {
+    private static final Logger log = LoggerFactory.getLogger(HrController.class);
 
     private final CandidateRepository candidateRepository;
+    private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
     private final PanelRepository panelRepository;
     private final EmailService emailService;
 
     public HrController(
             CandidateRepository candidateRepository,
+            FeedbackRepository feedbackRepository,
             UserRepository userRepository,
             PanelRepository panelRepository,
             EmailService emailService
     ) {
         this.candidateRepository = candidateRepository;
+        this.feedbackRepository = feedbackRepository;
         this.userRepository = userRepository;
         this.panelRepository = panelRepository;
         this.emailService = emailService;
+    }
+
+    @GetMapping("/candidates")
+    public ResponseEntity<?> getCandidatesWithProgress() {
+        List<Candidate> candidates = candidateRepository.findAllByOrderByApplicationDateDesc();
+        List<Map<String, Object>> payload = candidates.stream().map(candidate -> {
+            List<Feedback> feedbackList = feedbackRepository.findByInterview_Candidate_IdOrderByIdDesc(candidate.getId());
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("candidate", candidate);
+            item.put("feedback", feedbackList);
+            item.put("feedbackCount", feedbackList.size());
+            item.put("latestFeedback", feedbackList.isEmpty() ? null : feedbackList.get(0));
+            return item;
+        }).toList();
+        return ResponseEntity.ok(payload);
     }
 
     @PostMapping("/panels")
@@ -51,17 +76,15 @@ public class HrController {
             return ResponseEntity.badRequest().body("User with this email already exists");
         }
 
-        // Create USER for authentication
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setRole("PANEL");
-        user.setEmailVerified(true); // HR is onboarding; send set-password link next
+        user.setEmailVerified(true);
         user.setActive(true);
         user.setInvitedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
 
-        // Create Panel profile
         Panel panel = new Panel();
         panel.setName(request.getName());
         panel.setEmail(request.getEmail());
@@ -70,8 +93,8 @@ public class HrController {
         panel.setOrganization(request.getOrganization());
         panel.setDesignation(request.getDesignation());
         Panel savedPanel = panelRepository.save(panel);
+        log.info("HR onboarded panel profile: email={}", request.getEmail());
 
-        // Send password setup email (secure link)
         emailService.sendPasswordSetEmail(savedUser);
 
         return ResponseEntity.ok(savedPanel);
@@ -96,6 +119,7 @@ public class HrController {
 
         c.setStage(next);
         c.setStageStatus(StageStatus.PENDING);
+        log.info("Candidate stage advanced: id={}, stage={}", c.getId(), next);
 
         if (body != null && body.containsKey("comments")) {
             c.setHrComments(body.get("comments"));
@@ -117,6 +141,7 @@ public class HrController {
         c.setStage(Stage.REJECTED);
         c.setStageStatus(StageStatus.COMPLETED);
         c.setHrComments(comments);
+        log.info("Candidate rejected by HR: id={}", c.getId());
         return ResponseEntity.ok(candidateRepository.save(c));
     }
 
@@ -133,6 +158,7 @@ public class HrController {
         c.setStage(Stage.SELECTED);
         c.setStageStatus(StageStatus.COMPLETED);
         c.setHrComments(comments);
+        log.info("Candidate selected by HR: id={}", c.getId());
         return ResponseEntity.ok(candidateRepository.save(c));
     }
 

@@ -4,6 +4,10 @@
   align-items: center;
   margin-bottom: 30px;
 }
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
 .back-btn {
   background: transparent;
   color: var(--text);

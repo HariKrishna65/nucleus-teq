@@ -69,7 +69,7 @@ function login() {
     // Redirect based on role
     setTimeout(() => {
       if (data.role === "HR") {
-        window.location.href = "jd.html";
+        window.location.href = "hr-dashboard.html";
       } else if (data.role === "PANEL") {
         window.location.href = "panel-dashboard.html";
       } else {
@@ -87,7 +87,7 @@ function login() {
       document.getElementById("verificationNotice").style.display = "block";
       showAlert(errorMsg, "error");
     } else if (errorMsg.includes("Password not set") || errorMsg.includes("password")) {
-      showAlert(errorMsg + " <a href='forgot-password.html?email=" + encodeURIComponent(data.email || "") + "' style='color: var(--primary);'>Reset here</a>", "error");
+      showAlert(errorMsg + " Use Forgot password to reset.", "error");
     } else {
       showAlert(errorMsg, "error");
     }

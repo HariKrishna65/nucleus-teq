@@ -39,7 +39,6 @@ public class UserService {
     private static final Pattern PASSWORD_POLICY =
             Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$");
 
-    
     public AuthResponse register(RegisterRequest request) {
 
 
@@ -55,12 +54,10 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         
-        // Don't set password during registration - will be set after email verification
         user.setPassword(null);
         
         user.setRole(request.getRole());
         
-        // Set additional profile fields
         user.setDateOfBirth(request.getDateOfBirth());
         user.setGender(request.getGender());
         user.setPhone(request.getPhone());
@@ -69,13 +66,10 @@ public class UserService {
         user.setState(request.getState());
         user.setCountry(request.getCountry());
         
-        // Set verification as pending
         user.setEmailVerified(false);
         
-        // Save user first
         User saved = userRepository.save(user);
         
-        // Send verification email
         emailService.sendVerificationEmail(saved);
 
         return new AuthResponse(
@@ -88,18 +82,15 @@ public class UserService {
         );
     }
 
-    
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Check if email is verified
         if (!user.isEmailVerified()) {
             throw new IllegalArgumentException("Please verify your email first. Check your inbox for the verification link.");
         }
 
-        // Check if password is set
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             throw new IllegalArgumentException("Password not set. Please set your password using the link sent to your email.");
         }
@@ -124,7 +115,6 @@ public class UserService {
         return new AuthResponse("Login successful", user.getRole(), user.getId(), user.getName(), panelId, token);
     }
 
-    
     public AuthResponse verifyEmail(String token) {
         User user = userRepository.findAll().stream()
                 .filter(u -> token.equals(u.getVerificationToken()))
@@ -135,13 +125,11 @@ public class UserService {
             throw new IllegalArgumentException("Verification token has expired");
         }
 
-        // Mark email as verified
         user.setEmailVerified(true);
         user.setVerificationToken(null);
         user.setTokenExpiry(null);
         userRepository.save(user);
 
-        // Send password set email
         emailService.sendPasswordSetEmail(user);
 
         return new AuthResponse(
@@ -154,7 +142,6 @@ public class UserService {
         );
     }
 
-    
     public AuthResponse setPassword(SetPasswordRequest request) {
         User user = userRepository.findAll().stream()
                 .filter(u -> request.getToken().equals(u.getVerificationToken()))
@@ -167,12 +154,10 @@ public class UserService {
 
         validatePasswordPolicy(request.getNewPassword());
 
-        // Encode and set the new password
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setVerificationToken(null);
         user.setTokenExpiry(null);
 
-        // Mark panel as activated
         if ("PANEL".equals(user.getRole()) && user.getActivatedAt() == null) {
             user.setActivatedAt(java.time.LocalDateTime.now());
         }
@@ -188,7 +173,6 @@ public class UserService {
         );
     }
 
-    
     public AuthResponse requestPasswordReset(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Email not found"));
@@ -209,12 +193,10 @@ public class UserService {
         );
     }
 
-    
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    
     public User findById(Long id) {
         return userRepository.findById(id).orElse(null);
     }

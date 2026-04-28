@@ -14,9 +14,6 @@ import java.util.List;
 
 import static com.interview.tracker.constants.AppConstants.CANDIDATES;
 
-/**
- * Controller for candidate operations such as applying and dashboard.
- */
 @RestController
 @RequestMapping(CANDIDATES)
 public class CandidateController {
@@ -24,9 +21,6 @@ public class CandidateController {
     @Autowired
     private CandidateService candidateService;
 
-    /**
-     * Apply for job (create candidate + upload resume).
-     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Candidate createCandidate(
             @Valid @RequestPart("candidate") Candidate candidate,
@@ -43,9 +37,6 @@ public class CandidateController {
         return candidateService.createCandidate(candidate, file);
     }
 
-    /**
-     * Fetch candidates for dashboard (status tracking).
-     */
     @GetMapping
     public ResponseEntity<?> getByUser(@RequestParam Long userId) {
         String role = SecurityUtil.currentRole();

@@ -1,8 +1,5 @@
 package com.interview.tracker.constants;
 
-/**
- * Application constants for API paths.
- */
 public class AppConstants {
 
     public static final String AUTH = "/auth";

@@ -20,7 +20,6 @@ public class RegisterRequest {
     @NotBlank(message = "Role is required")
     private String role;
     
-    // New fields - password removed from registration
     private LocalDate dateOfBirth;
     private String gender;
     @Pattern(regexp = "^[0-9+\\-()\\s]{7,20}$", message = "Enter a valid phone number")
@@ -41,7 +40,6 @@ public class RegisterRequest {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    // New field getters/setters
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 

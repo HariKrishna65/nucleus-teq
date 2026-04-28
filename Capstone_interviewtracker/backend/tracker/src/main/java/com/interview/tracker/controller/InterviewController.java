@@ -14,9 +14,6 @@ import java.util.List;
 
 import static com.interview.tracker.constants.AppConstants.INTERVIEWS;
 
-/**
- * Controller for interview scheduling and panel dashboard.
- */
 @RestController
 @RequestMapping(INTERVIEWS)
 public class InterviewController {
@@ -27,25 +24,16 @@ public class InterviewController {
     @Autowired
     private PanelRepository panelRepository;
 
-    /**
-     * Create a new panel.
-     */
     @PostMapping("/panel")
     public Panel createPanel(@RequestBody Panel panel) {
         return panelRepository.save(panel);
     }
 
-    /**
-     * Get all panels.
-     */
     @GetMapping("/panel")
     public List<Panel> getPanels() {
         return panelRepository.findAll();
     }
 
-    /**
-     * Schedule interview (L1/L2).
-     */
     @PostMapping
     public Interview scheduleInterview(@Valid @RequestBody Interview interview) {
         String role = SecurityUtil.currentRole();
@@ -55,9 +43,6 @@ public class InterviewController {
         return interviewService.scheduleInterview(interview);
     }
 
-    /**
-     * Get interview details (for feedback page).
-     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
         Interview interview = interviewService.getById(id);
@@ -85,9 +70,6 @@ public class InterviewController {
         return ResponseEntity.ok(interview);
     }
 
-    /**
-     * Fetch interviews assigned to panel (dashboard).
-     */
     @GetMapping
     public ResponseEntity<?> getByPanel(@RequestParam Long panelId) {
         String role = SecurityUtil.currentRole();

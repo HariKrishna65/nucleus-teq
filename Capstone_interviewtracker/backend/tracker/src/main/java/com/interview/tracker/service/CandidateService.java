@@ -4,6 +4,8 @@ import com.interview.tracker.entity.Candidate;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
 import com.interview.tracker.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +21,7 @@ import com.interview.tracker.constants.StageStatus;
 
 @Service
 public class CandidateService {
+    private static final Logger log = LoggerFactory.getLogger(CandidateService.class);
 
     @Autowired
     private CandidateRepository candidateRepository;
@@ -28,7 +31,6 @@ public class CandidateService {
 
     private static final String UPLOAD_DIR = "uploads/";
 
-   
     public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
 
         if (candidate.getUser() == null || candidate.getUser().getId() == null) {
@@ -42,22 +44,18 @@ public class CandidateService {
         Long userId = candidate.getUser().getId();
         Long jdId = candidate.getJd().getId();
 
-        // Scope note: only one job application per candidate
         if (!candidateRepository.findByUser_Id(userId).isEmpty()) {
             throw new IllegalArgumentException("Only one job application is allowed per candidate");
         }
 
-        // Enforce "only one application per candidate per JD"
         if (candidateRepository.findByUser_IdAndJd_Id(userId, jdId).isPresent()) {
             throw new IllegalArgumentException("You have already applied for this job");
         }
 
-        // Attach existing user instead of re-creating a new one via cascade
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         candidate.setUser(existingUser);
 
-        // Prevent duplicate accounts using the same mobile number
         if (candidate.getPhone() != null && !candidate.getPhone().isBlank()) {
             candidateRepository.findByPhone(candidate.getPhone())
                     .ifPresent(existing -> { throw new IllegalArgumentException("Mobile number already exists"); });
@@ -74,7 +72,6 @@ public class CandidateService {
 
         
         if (file != null && !file.isEmpty()) {
-            // Basic PDF check (frontend already enforces, backend must too)
             String originalName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
             if (!originalName.endsWith(".pdf")) {
                 throw new IllegalArgumentException("Resume must be a PDF file");
@@ -90,11 +87,11 @@ public class CandidateService {
 
             candidate.setResumeUrl(filePath);
         }
-
-        return candidateRepository.save(candidate);
+        Candidate saved = candidateRepository.save(candidate);
+        log.info("Candidate application submitted: candidateId={}, userId={}, jdId={}", saved.getId(), userId, jdId);
+        return saved;
     }
 
-   
     public List<Candidate> getByUser(Long userId) {
         return candidateRepository.findByUser_Id(userId);
     }

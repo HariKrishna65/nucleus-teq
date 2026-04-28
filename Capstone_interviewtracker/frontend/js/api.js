@@ -6,13 +6,20 @@ const STORAGE_KEYS = {
   SELECTED_JD_ID: "selectedJdId"
 };
 
-function getAuthToken() {
+function getStoredUser() {
   try {
-    const user = JSON.parse(localStorage.getItem(STORAGE_KEYS.USER));
-    return user && user.token ? user.token : null;
+    const raw = localStorage.getItem(STORAGE_KEYS.USER);
+    if (!raw) return null;
+    return JSON.parse(raw);
   } catch (e) {
+    localStorage.removeItem(STORAGE_KEYS.USER);
     return null;
   }
+}
+
+function getAuthToken() {
+  const user = getStoredUser();
+  return user && user.token ? user.token : null;
 }
 
 function authHeaders(extra = {}) {
@@ -72,10 +79,24 @@ const candidateActions = {
 
 const interviewActions = {
   listByPanel: (panelId) => fetchHandler(`/interviews?panelId=${panelId}`, { requireAuth: true }),
-  getById: (id) => fetchHandler(`/interviews/${id}`, { requireAuth: true })
+  getById: (id) => fetchHandler(`/interviews/${id}`, { requireAuth: true }),
+  listPanels: () => fetchHandler("/interviews/panel", { requireAuth: true }),
+  schedule: (payload) => fetchHandler("/interviews", { method: "POST", body: payload, requireAuth: true })
 };
 
 const feedbackActions = {
-  submit: (feedback) => fetchHandler("/feedback", { method: "POST", body: feedback, requireAuth: true })
+  submit: (feedback) => fetchHandler("/feedback", { method: "POST", body: feedback, requireAuth: true }),
+  getByInterview: (interviewId) => fetchHandler(`/feedback/interview/${interviewId}`, { requireAuth: true })
+};
+
+const hrActions = {
+  listCandidates: () => fetchHandler("/hr/candidates", { requireAuth: true }),
+  advanceCandidate: (candidateId, comments) =>
+    fetchHandler(`/hr/candidates/${candidateId}/advance`, { method: "POST", body: { comments }, requireAuth: true }),
+  rejectCandidate: (candidateId, comments) =>
+    fetchHandler(`/hr/candidates/${candidateId}/reject`, { method: "POST", body: { comments }, requireAuth: true }),
+  selectCandidate: (candidateId, comments) =>
+    fetchHandler(`/hr/candidates/${candidateId}/select`, { method: "POST", body: { comments }, requireAuth: true }),
+  createPanel: (panel) => fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true })
 };
 

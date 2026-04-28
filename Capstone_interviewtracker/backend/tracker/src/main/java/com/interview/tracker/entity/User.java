@@ -21,7 +21,6 @@ public class User {
 
     private String role;
 
-    // New fields for extended profile
     private LocalDate dateOfBirth;
 
     private String gender;
@@ -38,14 +37,12 @@ public class User {
 
     private String resumePath;
 
-    // Email verification fields
     private Boolean emailVerified = false;
 
     private String verificationToken;
 
     private LocalDate tokenExpiry;
 
-    // Account status
     private Boolean active = true;
 
     private LocalDateTime invitedAt;
@@ -54,7 +51,6 @@ public class User {
 
     public User() {}
 
-    
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -70,7 +66,6 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    // Getters and Setters for new fields
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 

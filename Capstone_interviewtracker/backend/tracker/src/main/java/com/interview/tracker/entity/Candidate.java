@@ -29,7 +29,6 @@ public class Candidate {
 
     private LocalDateTime applicationDate;
 
-    // Stage tracking (SRS)
     @Enumerated(EnumType.STRING)
     private Stage stage;
 
@@ -38,7 +37,6 @@ public class Candidate {
 
     private String hrComments;
 
-    // SRS fields (nullable / migration-safe)
     private String fullName;
     private String mobileCode;
     private String mobileNumber;

@@ -1,4 +1,4 @@
-const user = JSON.parse(localStorage.getItem("user"));
+const user = getStoredUser();
 
 // Check authentication
 if (!user) {
@@ -6,18 +6,24 @@ if (!user) {
 }
 
 // Check role
-if (user.role !== "PANEL") {
+if (user && user.role !== "PANEL") {
   showAlert("Access denied. Panel members only.", "error");
   setTimeout(() => window.location.href = "index.html", 2000);
 }
 
 // Update user info
-document.getElementById("userName").textContent = user.name || "Panel Member";
-document.getElementById("userAvatar").textContent = (user.name || "P").charAt(0).toUpperCase();
+if (user) {
+  document.getElementById("userName").textContent = user.name || "Panel Member";
+  document.getElementById("userAvatar").textContent = (user.name || "P").charAt(0).toUpperCase();
+}
 
 // Load interviews assigned to panel
 function loadInterviews() {
   const list = document.getElementById("interviewList");
+  if (!user || !user.userId) {
+    list.innerHTML = `<div class="alert alert-error">Session expired. Please login again.</div>`;
+    return;
+  }
   const panelId = user.panelId || user.userId;
   
   interviewActions.listByPanel(panelId)
@@ -50,6 +56,7 @@ function loadInterviews() {
       data.forEach(i => {
         const li = document.createElement("li");
         li.className = "interview-card";
+        const hasFeedback = i.status === "COMPLETED";
         
         li.innerHTML = `
           <div class="interview-info">
@@ -62,7 +69,7 @@ function loadInterviews() {
             </div>
           </div>
           <button class="btn btn-small" onclick="giveFeedback(${i.id})">
-            ${i.status === 'COMPLETED' ? 'View Feedback' : 'Give Feedback'}
+            ${hasFeedback ? 'View Feedback' : 'Submit Feedback'}
           </button>
         `;
 

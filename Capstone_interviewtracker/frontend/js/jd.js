@@ -1,4 +1,4 @@
-const user = JSON.parse(localStorage.getItem("user"));
+const user = getStoredUser();
 
 // Check authentication
 if (!user) {
@@ -6,8 +6,9 @@ if (!user) {
 }
 
 // Hide form if not HR
-if (user.role === "HR") {
-  document.getElementById("jdForm").style.display = "block";
+if (user && user.role === "HR") {
+  document.getElementById("jdForm").classList.remove("is-hidden");
+  document.getElementById("hrDashboardBtn").classList.remove("is-hidden");
 }
 
 // Fetch all JDs
@@ -42,7 +43,7 @@ function loadJDs() {
               <span class="meta-item">${jd.skills || 'N/A'}</span>
             </div>
           </div>
-          ${user.role === 'CANDIDATE' ? `<button class="apply-jd-btn" onclick="applyToJob(${jd.id}, '${jd.title}')">Apply</button>` : ''}
+          ${user && user.role === 'CANDIDATE' ? `<button class="apply-jd-btn" onclick="applyToJob(${jd.id}, '${jd.title}')">Apply</button>` : ''}
         `;
 
         list.appendChild(li);
@@ -150,7 +151,7 @@ function createJD() {
   })
   .catch(err => {
     showLoading(false);
-    showAlert("Error creating job. Please try again.", "error");
+    showAlert(err.message || "Error creating job. Please try again.", "error");
   });
 }
 
@@ -170,8 +171,7 @@ function showLoading(show) {
 // Apply to job from JD list
 function applyToJob(jdId, jdTitle) {
   if (confirm(`Apply for "${jdTitle}"?`)) {
-    // Store the JD ID and redirect to apply page
-    localStorage.setItem("selectedJdId", jdId);
+    localStorage.setItem(STORAGE_KEYS.SELECTED_JD_ID, jdId);
     window.location.href = "apply.html";
   }
 }

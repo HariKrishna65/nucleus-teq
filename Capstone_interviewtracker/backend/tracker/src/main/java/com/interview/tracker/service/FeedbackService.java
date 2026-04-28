@@ -6,14 +6,16 @@ import com.interview.tracker.entity.Panel;
 import com.interview.tracker.repository.FeedbackRepository;
 import com.interview.tracker.repository.InterviewRepository;
 import com.interview.tracker.repository.PanelRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/**
- * Service for feedback operations.
- */
+import java.util.Optional;
+
 @Service
 public class FeedbackService {
+    private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
 
     @Autowired
     private FeedbackRepository feedbackRepository;
@@ -24,9 +26,6 @@ public class FeedbackService {
     @Autowired
     private PanelRepository panelRepository;
 
-    /**
-     * Save feedback.
-     */
     public Feedback save(Feedback feedback) {
         if (feedback.getInterview() == null || feedback.getInterview().getId() == null) {
             throw new IllegalArgumentException("Interview is required");
@@ -47,7 +46,6 @@ public class FeedbackService {
 
         String role = SecurityUtil.currentRole();
 
-        // PANEL enforcement: panel must be assigned to the interview
         String email = SecurityUtil.currentEmail();
         if ("PANEL".equals(role) && email != null) {
             Panel panel = panelRepository.findByEmail(email)
@@ -66,10 +64,33 @@ public class FeedbackService {
             throw new IllegalArgumentException("Access denied");
         }
 
-        // Mark interview as completed when feedback is submitted
         interview.setStatus("COMPLETED");
         interviewRepository.save(interview);
+        Feedback saved = feedbackRepository.save(feedback);
+        log.info("Feedback submitted: feedbackId={}, interviewId={}, role={}", saved.getId(), interviewId, role);
+        return saved;
+    }
 
-        return feedbackRepository.save(feedback);
+    public Feedback getLatestByInterview(Long interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
+
+        String role = SecurityUtil.currentRole();
+        String email = SecurityUtil.currentEmail();
+        if ("PANEL".equals(role)) {
+            Panel panel = panelRepository.findByEmail(email)
+                    .orElseThrow(() -> new IllegalArgumentException("Panel profile not found"));
+            boolean assigned =
+                    (interview.getPanel() != null && interview.getPanel().getId().equals(panel.getId())) ||
+                            (interview.getPanels() != null && interview.getPanels().stream().anyMatch(p -> p.getId().equals(panel.getId())));
+            if (!assigned) {
+                throw new IllegalArgumentException("You are not assigned to this interview");
+            }
+        } else if (!"HR".equals(role)) {
+            throw new IllegalArgumentException("Access denied");
+        }
+
+        Optional<Feedback> latest = feedbackRepository.findTopByInterview_IdOrderByIdDesc(interviewId);
+        return latest.orElse(null);
     }
 }

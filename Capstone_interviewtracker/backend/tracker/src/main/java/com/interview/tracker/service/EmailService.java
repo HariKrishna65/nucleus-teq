@@ -24,7 +24,6 @@ public class EmailService {
     private String baseUrl;
 
     public void sendVerificationEmail(User user) {
-        // Generate verification token
         String token = UUID.randomUUID().toString();
         LocalDate expiry = LocalDate.now().plusDays(7);
 
@@ -32,7 +31,6 @@ public class EmailService {
         user.setTokenExpiry(expiry);
         userRepository.save(user);
 
-        // Send email
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Verify your Interview Tracker Account");
@@ -59,7 +57,6 @@ public class EmailService {
     }
 
     public void sendPasswordSetEmail(User user) {
-        // Generate a one-time password reset token
         String token = UUID.randomUUID().toString();
         LocalDate expiry = LocalDate.now().plusDays(3);
 
@@ -67,7 +64,6 @@ public class EmailService {
         user.setTokenExpiry(expiry);
         userRepository.save(user);
 
-        // Send email
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Set Your Password - Interview Tracker");
@@ -94,7 +90,6 @@ public class EmailService {
     }
 
     public void sendPasswordResetEmail(User user) {
-        // Generate password reset token
         String token = UUID.randomUUID().toString();
         LocalDate expiry = LocalDate.now().plusDays(1);
 
@@ -102,7 +97,6 @@ public class EmailService {
         user.setTokenExpiry(expiry);
         userRepository.save(user);
 
-        // Send email
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Reset Your Password - Interview Tracker");

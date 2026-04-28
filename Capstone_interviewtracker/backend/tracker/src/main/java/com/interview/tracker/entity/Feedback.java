@@ -21,7 +21,6 @@ public class Feedback {
     private Integer rating;
     private String result;
 
-    // SRS fields (nullable / migration-safe)
     private String strengths;
     private String weaknesses;
     private String areasCovered;
@@ -48,7 +47,6 @@ public class Feedback {
     public String getResult() { return result; }
     public void setResult(String result) { this.result = result; }
 
-    // Frontend uses "status" - map it to the stored result field
     public String getStatus() { return result; }
     public void setStatus(String status) { this.result = status; }
 
