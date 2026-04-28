@@ -4,7 +4,10 @@ import com.interview.tracker.entity.Interview;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.service.InterviewService;
+import com.interview.tracker.service.SecurityUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,15 +47,61 @@ public class InterviewController {
      * Schedule interview (L1/L2).
      */
     @PostMapping
-    public Interview scheduleInterview(@RequestBody Interview interview) {
+    public Interview scheduleInterview(@Valid @RequestBody Interview interview) {
+        String role = SecurityUtil.currentRole();
+        if (!"HR".equals(role)) {
+            throw new IllegalArgumentException("Only HR can schedule interviews");
+        }
         return interviewService.scheduleInterview(interview);
+    }
+
+    /**
+     * Get interview details (for feedback page).
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Long id) {
+        Interview interview = interviewService.getById(id);
+        if (interview == null) {
+            return ResponseEntity.status(404).body("Interview not found");
+        }
+
+        String role = SecurityUtil.currentRole();
+        Long currentUserId = SecurityUtil.currentUserId();
+        String currentEmail = SecurityUtil.currentEmail();
+
+        if ("CANDIDATE".equals(role)) {
+            if (interview.getCandidate() == null || interview.getCandidate().getUser() == null ||
+                    !interview.getCandidate().getUser().getId().equals(currentUserId)) {
+                return ResponseEntity.status(403).body("Access denied");
+            }
+        } else if ("PANEL".equals(role)) {
+            Panel panel = panelRepository.findByEmail(currentEmail).orElse(null);
+            if (panel == null) return ResponseEntity.status(403).body("Panel profile not found");
+            boolean assigned = (interview.getPanel() != null && interview.getPanel().getId().equals(panel.getId())) ||
+                    (interview.getPanels() != null && interview.getPanels().stream().anyMatch(p -> p.getId().equals(panel.getId())));
+            if (!assigned) return ResponseEntity.status(403).body("Access denied");
+        }
+
+        return ResponseEntity.ok(interview);
     }
 
     /**
      * Fetch interviews assigned to panel (dashboard).
      */
     @GetMapping
-    public List<Interview> getByPanel(@RequestParam Long panelId) {
-        return interviewService.getByPanel(panelId);
+    public ResponseEntity<?> getByPanel(@RequestParam Long panelId) {
+        String role = SecurityUtil.currentRole();
+        String currentEmail = SecurityUtil.currentEmail();
+
+        if ("PANEL".equals(role)) {
+            Panel panel = panelRepository.findByEmail(currentEmail).orElse(null);
+            if (panel == null || !panel.getId().equals(panelId)) {
+                return ResponseEntity.status(403).body("You can only view your assigned interviews");
+            }
+        } else if (!"HR".equals(role)) {
+            return ResponseEntity.status(403).body("Access denied");
+        }
+
+        return ResponseEntity.ok(interviewService.getByPanel(panelId));
     }
 }

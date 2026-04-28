@@ -1,35 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Job Descriptions</title>
+  <title>Job Descriptions - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/jd.css">
 </head>
-<body>
+<body class="page-workflow">
 
 <div class="container">
-  <h2>Job Descriptions</h2>
+  <div class="header">
+    <h2>Job Opportunities</h2>
+    <button class="back-btn" onclick="window.location.href='index.html'">Home</button>
+  </div>
 
   <!-- CREATE JD FORM (HR ONLY) -->
-  <div id="jdForm">
-    <h3>Create JD</h3>
-
-    <input id="title" placeholder="Title">
-    <input id="description" placeholder="Description">
-    <input id="skills" placeholder="Skills">
-    <input id="experience" placeholder="Experience">
-
-    <button onclick="createJD()">Create JD</button>
+  <div id="jdForm" class="create-jd-form is-hidden">
+    <h3>Create New Job</h3>
+    <div class="form-row">
+      <div class="input-group">
+        <label for="title">Job Title</label>
+        <input id="title" placeholder="e.g., Software Engineer">
+      </div>
+      <div class="input-group">
+        <label for="experience">Experience (years)</label>
+        <input id="experience" type="number" min="0" placeholder="e.g., 2">
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="description">Job Description</label>
+      <input id="description" placeholder="Describe the role and responsibilities">
+    </div>
+    <div class="input-group">
+      <label for="skills">Required Skills</label>
+      <input id="skills" placeholder="e.g., Java, Spring, React">
+    </div>
+    <button onclick="createJD()">Post Job</button>
   </div>
 
   <hr>
 
   <!-- JD LIST -->
   <div>
-    <h3>All Jobs</h3>
-    <ul id="jdList"></ul>
+    <h3>Available Positions</h3>
+    <ul id="jdList">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading jobs...</p>
+      </div>
+    </ul>
   </div>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/jd.js"></script>
 </body>
 </html>

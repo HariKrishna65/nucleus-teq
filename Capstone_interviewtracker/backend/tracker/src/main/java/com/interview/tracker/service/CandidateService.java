@@ -1,6 +1,7 @@
 package com.interview.tracker.service;
 
 import com.interview.tracker.entity.Candidate;
+import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
 import com.interview.tracker.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import com.interview.tracker.constants.Stage;
+import com.interview.tracker.constants.StageStatus;
 
 @Service
 public class CandidateService {
@@ -26,14 +31,54 @@ public class CandidateService {
    
     public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
 
-        
-        if (candidate.getUser() != null &&
-                userRepository.findByEmail(candidate.getUser().getEmail()).isPresent()) {
-            throw new RuntimeException("Candidate with this email already exists");
+        if (candidate.getUser() == null || candidate.getUser().getId() == null) {
+            throw new IllegalArgumentException("User is required");
+        }
+
+        if (candidate.getJd() == null || candidate.getJd().getId() == null) {
+            throw new IllegalArgumentException("Job description is required");
+        }
+
+        Long userId = candidate.getUser().getId();
+        Long jdId = candidate.getJd().getId();
+
+        // Scope note: only one job application per candidate
+        if (!candidateRepository.findByUser_Id(userId).isEmpty()) {
+            throw new IllegalArgumentException("Only one job application is allowed per candidate");
+        }
+
+        // Enforce "only one application per candidate per JD"
+        if (candidateRepository.findByUser_IdAndJd_Id(userId, jdId).isPresent()) {
+            throw new IllegalArgumentException("You have already applied for this job");
+        }
+
+        // Attach existing user instead of re-creating a new one via cascade
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        candidate.setUser(existingUser);
+
+        // Prevent duplicate accounts using the same mobile number
+        if (candidate.getPhone() != null && !candidate.getPhone().isBlank()) {
+            candidateRepository.findByPhone(candidate.getPhone())
+                    .ifPresent(existing -> { throw new IllegalArgumentException("Mobile number already exists"); });
+        }
+
+        if (candidate.getStatus() == null || candidate.getStatus().isBlank()) {
+            candidate.setStatus("APPLIED");
+        }
+        candidate.setApplicationDate(LocalDateTime.now());
+        if (candidate.getStage() == null) {
+            candidate.setStage(Stage.PROFILING);
+            candidate.setStageStatus(StageStatus.COMPLETED);
         }
 
         
         if (file != null && !file.isEmpty()) {
+            // Basic PDF check (frontend already enforces, backend must too)
+            String originalName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+            if (!originalName.endsWith(".pdf")) {
+                throw new IllegalArgumentException("Resume must be a PDF file");
+            }
 
             File dir = new File(UPLOAD_DIR);
             if (!dir.exists()) dir.mkdirs();

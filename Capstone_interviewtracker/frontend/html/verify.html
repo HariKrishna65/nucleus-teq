@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verify Email - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/verify.css">
+</head>
+<body class="page-auth">
+
+<div class="container">
+  <div class="icon" id="icon">Email</div>
+  <h2 id="title">Verify Your Email</h2>
+  <p class="message" id="message">Please wait while we verify your email...</p>
+  
+  <div id="resendSection" class="is-hidden">
+    <p class="resend-link">
+      Didn't receive the email? 
+      <a onclick="resendVerification()">Resend verification email</a>
+    </p>
+  </div>
+  
+  <a href="login.html"><button>Back to Login</button></a>
+</div>
+
+<script>
+const BASE_URL = "http://localhost:8080";
+
+// Get token from URL
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+
+if (token) {
+  verifyEmail(token);
+} else {
+  showError("Invalid verification link. Please request a new verification email.");
+}
+
+function verifyEmail(token) {
+  fetch(BASE_URL + "/auth/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: token })
+  })
+  .then(res => res.text())
+  .then(data => {
+    if (data.includes("success") || data.includes("verified") || data.includes("password")) {
+      showSuccess("Email verified! Please check your email for the password setup link.");
+    } else {
+      showError(data);
+    }
+  })
+  .catch(err => {
+    showError("Verification failed. Please try again.");
+  });
+}
+
+function showSuccess(message) {
+  document.getElementById("icon").className = "icon success-icon";
+  document.getElementById("icon").textContent = "Success";
+  document.getElementById("title").textContent = "Email Verified!";
+  document.getElementById("message").textContent = message;
+}
+
+function showError(message) {
+  document.getElementById("icon").className = "icon error-icon";
+  document.getElementById("icon").textContent = "Error";
+  document.getElementById("title").textContent = "Verification Failed";
+  document.getElementById("message").textContent = message;
+  document.getElementById("resendSection").style.display = "block";
+}
+
+function resendVerification() {
+  const email = prompt("Enter your email address:");
+  if (email) {
+    fetch(BASE_URL + "/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email, name: "User", role: "CANDIDATE" })
+    })
+    .then(res => res.text())
+    .then(data => {
+      alert("Verification email resent! Check your inbox.");
+    })
+    .catch(err => {
+      alert("Failed to resend email. Please try again.");
+    });
+  }
+}
+</script>
+
+</body>
+</html>

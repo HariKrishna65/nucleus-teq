@@ -1,22 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Login - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/login.css">
 </head>
-<body>
+<body class="page-auth">
 
 <div class="container">
-  <h2>Login</h2>
+  <div class="logo">Interview Tracker</div>
+  <h2>Welcome Back</h2>
+  <p class="subtitle">Sign in to continue to your dashboard</p>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <div class="verification-notice is-hidden" id="verificationNotice">
+    <p>Please verify your email first. Check your inbox for the verification link.</p>
+  </div>
 
-  <button onclick="login()">Login</button>
+  <div class="input-group">
+    <label for="email">Email Address</label>
+    <input id="email" type="email" placeholder="Enter your email">
+  </div>
 
-  <p>New user? <a href="register.html">Signup</a></p>
+  <div class="input-group">
+    <label for="password">Password</label>
+    <div class="password-wrapper">
+      <input id="password" type="password" placeholder="Enter your password">
+      <button type="button" class="toggle-password" onclick="togglePassword('password', this)">👁</button>
+    </div>
+  </div>
+
+  <div class="forgot-password">
+    <a onclick="showForgotPassword()">Forgot password?</a>
+  </div>
+
+  <button onclick="login()">Sign In</button>
+
+  <div class="signup-link">
+    Don't have an account? <a href="register.html">Create one</a>
+  </div>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/login.js"></script>
 </body>
 </html>

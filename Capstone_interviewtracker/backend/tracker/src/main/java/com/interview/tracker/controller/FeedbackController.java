@@ -2,6 +2,7 @@ package com.interview.tracker.controller;
 
 import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.service.FeedbackService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class FeedbackController {
      * Submit feedback for an interview.
      */
     @PostMapping
-    public Feedback submit(@RequestBody Feedback feedback) {
+    public Feedback submit(@Valid @RequestBody Feedback feedback) {
         return feedbackService.save(feedback);
     }
 }

@@ -1,29 +1,125 @@
-const BASE_URL = "http://localhost:8080";
-
 const user = JSON.parse(localStorage.getItem("user"));
 
-// 🔹 Load JDs into dropdown
+if (!user) {
+  window.location.href = "login.html";
+}
+
+// Load JDs into dropdown
 function loadJDs() {
-  fetch(BASE_URL + "/jd")
-    .then(res => res.json())
+  jdActions.list()
     .then(data => {
       const select = document.getElementById("jdSelect");
-      select.innerHTML = "";
+      select.innerHTML = '<option value="">-- Select a job --</option>';
 
       data.forEach(jd => {
         const option = document.createElement("option");
         option.value = jd.id;
-        option.textContent = jd.title;
+        option.textContent = `${jd.title} - ${jd.experience} yrs exp`;
+        option.dataset.title = jd.title;
+        option.dataset.description = jd.description;
+        option.dataset.skills = jd.skills;
         select.appendChild(option);
       });
+    })
+    .catch(err => {
+      console.error(err);
+      showAlert("Error loading jobs. Please refresh.", "error");
     });
 }
 
-// 🔹 Apply to job
+function updateJdInfo() {
+  const select = document.getElementById("jdSelect");
+  const selectedOption = select.options[select.selectedIndex];
+  const title = selectedOption.dataset.title || "Select a job";
+  document.getElementById("jdTitle").textContent = title;
+}
+
+function updateFileName() {
+  const file = document.getElementById("resume").files[0];
+  const fileNameEl = document.getElementById("fileName");
+  if (file) {
+    fileNameEl.textContent = `Selected: ${file.name}`;
+  } else {
+    fileNameEl.textContent = "";
+  }
+}
+
+function validateApply() {
+  const jdSelect = document.getElementById("jdSelect");
+  const phone = document.getElementById("phone");
+  const experience = document.getElementById("experience");
+  const resume = document.getElementById("resume");
+  let isValid = true;
+
+  // Clear errors
+  [jdSelect, phone, experience].forEach(el => {
+    el.classList.remove("input-error");
+    const err = el.nextElementSibling;
+    if (err && err.classList.contains("error-message")) err.style.display = "none";
+  });
+
+  if (!jdSelect.value) {
+    showError(jdSelect, "Please select a job");
+    isValid = false;
+  }
+
+  if (!phone.value.trim()) {
+    showError(phone, "Phone number is required");
+    isValid = false;
+  } else if (!/^\d{10,15}$/.test(phone.value.replace(/\D/g, ''))) {
+    showError(phone, "Please enter a valid phone number");
+    isValid = false;
+  }
+
+  if (!experience.value) {
+    showError(experience, "Experience is required");
+    isValid = false;
+  }
+
+  if (!resume.files[0]) {
+    showAlert("Please upload your resume", "error");
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function showError(input, message) {
+  input.classList.add("input-error");
+  let errorDiv = input.nextElementSibling;
+  if (!errorDiv || !errorDiv.classList.contains("error-message")) {
+    errorDiv = document.createElement("div");
+    errorDiv.className = "error-message";
+    input.parentNode.insertBefore(errorDiv, input.nextSibling);
+  }
+  errorDiv.textContent = message;
+  errorDiv.style.display = "block";
+}
+
+function showAlert(message, type) {
+  const existing = document.querySelector(".alert");
+  if (existing) existing.remove();
+
+  const alert = document.createElement("div");
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+
+  const container = document.querySelector(".container");
+  container.insertBefore(alert, container.firstChild);
+  
+  if (type === "error") {
+    setTimeout(() => alert.remove(), 5000);
+  }
+}
+
+// Apply to job
 function applyJob() {
+  if (!validateApply()) return;
+
+  showLoading(true);
 
   const candidate = {
-    phone: document.getElementById("phone").value,
+    phone: document.getElementById("phone").value.trim(),
     experience: parseInt(document.getElementById("experience").value),
     status: "APPLIED",
     user: {
@@ -37,27 +133,36 @@ function applyJob() {
   const file = document.getElementById("resume").files[0];
 
   const formData = new FormData();
-
-  // IMPORTANT: send JSON as Blob
   formData.append("candidate", new Blob([JSON.stringify(candidate)], {
     type: "application/json"
   }));
-
   formData.append("file", file);
 
-  fetch(BASE_URL + "/candidates", {
-    method: "POST",
-    body: formData
-  })
-  .then(res => res.json())
+  candidateActions.apply(formData)
   .then(data => {
-    alert("Applied successfully!");
-    window.location.href = "dashboard.html";
+    showLoading(false);
+    showAlert("Application submitted successfully!", "success");
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
   })
   .catch(err => {
+    showLoading(false);
     console.error(err);
-    alert("Error applying");
+    showAlert("Error submitting application. Please try again.", "error");
   });
 }
 
+function showLoading(show) {
+  const btn = document.querySelector("button");
+  if (show) {
+    btn.innerHTML = '<span class="spinner"></span> Submitting...';
+    btn.disabled = true;
+  } else {
+    btn.textContent = "Submit Application";
+    btn.disabled = false;
+  }
+}
+
+// Initialize
 loadJDs();

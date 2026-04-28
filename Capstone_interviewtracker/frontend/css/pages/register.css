@@ -1,0 +1,17 @@
+.logo { font-size: 2rem; margin-bottom: 10px; }
+.subtitle { color: var(--text-light); margin-bottom: 30px; text-align: center; }
+.role-select { margin-bottom: 20px; }
+.role-info { font-size: 0.85rem; color: var(--text-light); margin-top: 5px; }
+.login-link { text-align: center; margin-top: 20px; color: var(--text-light); }
+.login-link a { color: var(--primary); font-weight: 600; text-decoration: none; }
+.login-link a:hover { text-decoration: underline; }
+.form-section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+.form-section-title { font-size: 0.9rem; font-weight: 600; color: var(--text-light); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.gender-options { display: flex; gap: 15px; margin: 10px 0; }
+.gender-option { flex: 1; padding: 12px; background: var(--bg); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.3s ease; }
+.gender-option:hover { border-color: var(--primary); }
+.gender-option.selected { border-color: var(--primary); background: rgba(79, 70, 229, 0.1); }
+.info-box { background: #e0f2fe; border: 1px solid #0ea5e9; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+.info-box p { margin: 0; font-size: 0.9rem; color: #0369a1; }
+.text-danger { color: #ef4444; }

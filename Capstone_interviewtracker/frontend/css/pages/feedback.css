@@ -1,0 +1,100 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.back-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  width: auto;
+  padding: 8px 16px;
+}
+.back-btn:hover {
+  background: var(--bg);
+}
+.rating-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+.rating-option {
+  padding: 15px 20px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+.rating-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+}
+.rating-option.selected {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.1);
+}
+.rating-option .stars {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+.rating-option .label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.status-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+.status-option {
+  padding: 15px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+.status-option:hover {
+  border-color: var(--primary);
+}
+.status-option.selected {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.1);
+}
+.status-option .icon {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+.status-option .label {
+  font-weight: 600;
+}
+.status-option.rejected {
+  border-color: var(--danger);
+}
+.status-option.rejected.selected {
+  background: rgba(239, 68, 68, 0.1);
+}
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.interview-summary {
+  background: var(--bg);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+}
+.interview-summary h4 {
+  margin: 0 0 15px 0;
+  color: var(--primary);
+}
+.interview-summary p {
+  margin: 8px 0;
+  font-size: 0.9rem;
+}

@@ -1,33 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Feedback</title>
+  <title>Submit Feedback - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/feedback.css">
 </head>
-<body>
+<body class="page-feedback">
 
 <div class="container">
-  <h2>Submit Feedback</h2>
+  <div class="header">
+    <h2>Submit Feedback</h2>
+    <button class="back-btn" onclick="window.location.href='panel-dashboard.html'">Back</button>
+  </div>
 
-  <select id="rating">
-    <option value="1">1 - Poor</option>
-    <option value="2">2 - Average</option>
-    <option value="3">3 - Good</option>
-    <option value="4">4 - Very Good</option>
-    <option value="5">5 - Excellent</option>
-  </select>
+  <div class="interview-summary" id="interviewSummary">
+    <h4>Interview Details</h4>
+    <p><strong>Candidate:</strong> <span id="candidateName">Loading...</span></p>
+    <p><strong>Round:</strong> <span id="roundInfo">Loading...</span></p>
+    <p><strong>Focus Area:</strong> <span id="focusArea">Loading...</span></p>
+  </div>
 
-  <input id="comments" placeholder="Comments">
+  <div class="input-group">
+    <label>Rating</label>
+    <div class="rating-container" id="ratingContainer">
+      <div class="rating-option" data-value="1" onclick="selectRating(1)">
+        <div class="stars">1/5</div>
+        <div class="label">Poor</div>
+      </div>
+      <div class="rating-option" data-value="2" onclick="selectRating(2)">
+        <div class="stars">2/5</div>
+        <div class="label">Average</div>
+      </div>
+      <div class="rating-option" data-value="3" onclick="selectRating(3)">
+        <div class="stars">3/5</div>
+        <div class="label">Good</div>
+      </div>
+      <div class="rating-option" data-value="4" onclick="selectRating(4)">
+        <div class="stars">4/5</div>
+        <div class="label">Very Good</div>
+      </div>
+      <div class="rating-option" data-value="5" onclick="selectRating(5)">
+        <div class="stars">5/5</div>
+        <div class="label">Excellent</div>
+      </div>
+    </div>
+    <input type="hidden" id="rating" value="">
+  </div>
 
-  <select id="status">
-    <option value="L2">Move to L2</option>
-    <option value="HR">Move to HR</option>
-    <option value="REJECTED">Reject</option>
-  </select>
+  <div class="input-group">
+    <label for="comments">Comments / Feedback</label>
+    <textarea id="comments" placeholder="Provide detailed feedback about the candidate's performance..."></textarea>
+  </div>
 
-  <button onclick="submitFeedback()">Submit</button>
+  <div class="input-group">
+    <label>Interview Decision</label>
+    <div class="status-options" id="statusOptions">
+      <div class="status-option" data-value="L1" onclick="selectStatus('L1')">
+        <div class="icon">Stage 1</div>
+        <div class="label">Move to L1</div>
+      </div>
+      <div class="status-option" data-value="L2" onclick="selectStatus('L2')">
+        <div class="icon">Stage 2</div>
+        <div class="label">Move to L2</div>
+      </div>
+      <div class="status-option" data-value="HR" onclick="selectStatus('HR')">
+        <div class="icon">HR</div>
+        <div class="label">HR Round</div>
+      </div>
+      <div class="status-option rejected" data-value="REJECTED" onclick="selectStatus('REJECTED')">
+        <div class="icon">Reject</div>
+        <div class="label">Reject</div>
+      </div>
+    </div>
+    <input type="hidden" id="status" value="">
+  </div>
+
+  <button onclick="submitFeedback()">Submit Feedback</button>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/feedback.js"></script>
 </body>
 </html>

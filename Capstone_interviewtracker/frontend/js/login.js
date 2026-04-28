@@ -1,43 +1,160 @@
-const BASE_URL = "http://localhost:8080";
+function validateLogin() {
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  let isValid = true;
+
+  // Reset errors
+  email.classList.remove("input-error");
+  password.classList.remove("input-error");
+
+  // Validate email
+  if (!email.value.trim()) {
+    showError(email, "Email is required");
+    isValid = false;
+  } else if (!isValidEmail(email.value)) {
+    showError(email, "Please enter a valid email");
+    isValid = false;
+  }
+
+  // Validate password
+  if (!password.value) {
+    showError(password, "Password is required");
+    isValid = false;
+  } else if (password.value.length < 8) {
+    showError(password, "Password must be at least 8 characters");
+    isValid = false;
+  }
+
+  return isValid;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function showError(input, message) {
+  input.classList.add("input-error");
+  // Create or update error message
+  let errorDiv = input.nextElementSibling;
+  if (!errorDiv || !errorDiv.classList.contains("error-message")) {
+    errorDiv = document.createElement("div");
+    errorDiv.className = "error-message";
+    input.parentNode.insertBefore(errorDiv, input.nextSibling);
+  }
+  errorDiv.textContent = message;
+  errorDiv.style.display = "block";
+}
 
 function login() {
+  if (!validateLogin()) return;
+
+  showLoading(true);
 
   const data = {
-    email: document.getElementById("email").value,
+    email: document.getElementById("email").value.trim(),
     password: document.getElementById("password").value
   };
 
-  fetch(BASE_URL + "/auth/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  })
-  .then(async (res) => {
-    const text = await res.text();
-
-    // 🔥 handle error properly
-    if (!res.ok) {
-      throw new Error(text);
-    }
-
-    return JSON.parse(text);
-  })
+  authActions.login(data)
   .then(data => {
     console.log("SUCCESS:", data);
+    showLoading(false);
 
-    alert(data.message);
+    // Store user data
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
 
-    // store user
-    localStorage.setItem("user", JSON.stringify(data));
+    // Show success message
+    showAlert("Login successful! Redirecting...", "success");
 
-    // redirect
-    window.location.href = "index.html";
-    window.location.href = "jd.html";
+    // Redirect based on role
+    setTimeout(() => {
+      if (data.role === "HR") {
+        window.location.href = "jd.html";
+      } else if (data.role === "PANEL") {
+        window.location.href = "panel-dashboard.html";
+      } else {
+        window.location.href = "dashboard.html";
+      }
+    }, 1000);
   })
   .catch(err => {
     console.error(err);
-    alert(err.message || "Login failed");
+    showLoading(false);
+    const errorMsg = err.message || "Login failed";
+    
+    // Check for specific error types
+    if (errorMsg.includes("verify") || errorMsg.includes("verified")) {
+      document.getElementById("verificationNotice").style.display = "block";
+      showAlert(errorMsg, "error");
+    } else if (errorMsg.includes("Password not set") || errorMsg.includes("password")) {
+      showAlert(errorMsg + " <a href='forgot-password.html?email=" + encodeURIComponent(data.email || "") + "' style='color: var(--primary);'>Reset here</a>", "error");
+    } else {
+      showAlert(errorMsg, "error");
+    }
   });
 }
+
+function showForgotPassword() {
+  let email = document.getElementById("email").value.trim();
+  
+  if (!email) {
+    email = prompt("Enter your email address to reset password:");
+    if (!email) return;
+  }
+
+  if (!isValidEmail(email)) {
+    showAlert("Please enter a valid email", "error");
+    return;
+  }
+
+  if (confirm(`Send password reset link to ${email}?`)) {
+    showLoading(true);
+    
+    authActions.forgotPassword({ email })
+    .then(() => {
+      showLoading(false);
+      showAlert("Password reset link sent to your email!", "success");
+    })
+    .catch(err => {
+      showLoading(false);
+      showAlert("Failed to send reset email. Please try again.", "error");
+    });
+  }
+}
+
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isHidden = input.type === "password";
+  input.type = isHidden ? "text" : "password";
+  btn.textContent = isHidden ? "🙈" : "👁";
+}
+
+function showLoading(show) {
+  const btn = document.querySelector("button");
+  if (show) {
+    btn.innerHTML = '<span class="spinner"></span> Loading...';
+    btn.disabled = true;
+  } else {
+    btn.textContent = "Login";
+    btn.disabled = false;
+  }
+}
+
+function showAlert(message, type) {
+  // Remove existing alerts
+  const existing = document.querySelector(".alert");
+  if (existing) existing.remove();
+
+  const alert = document.createElement("div");
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+
+  const container = document.querySelector(".container");
+  container.insertBefore(alert, container.firstChild);
+}
+
+// Enter key support
+document.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") login();
+});

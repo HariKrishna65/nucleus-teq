@@ -1,17 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Candidate Dashboard</title>
+  <title>My Applications - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/dashboard.css">
 </head>
-<body>
+<body class="page-dashboard">
 
 <div class="container">
-  <h2>My Applications</h2>
+  <div class="header">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="user-details">
+        <h3 id="userName">User</h3>
+        <p>Candidate</p>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
 
-  <ul id="applications"></ul>
+  <div class="stats">
+    <div class="stat-card">
+      <div class="number" id="totalApps">0</div>
+      <div class="label">Total Applications</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="pendingApps">0</div>
+      <div class="label">Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="interviewApps">0</div>
+      <div class="label">In Interview</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="selectedApps">0</div>
+      <div class="label">Selected</div>
+    </div>
+  </div>
+
+  <h2>My Applications</h2>
+  <ul id="applications">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading your applications...</p>
+    </div>
+  </ul>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/dashboard.js"></script>
 </body>
 </html>

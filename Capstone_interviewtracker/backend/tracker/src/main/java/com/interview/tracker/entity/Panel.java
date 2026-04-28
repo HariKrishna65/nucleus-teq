@@ -13,6 +13,9 @@ public class Panel {
     private String name;
     private String email;
     private String expertise;
+    private String mobile;
+    private String organization;
+    private String designation;
 
     public Panel() {}
 
@@ -27,4 +30,13 @@ public class Panel {
 
     public String getExpertise() { return expertise; }
     public void setExpertise(String expertise) { this.expertise = expertise; }
+
+    public String getMobile() { return mobile; }
+    public void setMobile(String mobile) { this.mobile = mobile; }
+
+    public String getOrganization() { return organization; }
+    public void setOrganization(String organization) { this.organization = organization; }
+
+    public String getDesignation() { return designation; }
+    public void setDesignation(String designation) { this.designation = designation; }
 }

@@ -1,29 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Signup</title>
+  <title>Signup - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/register.css">
 </head>
-<body>
+<body class="page-auth">
 
 <div class="container">
-  <h2>Signup</h2>
+  <div class="logo">Interview Tracker</div>
+  <h2>Create Account</h2>
+  <p class="subtitle">Join us and start tracking your interviews</p>
 
-  <input id="name" placeholder="Name">
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <div class="info-box">
+    <p>After registration, you will receive a verification email. Click the link to verify your email, then set your password to complete signup.</p>
+  </div>
 
-  <select id="role">
-    <option value="HR">HR</option>
-    <option value="PANEL">Panel</option>
-    <option value="CANDIDATE">Candidate</option>
-  </select>
+  <div class="form-section">
+    <div class="form-section-title">Basic Information</div>
+    
+    <div class="input-group">
+      <label for="name">Full Name <span class="text-danger">*</span></label>
+      <input id="name" type="text" placeholder="Enter your full name">
+    </div>
+
+    <div class="input-group">
+      <label for="email">Email Address <span class="text-danger">*</span></label>
+      <input id="email" type="email" placeholder="Enter your email">
+    </div>
+
+    <div class="input-group role-select">
+      <label for="role">I am a <span class="text-danger">*</span></label>
+      <select id="role">
+        <option value="">Select your role</option>
+        <option value="CANDIDATE">Candidate - Looking for jobs</option>
+        <option value="HR">HR - Managing recruitments</option>
+        <option value="PANEL">Interview Panel - Conducting interviews</option>
+      </select>
+      <p class="role-info">Select your role to personalize your experience</p>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Personal Details</div>
+    
+    <div class="form-row">
+      <div class="input-group">
+        <label for="dateOfBirth">Date of Birth</label>
+        <input id="dateOfBirth" type="date">
+      </div>
+      <div class="input-group">
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" placeholder="Enter phone number">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Gender</label>
+      <div class="gender-options" id="genderOptions">
+        <div class="gender-option" data-value="MALE" onclick="selectGender('MALE')">Male</div>
+        <div class="gender-option" data-value="FEMALE" onclick="selectGender('FEMALE')">Female</div>
+        <div class="gender-option" data-value="OTHER" onclick="selectGender('OTHER')">Other</div>
+      </div>
+      <input type="hidden" id="gender" value="">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title">Address (Optional)</div>
+    
+    <div class="input-group">
+      <label for="address">Street Address</label>
+      <input id="address" type="text" placeholder="Enter street address">
+    </div>
+
+    <div class="form-row">
+      <div class="input-group">
+        <label for="city">City</label>
+        <input id="city" type="text" placeholder="City">
+      </div>
+      <div class="input-group">
+        <label for="state">State</label>
+        <input id="state" type="text" placeholder="State">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="country">Country</label>
+      <input id="country" type="text" placeholder="Country">
+    </div>
+  </div>
 
   <button onclick="register()">Register</button>
 
-  <p>Already have account? <a href="login.html">Login</a></p>
+  <div class="login-link">
+    Already have an account? <a href="login.html">Sign in</a>
+  </div>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/register.js"></script>
 </body>
 </html>

@@ -1,24 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Apply Job</title>
+  <title>Apply for Job - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/apply.css">
 </head>
-<body>
+<body class="page-workflow">
 
 <div class="container">
-  <h2>Apply for Job</h2>
+  <div class="header">
+    <h2>Apply for Job</h2>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">Back</button>
+  </div>
 
-  <select id="jdSelect"></select>
+  <div class="jd-info" id="selectedJdInfo">
+    <h4>Selected Position</h4>
+    <p id="jdTitle">Select a job from the list below</p>
+  </div>
 
-  <input id="phone" placeholder="Phone">
-  <input id="experience" placeholder="Experience">
+  <div class="input-group">
+    <label for="jdSelect">Select Job</label>
+    <select id="jdSelect" onchange="updateJdInfo()">
+      <option value="">-- Select a job --</option>
+    </select>
+  </div>
 
-  <input type="file" id="resume">
+  <div class="input-group">
+    <label for="phone">Phone Number</label>
+    <input id="phone" type="tel" placeholder="Enter your phone number">
+  </div>
 
-  <button onclick="applyJob()">Apply</button>
+  <div class="input-group">
+    <label for="experience">Years of Experience</label>
+    <input id="experience" type="number" min="0" max="30" placeholder="Enter years of experience">
+  </div>
+
+  <div class="input-group">
+    <label>Resume (PDF/DOC)</label>
+    <div class="file-input-wrapper">
+      <input type="file" id="resume" accept=".pdf,.doc,.docx" onchange="updateFileName()">
+      <div class="file-display">
+        <div class="icon">Resume File</div>
+        <p>Click to upload or drag and drop</p>
+        <p class="file-hint-text">PDF, DOC, DOCX (Max 5MB)</p>
+        <div class="file-name" id="fileName"></div>
+      </div>
+    </div>
+  </div>
+
+  <button onclick="applyJob()">Submit Application</button>
 </div>
 
+<script src="../js/api.js"></script>
 <script src="../js/apply.js"></script>
 </body>
 </html>

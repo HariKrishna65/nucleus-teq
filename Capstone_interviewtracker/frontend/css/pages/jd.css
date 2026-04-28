@@ -1,0 +1,85 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.back-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  width: auto;
+  padding: 8px 16px;
+}
+.back-btn:hover {
+  background: var(--bg);
+}
+.jd-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.jd-info {
+  flex: 1;
+  min-width: 250px;
+}
+.jd-info b {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.jd-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+.jd-meta {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--text-light);
+  background: var(--bg);
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+.jd-actions {
+  display: flex;
+  gap: 10px;
+}
+.apply-jd-btn {
+  width: auto;
+  padding: 8px 20px;
+}
+.create-jd-form {
+  background: var(--bg);
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+.is-hidden {
+  display: none;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+.empty-state .icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}

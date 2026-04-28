@@ -19,12 +19,7 @@ public class JobDescriptionController {
 
     
     @PostMapping
-    public ResponseEntity<?> createJD(@Valid @RequestBody JobDescription jd,
-                                      @RequestParam String role) {
-
-        if (!role.equals("HR")) {
-            return ResponseEntity.status(403).body("Only HR can create JD");
-        }
+    public ResponseEntity<?> createJD(@Valid @RequestBody JobDescription jd) {
 
         return ResponseEntity.ok(service.save(jd));
     }
@@ -50,13 +45,7 @@ public class JobDescriptionController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id,
-                                   @RequestParam String role) {
-
-        if (!role.equals("HR")) {
-            return ResponseEntity.status(403).body("Only HR can delete JD");
-        }
-
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.ok("Deleted successfully");
     }

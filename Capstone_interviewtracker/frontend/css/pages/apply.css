@@ -1,0 +1,66 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.back-btn {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  width: auto;
+  padding: 8px 16px;
+}
+.back-btn:hover {
+  background: var(--bg);
+}
+.jd-info {
+  background: var(--bg);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+.jd-info h4 {
+  margin: 0 0 10px 0;
+  color: var(--primary);
+}
+.jd-info p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+.file-input-wrapper {
+  position: relative;
+  margin: 20px 0;
+}
+.file-input-wrapper input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.file-display {
+  padding: 40px;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  text-align: center;
+  background: var(--bg);
+  transition: all 0.3s ease;
+}
+.file-input-wrapper:hover .file-display {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.05);
+}
+.file-display .icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.file-name {
+  margin-top: 10px;
+  font-weight: 600;
+  color: var(--primary);
+}
+.file-hint-text {
+  font-size: 0.8rem;
+}
