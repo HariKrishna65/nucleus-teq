@@ -99,7 +99,12 @@ function register() {
   })
   .catch(err => {
     showLoading(false);
-    showAlert("Registration failed. Please try again.", "error");
+    const msg = (err && err.message) ? err.message : "Registration failed. Please try again.";
+    if (msg.toLowerCase().includes("email already")) {
+      showAlert("Email already registered. Please login or use forgot password.", "error");
+      return;
+    }
+    showAlert(msg, "error");
   });
 }
 

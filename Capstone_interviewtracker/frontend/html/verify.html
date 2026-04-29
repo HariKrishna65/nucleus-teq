@@ -41,16 +41,18 @@ function verifyEmail(token) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token: token })
   })
-  .then(res => res.text())
-  .then(data => {
-    if (data.includes("success") || data.includes("verified") || data.includes("password")) {
-      showSuccess("Email verified! Please check your email for the password setup link.");
-    } else {
-      showError(data);
+  .then(async res => {
+    const text = await res.text();
+    if (!res.ok) {
+      throw new Error(text || "Verification failed");
     }
+    return text;
+  })
+  .then(() => {
+    showSuccess("Email verified! Please check your email for the password setup link.");
   })
   .catch(err => {
-    showError("Verification failed. Please try again.");
+    showError(err.message || "Verification failed. Please try again.");
   });
 }
 

@@ -23,6 +23,17 @@ public class EmailService {
     @Value("${app.base.url:http://localhost:8080}")
     private String baseUrl;
 
+    @Value("${app.frontend.url:http://localhost:5500/frontend/html}")
+    private String frontendUrl;
+
+    private String buildFrontendUrl(String page, String token) {
+        String normalizedBase = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
+        return normalizedBase + "/" + page + "?token=" + token;
+    }
+
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
     public void sendVerificationEmail(User user) {
         String token = UUID.randomUUID().toString();
         LocalDate expiry = LocalDate.now().plusDays(7);
@@ -34,10 +45,9 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Verify your Interview Tracker Account");
-        message.setFrom("noreply@interviewtracker.com");
+        message.setFrom(mailUsername);
 
-        String verificationUrl = baseUrl + "/auth/verify?token=" + token;
-
+        String verificationUrl = buildFrontendUrl("verify.html", token);
         message.setText(
             "Hello " + user.getName() + ",\n\n" +
             "Welcome to Interview Tracker!\n\n" +
@@ -51,8 +61,10 @@ public class EmailService {
 
         try {
             mailSender.send(message);
+            System.out.println("✅ Verification email sent to: " + user.getEmail());
         } catch (Exception e) {
             System.err.println("Failed to send email: " + e.getMessage());
+            throw new RuntimeException("Email sending failed", e);
         }
     }
 
@@ -67,10 +79,9 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Set Your Password - Interview Tracker");
-        message.setFrom("noreply@interviewtracker.com");
+        message.setFrom(mailUsername);
 
-        String setPasswordUrl = baseUrl + "/auth/set-password?token=" + token;
-
+        String setPasswordUrl = buildFrontendUrl("set-password.html", token);
         message.setText(
             "Hello " + user.getName() + ",\n\n" +
             "Your account has been verified! Now you need to set your password.\n\n" +
@@ -84,8 +95,10 @@ public class EmailService {
 
         try {
             mailSender.send(message);
+            System.out.println("✅ Password set email sent to: " + user.getEmail());
         } catch (Exception e) {
             System.err.println("Failed to send email: " + e.getMessage());
+            throw new RuntimeException("Email sending failed", e);
         }
     }
 
@@ -100,10 +113,9 @@ public class EmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(user.getEmail());
         message.setSubject("Reset Your Password - Interview Tracker");
-        message.setFrom("noreply@interviewtracker.com");
+        message.setFrom(mailUsername);
 
-        String resetUrl = baseUrl + "/auth/set-password?token=" + token;
-
+        String resetUrl = buildFrontendUrl("set-password.html", token);
         message.setText(
             "Hello " + user.getName() + ",\n\n" +
             "We received a request to reset your password.\n\n" +
@@ -117,8 +129,10 @@ public class EmailService {
 
         try {
             mailSender.send(message);
+            System.out.println("✅ Password reset email sent to: " + user.getEmail());
         } catch (Exception e) {
             System.err.println("Failed to send email: " + e.getMessage());
+            throw new RuntimeException("Email sending failed", e);
         }
     }
 }
