@@ -8,49 +8,67 @@ import com.interview.tracker.dto.CreateTestUserRequest;
 import com.interview.tracker.dto.VerifyEmailRequest;
 import com.interview.tracker.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import static com.interview.tracker.constants.AppConstants.AUTH;
+import static com.interview.tracker.constants.AppConstants.CREATE_TEST_USER;
+import static com.interview.tracker.constants.AppConstants.FORGOT_PASSWORD;
+import static com.interview.tracker.constants.AppConstants.LOGIN;
+import static com.interview.tracker.constants.AppConstants.REGISTER;
+import static com.interview.tracker.constants.AppConstants.RESEND_VERIFICATION;
+import static com.interview.tracker.constants.AppConstants.SET_PASSWORD;
+import static com.interview.tracker.constants.AppConstants.VERIFY;
+import static com.interview.tracker.constants.AppConstants.VERIFY_AND_SET_PASSWORD;
 
 @RestController
 @RequestMapping(AUTH)
 
 public class AuthController {
 
-    @Autowired
-    private UserService userService;
-    
-    @CrossOrigin(origins = "*")
+    private final UserService userService;
 
-    @PostMapping("/register")
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping(REGISTER)
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
         return userService.register(request);
     }
 
-    @PostMapping("/login")
+    @PostMapping(LOGIN)
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return userService.login(request);
     }
 
-    @PostMapping("/verify")
+    @PostMapping(VERIFY)
     public AuthResponse verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
         return userService.verifyEmail(request.getToken());
     }
 
-    @PostMapping("/set-password")
+    @PostMapping(VERIFY_AND_SET_PASSWORD)
+    public java.util.Map<String, Object> verifyAndSetPassword(@Valid @RequestBody VerifyEmailRequest request) {
+        return userService.verifyAndPreparePasswordSetup(request.getToken());
+    }
+
+    @PostMapping(SET_PASSWORD)
     public AuthResponse setPassword(@Valid @RequestBody SetPasswordRequest request) {
         return userService.setPassword(request);
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping(FORGOT_PASSWORD)
     public AuthResponse forgotPassword(@Valid @RequestBody LoginRequest request) {
         return userService.requestPasswordReset(request.getEmail());
     }
 
     // Test endpoint - create user directly with password (bypasses email verification)
     // WARNING: This endpoint is open for testing purposes only
-    @PostMapping("/create-test-user")
+    @PostMapping(CREATE_TEST_USER)
     public AuthResponse createTestUser(@Valid @RequestBody CreateTestUserRequest request) {
         return userService.createTestUser(request);
+    }
+
+    @PostMapping(RESEND_VERIFICATION)
+    public AuthResponse resendVerificationEmail(@Valid @RequestBody LoginRequest request) {
+        return userService.resendVerificationEmail(request.getEmail());
     }
 }

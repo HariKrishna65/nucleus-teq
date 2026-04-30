@@ -10,42 +10,55 @@ import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
+
+import static com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE;
+import static com.interview.tracker.constants.AppConstants.ROLE_HR;
+import static com.interview.tracker.constants.AppConstants.ROLE_PANEL;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final PanelRepository panelRepository;
+    private final JwtService jwtService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private PanelRepository panelRepository;
-
-    @Autowired
-    private JwtService jwtService;
-
-    private final List<String> roles = List.of("HR", "PANEL", "CANDIDATE");
+    private final List<String> roles = List.of(ROLE_HR, ROLE_PANEL, ROLE_CANDIDATE);
     private static final Pattern PASSWORD_POLICY =
             Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$");
+
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            EmailService emailService,
+            PanelRepository panelRepository,
+            JwtService jwtService
+    ) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
+        this.panelRepository = panelRepository;
+        this.jwtService = jwtService;
+    }
 
     public AuthResponse register(RegisterRequest request) {
 
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
+        }
+
+        if (userRepository.findByPhone(request.getPhone()).isPresent()) {
+            throw new IllegalArgumentException("Phone already exists");
         }
 
         if (request.getRole() == null || !roles.contains(request.getRole())) {
@@ -72,10 +85,10 @@ public class UserService {
         
         User saved = userRepository.save(user);
         
-        emailService.sendVerificationEmail(saved);
+        emailService.sendVerificationAndPasswordEmail(saved);
 
         return new AuthResponse(
-                "Registration successful! Please check your email to verify your account.",
+                "Registration successful! Please check your email to verify your account and set your password.",
                 saved.getRole(),
                 saved.getId(),
                 saved.getName(),
@@ -102,7 +115,7 @@ public class UserService {
         }
 
         Long panelId = null;
-        if ("PANEL".equals(user.getRole())) {
+        if (ROLE_PANEL.equals(user.getRole())) {
             Panel panel = panelRepository.findByEmail(user.getEmail()).orElseGet(() -> {
                 Panel p = new Panel();
                 p.setName(user.getName());
@@ -144,6 +157,32 @@ public class UserService {
         );
     }
 
+    /**
+     * New combined endpoint: Verify email and prepare for password setup in one step
+     * This is called from the new combined verify-password page
+     */
+    public Map<String, Object> verifyAndPreparePasswordSetup(String token) {
+        User user = userRepository.findAll().stream()
+                .filter(u -> token.equals(u.getVerificationToken()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or expired verification token"));
+
+        if (user.getTokenExpiry() != null && LocalDate.now().isAfter(user.getTokenExpiry())) {
+            throw new IllegalArgumentException("Verification token has expired");
+        }
+
+        // Mark email as verified
+        user.setEmailVerified(true);
+        // Keep the token for password setup
+        userRepository.save(user);
+
+        Map<String, Object> response = new java.util.HashMap<>();
+        response.put("message", "Email verified successfully. You can now set your password.");
+        response.put("email", user.getEmail());
+        response.put("userId", user.getId());
+        return response;
+    }
+
     public AuthResponse setPassword(SetPasswordRequest request) {
         User user = userRepository.findAll().stream()
                 .filter(u -> request.getToken().equals(u.getVerificationToken()))
@@ -160,7 +199,7 @@ public class UserService {
         user.setVerificationToken(null);
         user.setTokenExpiry(null);
 
-        if ("PANEL".equals(user.getRole()) && user.getActivatedAt() == null) {
+        if (ROLE_PANEL.equals(user.getRole()) && user.getActivatedAt() == null) {
             user.setActivatedAt(java.time.LocalDateTime.now());
         }
         userRepository.save(user);
@@ -203,6 +242,27 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public AuthResponse resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Email not found"));
+
+        if (user.isEmailVerified() && user.getPassword() != null) {
+            throw new IllegalArgumentException("Account is already verified and active");
+        }
+
+        // Send combined verification + password email
+        emailService.sendVerificationAndPasswordEmail(user);
+
+        return new AuthResponse(
+                "Verification email resent successfully! Please check your inbox.",
+                user.getRole(),
+                user.getId(),
+                user.getName(),
+                null,
+                null
+        );
+    }
+
     private void validatePasswordPolicy(String password) {
         if (password == null || !PASSWORD_POLICY.matcher(password).matches()) {
             throw new IllegalArgumentException(
@@ -235,7 +295,7 @@ public class UserService {
         User saved = userRepository.save(user);
 
         // Create panel entry if role is PANEL
-        if ("PANEL".equals(user.getRole())) {
+        if (ROLE_PANEL.equals(user.getRole())) {
             Panel panel = new Panel();
             panel.setName(user.getName());
             panel.setEmail(user.getEmail());

@@ -2,7 +2,6 @@ package com.interview.tracker.service;
 
 import com.interview.tracker.entity.JobDescription;
 import com.interview.tracker.repository.JobDescriptionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,8 +9,11 @@ import java.util.List;
 @Service
 public class JobDescriptionService {
 
-    @Autowired
-    private JobDescriptionRepository repo;
+    private final JobDescriptionRepository repo;
+
+    public JobDescriptionService(JobDescriptionRepository repo) {
+        this.repo = repo;
+    }
 
     public JobDescription save(JobDescription jd) {
         if (jd == null) {

@@ -95,40 +95,60 @@ function renderCandidates(rows) {
     return;
   }
 
-  list.innerHTML = filtered.map((row) => {
-    const c = row.candidate || {};
-    const stage = normalizeStage(c);
-    const name = (c.user && c.user.name) || c.fullName || "Candidate";
-    const email = (c.user && c.user.email) || "N/A";
-    const phone = c.phone || c.mobileNumber || "N/A";
-    const job = c.jd && c.jd.title ? c.jd.title : "Not mapped";
-    const latestFeedback = row.latestFeedback || null;
-    const isFinal = stage === "SELECTED" || stage === "REJECTED";
-    const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
+  list.innerHTML = `
+    <div class="candidate-table-wrap">
+      <table class="candidate-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Job Title</th>
+            <th>Stage</th>
+            <th>Status</th>
+            <th>Feedback</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map((row) => {
+            const c = row.candidate || {};
+            const stage = normalizeStage(c);
+            const name = (c.user && c.user.name) || c.fullName || "Candidate";
+            const email = (c.user && c.user.email) || "N/A";
+            const phone = c.phone || c.mobileNumber || "N/A";
+            const job = c.jd && c.jd.title ? c.jd.title : "Not mapped";
+            const latestFeedback = row.latestFeedback || null;
+            const feedbackText = latestFeedback
+              ? `${(latestFeedback.panel && latestFeedback.panel.name) || "Panel"} | ${latestFeedback.status || "N/A"} | ${latestFeedback.rating || "N/A"}`
+              : "No feedback";
+            const isFinal = stage === "SELECTED" || stage === "REJECTED";
+            const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
 
-    return `
-      <div class="candidate-card">
-        <div class="candidate-top">
-          <div>
-            <h4>${name}</h4>
-            <div class="meta">${email} | ${phone}</div>
-            <div class="meta">Job: ${job}</div>
-          </div>
-          <div>
-            <span class="badge">${stageLabel(stage)}</span>
-            <span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span>
-          </div>
-        </div>
-        ${feedbackHtml(latestFeedback)}
-        <div class="candidate-actions">
-          <button onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Advance Stage</button>
-          ${canAssignPanel ? `<button class="secondary-btn" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign Panel</button>` : ``}
-          <button class="btn-success" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
-          <button class="btn-danger" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
-        </div>
-      </div>
-    `;
-  }).join("");
+            return `
+              <tr>
+                <td>${name}</td>
+                <td>${email}</td>
+                <td>${phone}</td>
+                <td>${job}</td>
+                <td><span class="badge">${stageLabel(stage)}</span></td>
+                <td><span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span></td>
+                <td>${feedbackText}</td>
+                <td>
+                  <div class="table-actions">
+                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Advance</button>
+                    ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
+                    <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
+                    <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 function setActiveFilter(filter) {
@@ -202,11 +222,84 @@ function loadPanels() {
   return interviewActions.listPanels()
     .then((panels) => {
       allPanels = Array.isArray(panels) ? panels : [];
+      renderPanelMembers(allPanels);
       return allPanels;
     })
     .catch(() => {
       allPanels = [];
+      renderPanelMembers(allPanels);
       return [];
+    });
+}
+
+function renderPanelMembers(panels) {
+  const body = document.getElementById("panelMembersBody");
+  if (!body) return;
+  if (!panels || panels.length === 0) {
+    body.innerHTML = '<tr><td colspan="6" class="empty-state">No panel members added yet.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = panels.map((p) => `
+    <tr>
+      <td>${p.name || "-"}</td>
+      <td>${p.email || "-"}</td>
+      <td>${p.mobile || "-"}</td>
+      <td>${p.organization || "-"}</td>
+      <td>${p.designation || "-"}</td>
+      <td>${p.expertise || "-"}</td>
+    </tr>
+  `).join("");
+}
+
+function showPanelAlert(message, type) {
+  const alert = document.getElementById("panelAlert");
+  if (!alert) return;
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+  alert.classList.remove("is-hidden");
+}
+
+function clearPanelForm() {
+  document.getElementById("panelName").value = "";
+  document.getElementById("panelEmail").value = "";
+  document.getElementById("panelPhone").value = "";
+  document.getElementById("panelOrganization").value = "";
+  document.getElementById("panelDesignation").value = "";
+  document.getElementById("panelExpertise").value = "";
+}
+
+function createPanelMember() {
+  const payload = {
+    name: document.getElementById("panelName").value.trim(),
+    email: document.getElementById("panelEmail").value.trim(),
+    phone: document.getElementById("panelPhone").value.trim(),
+    organization: document.getElementById("panelOrganization").value.trim(),
+    designation: document.getElementById("panelDesignation").value.trim(),
+    expertise: document.getElementById("panelExpertise").value.trim()
+  };
+
+  if (!payload.name || !payload.email || !payload.organization || !payload.designation || !payload.expertise) {
+    showPanelAlert("Please fill all required panel details.", "error");
+    return;
+  }
+
+  const btn = document.getElementById("createPanelBtn");
+  btn.disabled = true;
+  btn.textContent = "Creating...";
+
+  hrActions.createPanel(payload)
+    .then(() => {
+      showPanelAlert("Panel member created. Password setup email sent successfully.", "success");
+      clearPanelForm();
+      return loadPanels();
+    })
+    .catch((err) => {
+      showPanelAlert(err.message || "Failed to create panel member.", "error");
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.textContent = "Create Panel";
     });
 }
 
@@ -295,14 +388,26 @@ function logout() {
   window.location.href = "login.html";
 }
 
+function wireSidebarNavigation() {
+  const links = Array.from(document.querySelectorAll(".sidebar-nav a"));
+  links.forEach((link) => {
+    link.addEventListener("click", () => {
+      links.forEach((l) => l.classList.remove("active"));
+      link.classList.add("active");
+    });
+  });
+}
+
 // Expose modal functions to HTML onclick handlers
 window.closeAssignPanel = closeAssignPanel;
 window.submitAssignPanel = submitAssignPanel;
 window.openAssignPanel = openAssignPanel;
+window.createPanelMember = createPanelMember;
 
 wireStatFilters();
 loadPanels();
 loadCandidates();
+wireSidebarNavigation();
 
 // Ensure modal starts hidden + allow backdrop/Esc close
 (() => {

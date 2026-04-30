@@ -9,11 +9,11 @@ function selectGender(value) {
 function validateRegister() {
   const name = document.getElementById("name");
   const email = document.getElementById("email");
-  const role = document.getElementById("role");
+  const phone = document.getElementById("phone");
   let isValid = true;
 
   // Clear previous errors
-  [name, email, role].forEach(el => {
+  [name, email, phone].forEach(el => {
     el.classList.remove("input-error");
     const err = el.nextElementSibling;
     if (err && err.classList.contains("error-message")) err.style.display = "none";
@@ -37,9 +37,12 @@ function validateRegister() {
     isValid = false;
   }
 
-  // Validate role
-  if (!role.value) {
-    showError(role, "Please select your role");
+  // Validate phone
+  if (!phone.value.trim()) {
+    showError(phone, "Phone number is required");
+    isValid = false;
+  } else if (!isValidPhone(phone.value.trim())) {
+    showError(phone, "Please enter a valid phone number");
     isValid = false;
   }
 
@@ -48,6 +51,10 @@ function validateRegister() {
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidPhone(phone) {
+  return /^[0-9+\-()\s]{7,20}$/.test(phone);
 }
 
 function showError(input, message) {
@@ -70,10 +77,10 @@ function register() {
   const data = {
     name: document.getElementById("name").value.trim(),
     email: document.getElementById("email").value.trim(),
-    role: document.getElementById("role").value,
+    role: "CANDIDATE",
     dateOfBirth: document.getElementById("dateOfBirth").value || null,
     gender: document.getElementById("gender").value || null,
-    phone: document.getElementById("phone").value.trim() || null,
+    phone: document.getElementById("phone").value.trim(),
     address: document.getElementById("address").value.trim() || null,
     city: document.getElementById("city").value.trim() || null,
     state: document.getElementById("state").value.trim() || null,
@@ -102,6 +109,10 @@ function register() {
     const msg = (err && err.message) ? err.message : "Registration failed. Please try again.";
     if (msg.toLowerCase().includes("email already")) {
       showAlert("Email already registered. Please login or use forgot password.", "error");
+      return;
+    }
+    if (msg.toLowerCase().includes("phone already")) {
+      showAlert("Phone number already registered. Please use another phone number.", "error");
       return;
     }
     showAlert(msg, "error");

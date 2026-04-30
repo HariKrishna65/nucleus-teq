@@ -3,19 +3,22 @@ package com.interview.tracker.controller;
 import com.interview.tracker.entity.JobDescription;
 import com.interview.tracker.service.JobDescriptionService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.interview.tracker.constants.AppConstants.JD;
+
 @RestController
-@RequestMapping("/jd")
-@CrossOrigin("*")
+@RequestMapping(JD)
 public class JobDescriptionController {
 
-    @Autowired
-    private JobDescriptionService service;
+    private final JobDescriptionService service;
+
+    public JobDescriptionController(JobDescriptionService service) {
+        this.service = service;
+    }
 
     
     @PostMapping

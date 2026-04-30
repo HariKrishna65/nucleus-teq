@@ -1,9 +1,0 @@
-.container { max-width: 450px; }
-.icon { font-size: 4rem; text-align: center; margin-bottom: 20px; }
-.message { text-align: center; color: var(--text-light); margin-bottom: 30px; line-height: 1.6; }
-.success-icon { color: var(--success); }
-.error-icon { color: var(--danger); }
-.resend-link { text-align: center; margin-top: 20px; }
-.resend-link a { color: var(--primary); cursor: pointer; }
-.resend-link a:hover { text-decoration: underline; }
-.is-hidden { display: none; }

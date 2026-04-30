@@ -6,40 +6,42 @@ import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.service.InterviewService;
 import com.interview.tracker.service.SecurityUtil;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 import static com.interview.tracker.constants.AppConstants.INTERVIEWS;
+import static com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE;
+import static com.interview.tracker.constants.AppConstants.ROLE_HR;
+import static com.interview.tracker.constants.AppConstants.ROLE_PANEL;
 
 @RestController
 @RequestMapping(INTERVIEWS)
 public class InterviewController {
 
-    @Autowired
-    private InterviewService interviewService;
+    private static final String PANEL_PATH = "/panel";
 
-    @Autowired
-    private PanelRepository panelRepository;
+    private final InterviewService interviewService;
+    private final PanelRepository panelRepository;
 
-    @PostMapping("/panel")
+    public InterviewController(InterviewService interviewService, PanelRepository panelRepository) {
+        this.interviewService = interviewService;
+        this.panelRepository = panelRepository;
+    }
+
+    @PostMapping(PANEL_PATH)
     public Panel createPanel(@RequestBody Panel panel) {
         return panelRepository.save(panel);
     }
 
-    @GetMapping("/panel")
+    @GetMapping(PANEL_PATH)
     public List<Panel> getPanels() {
         return panelRepository.findAll();
     }
 
     @PostMapping
     public Interview scheduleInterview(@Valid @RequestBody Interview interview) {
-        String role = SecurityUtil.currentRole();
-        if (!"HR".equals(role)) {
-            throw new IllegalArgumentException("Only HR can schedule interviews");
-        }
         return interviewService.scheduleInterview(interview);
     }
 
@@ -54,12 +56,12 @@ public class InterviewController {
         Long currentUserId = SecurityUtil.currentUserId();
         String currentEmail = SecurityUtil.currentEmail();
 
-        if ("CANDIDATE".equals(role)) {
+        if (ROLE_CANDIDATE.equals(role)) {
             if (interview.getCandidate() == null || interview.getCandidate().getUser() == null ||
                     !interview.getCandidate().getUser().getId().equals(currentUserId)) {
                 return ResponseEntity.status(403).body("Access denied");
             }
-        } else if ("PANEL".equals(role)) {
+        } else if (ROLE_PANEL.equals(role)) {
             Panel panel = panelRepository.findByEmail(currentEmail).orElse(null);
             if (panel == null) return ResponseEntity.status(403).body("Panel profile not found");
             boolean assigned = (interview.getPanel() != null && interview.getPanel().getId().equals(panel.getId())) ||
@@ -75,12 +77,12 @@ public class InterviewController {
         String role = SecurityUtil.currentRole();
         String currentEmail = SecurityUtil.currentEmail();
 
-        if ("PANEL".equals(role)) {
+        if (ROLE_PANEL.equals(role)) {
             Panel panel = panelRepository.findByEmail(currentEmail).orElse(null);
             if (panel == null) return ResponseEntity.status(403).body("Panel profile not found");
             // For panel users, always scope to their own panel id (ignore request param)
             return ResponseEntity.ok(interviewService.getByPanel(panel.getId()));
-        } else if (!"HR".equals(role)) {
+        } else if (!ROLE_HR.equals(role)) {
             return ResponseEntity.status(403).body("Access denied");
         }
 

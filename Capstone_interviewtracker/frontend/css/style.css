@@ -299,6 +299,12 @@ button:disabled {
   color: white;
 }
 
+.top-nav {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 10px;
+}
+
 /* ========================================
    LISTS & ITEMS
    ======================================== */

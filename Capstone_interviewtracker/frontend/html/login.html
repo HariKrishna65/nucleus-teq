@@ -6,38 +6,59 @@
   <link rel="stylesheet" href="../css/pages/login.css">
 </head>
 <body class="page-auth">
-
-<div class="container">
-  <div class="logo">Interview Tracker</div>
-  <h2>Welcome Back</h2>
-  <p class="subtitle">Sign in to continue to your dashboard</p>
-
-  <div class="verification-notice is-hidden" id="verificationNotice">
-    <p>Please verify your email first. Check your inbox for the verification link.</p>
-  </div>
-
-  <div class="input-group">
-    <label for="email">Email Address</label>
-    <input id="email" type="email" placeholder="Enter your email">
-  </div>
-
-  <div class="input-group">
-    <label for="password">Password</label>
-    <div class="password-wrapper">
-      <input id="password" type="password" placeholder="Enter your password">
-      <button type="button" class="toggle-password" onclick="togglePassword('password', this)">👁</button>
+<div class="auth-layout">
+  <section class="auth-visual">
+    <div class="brand">Interview Tracker</div>
+    <h1>Finalize Your Onboarding Experience</h1>
+    <p>Secure your account and continue your hiring journey with a clean, reliable platform.</p>
+    <div class="visual-cards">
+      <div class="visual-card">
+        <h3>Secure Access</h3>
+        <p>Protected onboarding with modern security standards.</p>
+      </div>
+      <div class="visual-card">
+        <h3>Easy Setup</h3>
+        <p>Quick activation and instant role-based dashboard access.</p>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="forgot-password">
-    <a onclick="showForgotPassword()">Forgot password?</a>
-  </div>
+  <section class="auth-panel">
+    <div class="container auth-card">
+      <div class="top-nav">
+        <a href="index.html" class="btn btn-small btn-secondary">Home</a>
+      </div>
+      <h2>Activate Account</h2>
+      <p class="subtitle">Sign in to access your dashboard</p>
 
-  <button onclick="login()">Sign In</button>
+      <div class="verification-notice is-hidden" id="verificationNotice">
+        <p>Please verify your email first. Check your inbox for the verification link.</p>
+      </div>
 
-  <div class="signup-link">
-    Don't have an account? <a href="register.html">Create one</a>
-  </div>
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" placeholder="Enter your email">
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input id="password" type="password" placeholder="Enter your password">
+          <button type="button" class="toggle-password" onclick="togglePassword('password', this)">👁</button>
+        </div>
+      </div>
+
+      <div class="forgot-password">
+        <a onclick="showForgotPassword()">Forgot password?</a>
+      </div>
+
+      <button onclick="login()">Activate</button>
+
+      <div class="signup-link">
+        Need an account? <a href="register.html">Create one</a>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script src="../js/api.js"></script>

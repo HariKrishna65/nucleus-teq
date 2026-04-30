@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/hr")
+@RequestMapping(com.interview.tracker.constants.AppConstants.HR)
 public class HrController {
     private static final Logger log = LoggerFactory.getLogger(HrController.class);
 
@@ -75,13 +75,6 @@ public class HrController {
 
     @PostMapping("/panels")
     public ResponseEntity<?> createPanel(@Valid @RequestBody CreatePanelRequest request) {
-        if (request.getEmail() == null || request.getEmail().isBlank()) {
-            return ResponseEntity.badRequest().body("Email is required");
-        }
-        if (request.getName() == null || request.getName().isBlank()) {
-            return ResponseEntity.badRequest().body("Name is required");
-        }
-
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("User with this email already exists");
         }
@@ -89,7 +82,7 @@ public class HrController {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setRole("PANEL");
+        user.setRole(com.interview.tracker.constants.AppConstants.ROLE_PANEL);
         user.setEmailVerified(skipInviteVerification);
         user.setActive(true);
         user.setInvitedAt(LocalDateTime.now());
@@ -145,7 +138,7 @@ public class HrController {
                 .map(email -> {
                     User panelUser = userRepository.findByEmail(email)
                             .orElseThrow(() -> new IllegalArgumentException("Panel user account not found for email: " + email));
-                    if (!"PANEL".equals(panelUser.getRole())) {
+                    if (!com.interview.tracker.constants.AppConstants.ROLE_PANEL.equals(panelUser.getRole())) {
                         throw new IllegalArgumentException("User is not a PANEL role: " + email);
                     }
                     return panelRepository.findByEmail(email)

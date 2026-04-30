@@ -6,36 +6,107 @@
   <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
 </head>
 <body class="page-dashboard">
+<div class="dashboard-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">ATS</div>
+    <div class="sidebar-title">HR Dashboard</div>
+    <nav class="sidebar-nav">
+      <a href="jd.html">Job Descriptions</a>
+      <a class="active" href="#candidatesSection">Candidates</a>
+      <a href="#candidatesSection">Onboard Candidate</a>
+      <a href="#panelMembersSection">Panel Members</a>
+      <a href="feedback.html">Feedback</a>
+      <a href="login.html" onclick="logout()">Logout</a>
+    </nav>
+  </aside>
 
-<div class="container">
-  <div class="header">
-    <h2>HR Pipeline Dashboard</h2>
-    <div class="header-actions">
-      <button class="secondary-btn" onclick="window.location.href='jd.html'">Job Descriptions</button>
-      <button class="secondary-btn" onclick="window.location.href='jd.html?view=available'">Available Jobs</button>
-      <button class="secondary-btn" onclick="logout()">Logout</button>
+  <main class="content-area">
+    <div class="container">
+      <div id="candidatesSection" class="header">
+        <div>
+          <h2>Candidates</h2>
+          <p class="pipeline-note">Manage all candidates and track interview progression.</p>
+        </div>
+        <div class="header-actions">
+          <button onclick="window.location.href='jd.html'">Create JD</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card" data-filter="ALL" role="button" tabindex="0"><div class="stat-value" id="totalCount">0</div><div>Total</div></div>
+        <div class="stat-card" data-filter="PROFILING" role="button" tabindex="0"><div class="stat-value" id="profilingCount">0</div><div>Profiling</div></div>
+        <div class="stat-card" data-filter="SCREENING" role="button" tabindex="0"><div class="stat-value" id="screeningCount">0</div><div>Screening</div></div>
+        <div class="stat-card" data-filter="L1_TECH" role="button" tabindex="0"><div class="stat-value" id="l1Count">0</div><div>L1</div></div>
+        <div class="stat-card" data-filter="L2_TECH" role="button" tabindex="0"><div class="stat-value" id="l2Count">0</div><div>L2</div></div>
+        <div class="stat-card" data-filter="HR_ROUND" role="button" tabindex="0"><div class="stat-value" id="hrCount">0</div><div>HR</div></div>
+        <div class="stat-card" data-filter="SELECTED" role="button" tabindex="0"><div class="stat-value" id="selectedCount">0</div><div>Selected</div></div>
+        <div class="stat-card" data-filter="REJECTED" role="button" tabindex="0"><div class="stat-value" id="rejectedCount">0</div><div>Rejected</div></div>
+      </div>
+
+      <div id="candidateList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading candidates...</p>
+        </div>
+      </div>
+
+      <section id="panelMembersSection" class="panel-section">
+        <h3>Create Panel Member</h3>
+        <p class="pipeline-note">Create panel login and send password setup email.</p>
+        <div id="panelAlert" class="alert is-hidden"></div>
+        <div class="panel-form-grid">
+          <div class="input-group">
+            <label for="panelName">Full Name</label>
+            <input id="panelName" type="text" placeholder="Enter full name">
+          </div>
+          <div class="input-group">
+            <label for="panelEmail">Email</label>
+            <input id="panelEmail" type="email" placeholder="Enter email">
+          </div>
+          <div class="input-group">
+            <label for="panelPhone">Mobile</label>
+            <input id="panelPhone" type="tel" placeholder="Enter mobile number">
+          </div>
+          <div class="input-group">
+            <label for="panelOrganization">Organization</label>
+            <input id="panelOrganization" type="text" placeholder="Enter organization">
+          </div>
+          <div class="input-group">
+            <label for="panelDesignation">Designation</label>
+            <input id="panelDesignation" type="text" placeholder="Enter designation">
+          </div>
+          <div class="input-group">
+            <label for="panelExpertise">Expertise</label>
+            <input id="panelExpertise" type="text" placeholder="Enter expertise">
+          </div>
+        </div>
+        <button id="createPanelBtn" class="create-panel-btn" type="button" onclick="createPanelMember()">Create Panel</button>
+      </section>
+
+      <section class="panel-list-section">
+        <h3>Panel Members</h3>
+        <div class="panel-table-wrap">
+          <table class="panel-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Organization</th>
+                <th>Designation</th>
+                <th>Expertise</th>
+              </tr>
+            </thead>
+            <tbody id="panelMembersBody">
+              <tr>
+                <td colspan="6" class="empty-state">Loading panel members...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
-  </div>
-
-  <div class="stats">
-    <div class="stat-card" data-filter="ALL" role="button" tabindex="0"><div class="stat-value" id="totalCount">0</div><div>Total</div></div>
-    <div class="stat-card" data-filter="PROFILING" role="button" tabindex="0"><div class="stat-value" id="profilingCount">0</div><div>Profiling</div></div>
-    <div class="stat-card" data-filter="SCREENING" role="button" tabindex="0"><div class="stat-value" id="screeningCount">0</div><div>Screening</div></div>
-    <div class="stat-card" data-filter="L1_TECH" role="button" tabindex="0"><div class="stat-value" id="l1Count">0</div><div>L1</div></div>
-    <div class="stat-card" data-filter="L2_TECH" role="button" tabindex="0"><div class="stat-value" id="l2Count">0</div><div>L2</div></div>
-    <div class="stat-card" data-filter="HR_ROUND" role="button" tabindex="0"><div class="stat-value" id="hrCount">0</div><div>HR</div></div>
-    <div class="stat-card" data-filter="SELECTED" role="button" tabindex="0"><div class="stat-value" id="selectedCount">0</div><div>Selected</div></div>
-    <div class="stat-card" data-filter="REJECTED" role="button" tabindex="0"><div class="stat-value" id="rejectedCount">0</div><div>Rejected</div></div>
-  </div>
-
-  <p class="pipeline-note">Manage stage progression, view candidate progress, and review latest panel feedback.</p>
-
-  <div id="candidateList">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading candidates...</p>
-    </div>
-  </div>
+  </main>
 </div>
 
 <!-- Assign Panel Modal -->

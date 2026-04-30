@@ -8,7 +8,6 @@ import com.interview.tracker.repository.JobDescriptionRepository;
 import com.interview.tracker.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,14 +24,19 @@ import com.interview.tracker.constants.StageStatus;
 public class CandidateService {
     private static final Logger log = LoggerFactory.getLogger(CandidateService.class);
 
-    @Autowired
-    private CandidateRepository candidateRepository;
+    private final CandidateRepository candidateRepository;
+    private final UserRepository userRepository;
+    private final JobDescriptionRepository jobDescriptionRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JobDescriptionRepository jobDescriptionRepository;
+    public CandidateService(
+            CandidateRepository candidateRepository,
+            UserRepository userRepository,
+            JobDescriptionRepository jobDescriptionRepository
+    ) {
+        this.candidateRepository = candidateRepository;
+        this.userRepository = userRepository;
+        this.jobDescriptionRepository = jobDescriptionRepository;
+    }
 
     private static final String UPLOAD_DIR = "uploads/";
 
@@ -52,6 +56,14 @@ public class CandidateService {
 
         Long userId = candidate.getUser().getId();
         Long jdId = candidate.getJd().getId();
+
+        // Access control: candidates can only apply for themselves
+        String role = SecurityUtil.currentRole();
+        Long currentUserId = SecurityUtil.currentUserId();
+        if (com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE.equals(role)
+                && (currentUserId == null || !currentUserId.equals(userId))) {
+            throw new IllegalArgumentException("Candidates can only apply for themselves");
+        }
 
         if (!candidateRepository.findByUser_Id(userId).isEmpty()) {
             throw new IllegalArgumentException("Only one job application is allowed per candidate");
@@ -107,5 +119,16 @@ public class CandidateService {
 
     public List<Candidate> getByUser(Long userId) {
         return candidateRepository.findByUser_Id(userId);
+    }
+
+    public List<Candidate> getByUserScoped(Long requestedUserId) {
+        String role = SecurityUtil.currentRole();
+        Long currentUserId = SecurityUtil.currentUserId();
+
+        if (com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE.equals(role)
+                && (currentUserId == null || requestedUserId == null || !requestedUserId.equals(currentUserId))) {
+            throw new IllegalArgumentException("You can only view your own applications");
+        }
+        return candidateRepository.findByUser_Id(requestedUserId);
     }
 }

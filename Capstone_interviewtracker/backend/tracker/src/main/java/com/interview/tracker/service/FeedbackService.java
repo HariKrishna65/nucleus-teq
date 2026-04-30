@@ -8,23 +8,30 @@ import com.interview.tracker.repository.InterviewRepository;
 import com.interview.tracker.repository.PanelRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
+import static com.interview.tracker.constants.AppConstants.ROLE_HR;
+import static com.interview.tracker.constants.AppConstants.ROLE_PANEL;
 
 @Service
 public class FeedbackService {
     private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);
 
-    @Autowired
-    private FeedbackRepository feedbackRepository;
+    private final FeedbackRepository feedbackRepository;
+    private final InterviewRepository interviewRepository;
+    private final PanelRepository panelRepository;
 
-    @Autowired
-    private InterviewRepository interviewRepository;
-
-    @Autowired
-    private PanelRepository panelRepository;
+    public FeedbackService(
+            FeedbackRepository feedbackRepository,
+            InterviewRepository interviewRepository,
+            PanelRepository panelRepository
+    ) {
+        this.feedbackRepository = feedbackRepository;
+        this.interviewRepository = interviewRepository;
+        this.panelRepository = panelRepository;
+    }
 
     public Feedback save(Feedback feedback) {
         if (feedback.getInterview() == null || feedback.getInterview().getId() == null) {
@@ -47,7 +54,7 @@ public class FeedbackService {
         String role = SecurityUtil.currentRole();
 
         String email = SecurityUtil.currentEmail();
-        if ("PANEL".equals(role) && email != null) {
+        if (ROLE_PANEL.equals(role) && email != null) {
             Panel panel = panelRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Panel profile not found"));
 
@@ -60,7 +67,7 @@ public class FeedbackService {
             }
 
             feedback.setPanel(panel);
-        } else if (!"HR".equals(role)) {
+        } else if (!ROLE_HR.equals(role)) {
             throw new IllegalArgumentException("Access denied");
         }
 
@@ -77,7 +84,7 @@ public class FeedbackService {
 
         String role = SecurityUtil.currentRole();
         String email = SecurityUtil.currentEmail();
-        if ("PANEL".equals(role)) {
+        if (ROLE_PANEL.equals(role)) {
             Panel panel = panelRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Panel profile not found"));
             boolean assigned =
@@ -86,7 +93,7 @@ public class FeedbackService {
             if (!assigned) {
                 throw new IllegalArgumentException("You are not assigned to this interview");
             }
-        } else if (!"HR".equals(role)) {
+        } else if (!ROLE_HR.equals(role)) {
             throw new IllegalArgumentException("Access denied");
         }
 

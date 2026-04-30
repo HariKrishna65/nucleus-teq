@@ -6,48 +6,62 @@
   <link rel="stylesheet" href="../css/pages/dashboard.css">
 </head>
 <body class="page-dashboard">
+<div class="dashboard-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">ATS</div>
+    <div class="sidebar-title">Candidate</div>
+    <nav class="sidebar-nav">
+      <a class="active" href="dashboard.html">My Applications</a>
+      <a href="apply.html">Apply Jobs</a>
+      <a href="jd.html?view=available">Available Jobs</a>
+      <a href="login.html" onclick="logout()">Logout</a>
+    </nav>
+  </aside>
 
-<div class="container">
-  <div class="header">
-    <div class="user-info">
-      <div class="user-avatar" id="userAvatar">U</div>
-      <div class="user-details">
-        <h3 id="userName">User</h3>
-        <p>Candidate</p>
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-details">
+            <h3 id="userName">User</h3>
+            <p>Candidate</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <a class="btn apply-more-btn" href="apply.html">Apply for more jobs</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
       </div>
-    </div>
-    <div class="header-actions">
-      <a class="btn apply-more-btn" href="apply.html">Apply for more jobs</a>
-      <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </div>
 
-  <div class="stats">
-    <div class="stat-card" data-filter="all" role="button" tabindex="0" aria-label="Show all applications">
-      <div class="number" id="totalApps">0</div>
-      <div class="label">Total Applications</div>
-    </div>
-    <div class="stat-card" data-filter="pending" role="button" tabindex="0" aria-label="Show pending applications">
-      <div class="number" id="pendingApps">0</div>
-      <div class="label">Pending</div>
-    </div>
-    <div class="stat-card" data-filter="interview" role="button" tabindex="0" aria-label="Show in interview applications">
-      <div class="number" id="interviewApps">0</div>
-      <div class="label">In Interview</div>
-    </div>
-    <div class="stat-card" data-filter="selected" role="button" tabindex="0" aria-label="Show selected applications">
-      <div class="number" id="selectedApps">0</div>
-      <div class="label">Selected</div>
-    </div>
-  </div>
+      <div class="stats">
+        <div class="stat-card" data-filter="all" role="button" tabindex="0" aria-label="Show all applications">
+          <div class="number" id="totalApps">0</div>
+          <div class="label">Total Applications</div>
+        </div>
+        <div class="stat-card" data-filter="pending" role="button" tabindex="0" aria-label="Show pending applications">
+          <div class="number" id="pendingApps">0</div>
+          <div class="label">Pending</div>
+        </div>
+        <div class="stat-card" data-filter="interview" role="button" tabindex="0" aria-label="Show in interview applications">
+          <div class="number" id="interviewApps">0</div>
+          <div class="label">In Interview</div>
+        </div>
+        <div class="stat-card" data-filter="selected" role="button" tabindex="0" aria-label="Show selected applications">
+          <div class="number" id="selectedApps">0</div>
+          <div class="label">Selected</div>
+        </div>
+      </div>
 
-  <h2 id="applicationsTitle">My Applications</h2>
-  <ul id="applications">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading your applications...</p>
+      <h2 id="applicationsTitle">My Applications</h2>
+      <ul id="applications">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading your applications...</p>
+        </div>
+      </ul>
     </div>
-  </ul>
+  </main>
 </div>
 
 <script src="../js/api.js"></script>

@@ -3,23 +3,27 @@ package com.interview.tracker.controller;
 import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.service.FeedbackService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import static com.interview.tracker.constants.AppConstants.FEEDBACK;
 
 @RestController
-@RequestMapping("/feedback")
+@RequestMapping(FEEDBACK)
 public class FeedbackController {
 
-    @Autowired
-    private FeedbackService feedbackService;
+    private final FeedbackService feedbackService;
+
+    public FeedbackController(FeedbackService feedbackService) {
+        this.feedbackService = feedbackService;
+    }
 
     @PostMapping
-    public Feedback submit(@Valid @RequestBody Feedback feedback) {
-        return feedbackService.save(feedback);
+    public ResponseEntity<Feedback> submit(@Valid @RequestBody Feedback feedback) {
+        return ResponseEntity.ok(feedbackService.save(feedback));
     }
 
     @GetMapping("/interview/{interviewId}")
-    public Feedback getLatestByInterview(@PathVariable Long interviewId) {
-        return feedbackService.getLatestByInterview(interviewId);
+    public ResponseEntity<Feedback> getLatestByInterview(@PathVariable Long interviewId) {
+        return ResponseEntity.ok(feedbackService.getLatestByInterview(interviewId));
     }
 }

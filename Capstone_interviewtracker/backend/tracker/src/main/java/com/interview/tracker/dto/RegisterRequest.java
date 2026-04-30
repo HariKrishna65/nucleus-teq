@@ -22,6 +22,7 @@ public class RegisterRequest {
     
     private LocalDate dateOfBirth;
     private String gender;
+    @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^[0-9+\\-()\\s]{7,20}$", message = "Enter a valid phone number")
     private String phone;
     private String address;

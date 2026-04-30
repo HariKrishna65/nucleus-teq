@@ -3,7 +3,6 @@ package com.interview.tracker.service;
 import com.interview.tracker.entity.Interview;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.repository.InterviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,8 +11,11 @@ import java.util.stream.Collectors;
 @Service
 public class InterviewService {
 
-    @Autowired
-    private InterviewRepository interviewRepository;
+    private final InterviewRepository interviewRepository;
+
+    public InterviewService(InterviewRepository interviewRepository) {
+        this.interviewRepository = interviewRepository;
+    }
 
     public Interview scheduleInterview(Interview interview) {
         if (interview.getPanels() != null && interview.getPanels().size() > 2) {

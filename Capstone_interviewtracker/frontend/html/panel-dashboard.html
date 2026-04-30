@@ -6,41 +6,54 @@
   <link rel="stylesheet" href="../css/pages/panel-dashboard.css">
 </head>
 <body class="page-dashboard">
+<div class="dashboard-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">ATS</div>
+    <div class="sidebar-title">Panel Dashboard</div>
+    <nav class="sidebar-nav">
+      <a class="active" href="panel-dashboard.html">My Interviews</a>
+      <a href="feedback.html">Feedback</a>
+      <a href="login.html" onclick="logout()">Logout</a>
+    </nav>
+  </aside>
 
-<div class="container">
-  <div class="header">
-    <div class="user-info">
-      <div class="user-avatar" id="userAvatar">P</div>
-      <div class="user-details">
-        <h3 id="userName">Panel Member</h3>
-        <p>Interview Panel</p>
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div class="user-details">
+            <h3 id="userName">Panel Member</h3>
+            <p>Interview Panel</p>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
-    </div>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </div>
 
-  <div class="stats">
-    <div class="stat-card" data-filter="all" role="button" tabindex="0" aria-label="Show all interviews">
-      <div class="number" id="totalInterviews">0</div>
-      <div class="label">Assigned</div>
-    </div>
-    <div class="stat-card" data-filter="pending" role="button" tabindex="0" aria-label="Show pending interviews">
-      <div class="number" id="pendingInterviews">0</div>
-      <div class="label">Pending</div>
-    </div>
-    <div class="stat-card" data-filter="completed" role="button" tabindex="0" aria-label="Show completed interviews">
-      <div class="number" id="completedInterviews">0</div>
-      <div class="label">Completed</div>
-    </div>
-  </div>
+      <div class="stats">
+        <div class="stat-card" data-filter="all" role="button" tabindex="0" aria-label="Show all interviews">
+          <div class="number" id="totalInterviews">0</div>
+          <div class="label">Assigned</div>
+        </div>
+        <div class="stat-card" data-filter="pending" role="button" tabindex="0" aria-label="Show pending interviews">
+          <div class="number" id="pendingInterviews">0</div>
+          <div class="label">Pending</div>
+        </div>
+        <div class="stat-card" data-filter="completed" role="button" tabindex="0" aria-label="Show completed interviews">
+          <div class="number" id="completedInterviews">0</div>
+          <div class="label">Completed</div>
+        </div>
+      </div>
 
-  <h2>My Interviews</h2>
-  <ul id="interviewList">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading interviews...</p>
+      <h2>My Interviews</h2>
+      <ul id="interviewList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading interviews...</p>
+        </div>
+      </ul>
     </div>
-  </ul>
+  </main>
 </div>
 
 <script src="../js/api.js"></script>

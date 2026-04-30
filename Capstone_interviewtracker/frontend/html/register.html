@@ -6,95 +6,106 @@
   <link rel="stylesheet" href="../css/pages/register.css">
 </head>
 <body class="page-auth">
-
-<div class="container">
-  <div class="logo">Interview Tracker</div>
-  <h2>Create Account</h2>
-  <p class="subtitle">Join us and start tracking your interviews</p>
-
-  <div class="info-box">
-    <p>After registration, you will receive a verification email. Click the link to verify your email, then set your password to complete signup.</p>
-  </div>
-
-  <div class="form-section">
-    <div class="form-section-title">Basic Information</div>
-    
-    <div class="input-group">
-      <label for="name">Full Name <span class="text-danger">*</span></label>
-      <input id="name" type="text" placeholder="Enter your full name">
-    </div>
-
-    <div class="input-group">
-      <label for="email">Email Address <span class="text-danger">*</span></label>
-      <input id="email" type="email" placeholder="Enter your email">
-    </div>
-
-    <div class="input-group role-select">
-      <label for="role">I am a <span class="text-danger">*</span></label>
-      <select id="role">
-        <option value="">Select your role</option>
-        <option value="CANDIDATE">Candidate - Looking for jobs</option>
-        <option value="HR">HR - Managing recruitments</option>
-        <option value="PANEL">Interview Panel - Conducting interviews</option>
-      </select>
-      <p class="role-info">Select your role to personalize your experience</p>
-    </div>
-  </div>
-
-  <div class="form-section">
-    <div class="form-section-title">Personal Details</div>
-    
-    <div class="form-row">
-      <div class="input-group">
-        <label for="dateOfBirth">Date of Birth</label>
-        <input id="dateOfBirth" type="date">
+<div class="auth-layout">
+  <section class="auth-visual">
+    <div class="brand">Interview Tracker</div>
+    <h1>Create Your Candidate Account</h1>
+    <p>Join the interview process with a seamless setup and secure account activation.</p>
+    <div class="visual-cards">
+      <div class="visual-card">
+        <h3>Candidate Ready</h3>
+        <p>Apply to open roles and track interview progress in one place.</p>
       </div>
-      <div class="input-group">
-        <label for="phone">Phone Number</label>
-        <input id="phone" type="tel" placeholder="Enter phone number">
+      <div class="visual-card">
+        <h3>Quick Verification</h3>
+        <p>Receive email verification and set password instantly.</p>
       </div>
     </div>
+  </section>
 
-    <div class="input-group">
-      <label>Gender</label>
-      <div class="gender-options" id="genderOptions">
-        <div class="gender-option" data-value="MALE" onclick="selectGender('MALE')">Male</div>
-        <div class="gender-option" data-value="FEMALE" onclick="selectGender('FEMALE')">Female</div>
-        <div class="gender-option" data-value="OTHER" onclick="selectGender('OTHER')">Other</div>
+  <section class="auth-panel">
+    <div class="container auth-card">
+      <div class="top-nav">
+        <a href="index.html" class="btn btn-small btn-secondary">Home</a>
       </div>
-      <input type="hidden" id="gender" value="">
-    </div>
-  </div>
+      <h2>Activate Account</h2>
+      <p class="subtitle">Set your profile to complete candidate signup</p>
 
-  <div class="form-section">
-    <div class="form-section-title">Address (Optional)</div>
-    
-    <div class="input-group">
-      <label for="address">Street Address</label>
-      <input id="address" type="text" placeholder="Enter street address">
-    </div>
-
-    <div class="form-row">
-      <div class="input-group">
-        <label for="city">City</label>
-        <input id="city" type="text" placeholder="City">
+      <div class="info-box">
+        <p>After registration, you will receive a verification email. Click the link to verify your email, then set your password to complete signup.</p>
       </div>
-      <div class="input-group">
-        <label for="state">State</label>
-        <input id="state" type="text" placeholder="State">
+
+      <div class="form-section">
+        <div class="form-section-title">Basic Information</div>
+        
+        <div class="input-group">
+          <label for="name">Full Name <span class="text-danger">*</span></label>
+          <input id="name" type="text" placeholder="Enter your full name">
+        </div>
+
+        <div class="input-group">
+          <label for="email">Email Address <span class="text-danger">*</span></label>
+          <input id="email" type="email" placeholder="Enter your email">
+        </div>
+
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Personal Details</div>
+        
+        <div class="form-row">
+          <div class="input-group">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input id="dateOfBirth" type="date">
+          </div>
+          <div class="input-group">
+            <label for="phone">Phone Number <span class="text-danger">*</span></label>
+            <input id="phone" type="tel" placeholder="Enter phone number">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Gender</label>
+          <div class="gender-options" id="genderOptions">
+            <div class="gender-option" data-value="MALE" onclick="selectGender('MALE')">Male</div>
+            <div class="gender-option" data-value="FEMALE" onclick="selectGender('FEMALE')">Female</div>
+            <div class="gender-option" data-value="OTHER" onclick="selectGender('OTHER')">Other</div>
+          </div>
+          <input type="hidden" id="gender" value="">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Address (Optional)</div>
+        
+        <div class="input-group">
+          <label for="address">Street Address</label>
+          <input id="address" type="text" placeholder="Enter street address">
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="city">City</label>
+            <input id="city" type="text" placeholder="City">
+          </div>
+          <div class="input-group">
+            <label for="state">State</label>
+            <input id="state" type="text" placeholder="State">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="country">Country</label>
+          <input id="country" type="text" placeholder="Country">
+        </div>
+      </div>
+
+      <button onclick="register()">Register</button>
+
+      <div class="login-link">
+        Already activated? <a href="login.html">Sign in</a>
       </div>
     </div>
-
-    <div class="input-group">
-      <label for="country">Country</label>
-      <input id="country" type="text" placeholder="Country">
-    </div>
-  </div>
-
-  <button onclick="register()">Register</button>
-
-  <div class="login-link">
-    Already have an account? <a href="login.html">Sign in</a>
   </div>
 </div>
 

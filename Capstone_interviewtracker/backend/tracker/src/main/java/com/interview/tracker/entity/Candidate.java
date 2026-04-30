@@ -11,6 +11,11 @@ import java.time.LocalDateTime;
 import com.interview.tracker.constants.Stage;
 import com.interview.tracker.constants.StageStatus;
 
+/**
+ * Candidate application entity.
+ *
+ * <p>Represents a user's application to a job description and its pipeline stage.</p>
+ */
 @Entity
 @Table(name = "candidates")
 public class Candidate {
