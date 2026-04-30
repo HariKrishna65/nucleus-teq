@@ -9,10 +9,26 @@ if (!user) {
 if (user && user.role === "HR") {
   document.getElementById("hrDashboardBtn").classList.remove("is-hidden");
   document.getElementById("availableJobsBtn").classList.remove("is-hidden");
+  document.getElementById("createJobBtn").classList.remove("is-hidden");
+}
 
-  if (viewMode !== "available") {
-    document.getElementById("jdForm").classList.remove("is-hidden");
+function setView(mode) {
+  const form = document.getElementById("jdForm");
+  const title = document.getElementById("jobsTitle");
+  const subtitle = document.getElementById("jobsSubtitle");
+  const isCreate = String(mode || "").toLowerCase() === "create";
+
+  if (user && user.role === "HR") {
+    form.classList.toggle("is-hidden", !isCreate);
+    title.textContent = isCreate ? "Create Job" : "Available Positions";
+    subtitle.textContent = isCreate ? "Post a new job opening." : "Browse open roles and apply.";
+  } else {
+    form.classList.add("is-hidden");
   }
+
+  const params = new URLSearchParams(window.location.search);
+  params.set("view", isCreate ? "create" : "available");
+  window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
 }
 
 function loadJDs() {
@@ -34,8 +50,8 @@ function loadJDs() {
       }
 
       data.forEach(jd => {
-        const li = document.createElement("li");
-        li.className = "jd-card";
+        const card = document.createElement("div");
+        card.className = "jd-card";
 
         const expMin = jd.experienceMin ?? jd.experience ?? 0;
         const expMax = jd.experienceMax ?? jd.experience ?? 0;
@@ -43,7 +59,11 @@ function loadJDs() {
         const salaryMax = jd.salaryMax ?? null;
         const salaryLabel = (salaryMin != null && salaryMax != null) ? `${salaryMin} - ${salaryMax}` : (jd.salary || "N/A");
         
-        li.innerHTML = `
+        const actionsHtml = (user && user.role === "CANDIDATE")
+          ? `<div class="jd-actions"><button class="apply-jd-btn btn-small" onclick="applyToJob(${jd.id}, '${jd.title}')">Apply</button></div>`
+          : ``;
+
+        card.innerHTML = `
           <div class="jd-info">
             <b>${jd.title}</b>
             <p>${jd.description || 'No description provided'}</p>
@@ -53,10 +73,10 @@ function loadJDs() {
               <span class="meta-item">${jd.skills || 'N/A'}</span>
             </div>
           </div>
-          ${user && user.role === 'CANDIDATE' ? `<button class="apply-jd-btn" onclick="applyToJob(${jd.id}, '${jd.title}')">Apply</button>` : ''}
+          ${actionsHtml}
         `;
 
-        list.appendChild(li);
+        list.appendChild(card);
       });
     })
     .catch(err => {
@@ -224,3 +244,11 @@ function applyToJob(jdId, jdTitle) {
 
 // Load JDs on page load
 loadJDs();
+
+// Init view
+(() => {
+  const initial = (viewMode === "create") ? "create" : "available";
+  if (user && user.role === "HR") {
+    setView(initial);
+  }
+})();

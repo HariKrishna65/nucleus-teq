@@ -12,6 +12,16 @@ body.page-dashboard::before {
   min-height: 100vh;
   background: #f6f7fb;
 }
+.dashboard-shell.sidebar-collapsed {
+  grid-template-columns: 72px 1fr;
+}
+.dashboard-shell.sidebar-collapsed .sidebar-title {
+  display: none;
+}
+.dashboard-shell.sidebar-collapsed .sidebar-nav a {
+  padding: 10px 10px;
+  text-align: center;
+}
 .sidebar {
   background: #fff;
   border-right: 1px solid #ececf1;
@@ -29,6 +39,22 @@ body.page-dashboard::before {
   font-weight: 700;
   margin-bottom: 12px;
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.icon-btn {
+  background: transparent !important;
+  border: 1px solid #e5e7eb !important;
+  color: #111827 !important;
+  width: auto;
+  min-width: 0;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+.icon-btn:hover { background: #f3f4f6 !important; }
 .sidebar-title {
   font-weight: 700;
   color: #111827;

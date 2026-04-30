@@ -67,7 +67,8 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, INTERVIEWS).hasRole(ROLE_HR)
                 .requestMatchers(INTERVIEWS + "/panel/**").hasRole(ROLE_HR)
-                .requestMatchers(FEEDBACK + "/**").hasAnyRole(ROLE_PANEL, ROLE_HR)
+                .requestMatchers(HttpMethod.POST, FEEDBACK).hasAnyRole(ROLE_PANEL, ROLE_HR)
+                .requestMatchers(HttpMethod.GET, FEEDBACK + "/**").hasRole(ROLE_HR)
                 .requestMatchers(INTERVIEWS + "/**").hasAnyRole(ROLE_PANEL, ROLE_HR, ROLE_CANDIDATE)
 
                 .requestMatchers(HttpMethod.POST, JD).hasRole(ROLE_HR)

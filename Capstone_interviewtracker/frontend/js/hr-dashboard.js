@@ -9,6 +9,7 @@ if (user.role !== "HR") {
 
 let allRows = [];
 let activeFilter = "ALL";
+let searchQuery = "";
 let allPanels = [];
 let assignCandidateId = null;
 
@@ -35,37 +36,38 @@ function stageLabel(stage) {
   return labels[stage] || stage;
 }
 
-function renderStats(rows) {
-  const counts = {
-    total: rows.length,
-    profiling: 0,
-    screening: 0,
-    l1: 0,
-    l2: 0,
-    hr: 0,
-    selected: 0,
-    rejected: 0
-  };
+function stageIndex(stage) {
+  const order = ["PROFILING", "SCREENING", "L1_TECH", "L2_TECH", "HR_ROUND", "SELECTED"];
+  const idx = order.indexOf(stage);
+  return idx === -1 ? 0 : idx;
+}
 
-  rows.forEach((row) => {
-    const stage = normalizeStage(row.candidate || {});
-    if (stage === "PROFILING") counts.profiling++;
-    if (stage === "SCREENING") counts.screening++;
-    if (stage === "L1_TECH") counts.l1++;
-    if (stage === "L2_TECH") counts.l2++;
-    if (stage === "HR_ROUND") counts.hr++;
-    if (stage === "SELECTED") counts.selected++;
-    if (stage === "REJECTED") counts.rejected++;
-  });
+function renderStageTracker(stage) {
+  const steps = ["PROFILING", "SCREENING", "L1_TECH", "L2_TECH", "HR_ROUND", "SELECTED"];
+  const current = stageIndex(stage);
+  const isRejected = stage === "REJECTED";
 
-  document.getElementById("totalCount").textContent = counts.total;
-  document.getElementById("profilingCount").textContent = counts.profiling;
-  document.getElementById("screeningCount").textContent = counts.screening;
-  document.getElementById("l1Count").textContent = counts.l1;
-  document.getElementById("l2Count").textContent = counts.l2;
-  document.getElementById("hrCount").textContent = counts.hr;
-  document.getElementById("selectedCount").textContent = counts.selected;
-  document.getElementById("rejectedCount").textContent = counts.rejected;
+  if (isRejected) {
+    return `<span class="badge">Rejected</span>`;
+  }
+
+  return `
+    <div class="stage-tracker" title="${stageLabel(stage)}">
+      ${steps.map((s, i) => {
+        const done = i < current;
+        const active = i === current;
+        const circleClass = done ? "done" : (active ? "active" : "");
+        const lineClass = i < current ? "done" : "";
+        const line = i < steps.length - 1 ? `<span class="stage-line ${lineClass}"></span>` : "";
+        return `
+          <span class="stage-step">
+            <span class="stage-circle ${circleClass}"></span>
+            ${line}
+          </span>
+        `;
+      }).join("")}
+    </div>
+  `;
 }
 
 function feedbackHtml(feedback) {
@@ -84,10 +86,18 @@ function feedbackHtml(feedback) {
 
 function renderCandidates(rows) {
   const list = document.getElementById("candidateList");
+  const q = (searchQuery || "").trim().toLowerCase();
   const filtered = (rows || []).filter((row) => {
-    if (activeFilter === "ALL") return true;
-    const stage = normalizeStage((row && row.candidate) || {});
-    return stage === activeFilter;
+    const c = (row && row.candidate) || {};
+    const stage = normalizeStage(c);
+    const name = ((c.user && c.user.name) || c.fullName || "Candidate").toLowerCase();
+    const email = ((c.user && c.user.email) || "").toLowerCase();
+    const phone = String(c.phone || c.mobileNumber || "").toLowerCase();
+    const job = ((c.jd && c.jd.title) || "").toLowerCase();
+
+    const stageOk = (activeFilter === "ALL") ? true : stage === activeFilter;
+    const searchOk = !q ? true : (name.includes(q) || email.includes(q) || phone.includes(q) || job.includes(q));
+    return stageOk && searchOk;
   });
 
   if (!filtered.length) {
@@ -131,7 +141,7 @@ function renderCandidates(rows) {
                 <td>${email}</td>
                 <td>${phone}</td>
                 <td>${job}</td>
-                <td><span class="badge">${stageLabel(stage)}</span></td>
+                <td>${renderStageTracker(stage)}</td>
                 <td><span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span></td>
                 <td>${feedbackText}</td>
                 <td>
@@ -140,6 +150,7 @@ function renderCandidates(rows) {
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
                     <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
+                    <button class="btn-danger btn-small" onclick="deleteCandidate(${c.id})">Delete</button>
                   </div>
                 </td>
               </tr>
@@ -153,32 +164,27 @@ function renderCandidates(rows) {
 
 function setActiveFilter(filter) {
   activeFilter = filter || "ALL";
-  document.querySelectorAll(".stat-card[data-filter]").forEach((card) => {
-    card.classList.toggle("active", String(card.dataset.filter) === String(activeFilter));
-  });
   renderCandidates(allRows);
 }
 
-function wireStatFilters() {
-  const cards = document.querySelectorAll(".stat-card[data-filter]");
-  cards.forEach((card) => {
-    const filter = card.dataset.filter || "ALL";
-    card.addEventListener("click", () => setActiveFilter(filter));
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        setActiveFilter(filter);
-      }
+function wireFilters() {
+  const stageSel = document.getElementById("stageFilter");
+  const search = document.getElementById("candidateSearch");
+  if (stageSel) {
+    stageSel.addEventListener("change", () => setActiveFilter(stageSel.value || "ALL"));
+  }
+  if (search) {
+    search.addEventListener("input", () => {
+      searchQuery = search.value || "";
+      renderCandidates(allRows);
     });
-  });
-  setActiveFilter("ALL");
+  }
 }
 
 function loadCandidates() {
   hrActions.listCandidates()
     .then((rows) => {
       allRows = Array.isArray(rows) ? rows : [];
-      renderStats(allRows);
       renderCandidates(allRows);
     })
     .catch((err) => {
@@ -216,6 +222,29 @@ function rejectCandidate(candidateId) {
   hrActions.rejectCandidate(candidateId, comments)
     .then(() => loadCandidates())
     .catch((err) => alert(err.message || "Failed to reject candidate"));
+}
+
+function deleteCandidate(candidateId) {
+  if (!confirm("Delete this candidate application?")) return;
+  hrActions.deleteCandidate(candidateId)
+    .then(() => loadCandidates())
+    .catch((err) => alert(err.message || "Failed to delete candidate"));
+}
+
+function clearCandidateFilters() {
+  activeFilter = "ALL";
+  searchQuery = "";
+  const stageSel = document.getElementById("stageFilter");
+  const search = document.getElementById("candidateSearch");
+  if (stageSel) stageSel.value = "ALL";
+  if (search) search.value = "";
+  renderCandidates(allRows);
+}
+
+function toggleSidebar() {
+  const shell = document.querySelector(".dashboard-shell");
+  if (!shell) return;
+  shell.classList.toggle("sidebar-collapsed");
 }
 
 function loadPanels() {
@@ -398,16 +427,43 @@ function wireSidebarNavigation() {
   });
 }
 
+function showHrSection(sectionId) {
+  const sections = Array.from(document.querySelectorAll(".hr-section"));
+  sections.forEach((s) => s.classList.add("is-hidden"));
+  const target = document.getElementById(sectionId);
+  if (target) {
+    target.classList.remove("is-hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+function wireSidebarSectionSwitching() {
+  const links = Array.from(document.querySelectorAll(".sidebar-nav a[data-section]"));
+  links.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      const sectionId = link.dataset.section;
+      if (!sectionId) return;
+      e.preventDefault();
+      showHrSection(sectionId);
+    });
+  });
+  showHrSection("candidatesSection");
+}
+
 // Expose modal functions to HTML onclick handlers
 window.closeAssignPanel = closeAssignPanel;
 window.submitAssignPanel = submitAssignPanel;
 window.openAssignPanel = openAssignPanel;
 window.createPanelMember = createPanelMember;
+window.deleteCandidate = deleteCandidate;
+window.clearCandidateFilters = clearCandidateFilters;
+window.toggleSidebar = toggleSidebar;
 
-wireStatFilters();
+wireFilters();
 loadPanels();
 loadCandidates();
 wireSidebarNavigation();
+wireSidebarSectionSwitching();
 
 // Ensure modal starts hidden + allow backdrop/Esc close
 (() => {

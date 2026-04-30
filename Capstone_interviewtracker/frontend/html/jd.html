@@ -12,7 +12,8 @@
     <h2>Job Opportunities</h2>
     <div class="header-actions">
       <button id="hrDashboardBtn" class="back-btn is-hidden" onclick="window.location.href='hr-dashboard.html'">HR Dashboard</button>
-      <button id="availableJobsBtn" class="back-btn is-hidden" onclick="window.location.href='jd.html?view=available'">Available Jobs</button>
+      <button id="availableJobsBtn" class="back-btn is-hidden" onclick="setView('available')">Available Jobs</button>
+      <button id="createJobBtn" class="back-btn is-hidden" onclick="setView('create')">Create Job</button>
       <button class="back-btn" onclick="window.location.href='index.html'">Home</button>
     </div>
   </div>
@@ -55,17 +56,15 @@
     <button onclick="createJD()">Post Job</button>
   </div>
 
-  <hr>
-
-  <!-- JD LIST -->
-  <div>
-    <h3>Available Positions</h3>
-    <ul id="jdList">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Loading jobs...</p>
-      </div>
-    </ul>
+  <div class="jobs-header">
+    <h3 id="jobsTitle">Available Positions</h3>
+    <div class="jobs-subtitle" id="jobsSubtitle">Browse open roles and apply.</div>
+  </div>
+  <div class="jobs-grid" id="jdList">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Loading jobs...</p>
+    </div>
   </div>
 </div>
 

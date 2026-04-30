@@ -249,4 +249,45 @@ public class EmailService {
         );
         mailSender.send(candidateMsg);
     }
+
+    public void sendCandidateSelectedEmail(User candidateUser, String jobTitle) {
+        if (candidateUser == null || candidateUser.getEmail() == null || candidateUser.getEmail().isBlank()) return;
+        String name = (candidateUser.getName() == null || candidateUser.getName().isBlank()) ? "Candidate" : candidateUser.getName();
+        String title = (jobTitle == null || jobTitle.isBlank()) ? "the role" : jobTitle;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(candidateUser.getEmail());
+        message.setSubject("Congratulations! You are selected - Interview Tracker");
+        message.setFrom(mailUsername);
+        message.setText(
+                "Hello " + name + ",\n\n" +
+                        "Congratulations! You have been selected for " + title + ".\n\n" +
+                        "Our HR team will contact you shortly with next steps.\n\n" +
+                        "Best regards,\n" +
+                        "Interview Tracker Team"
+        );
+        mailSender.send(message);
+        log.info("Selection email sent to: {}", candidateUser.getEmail());
+    }
+
+    public void sendCandidateRejectedEmail(User candidateUser, String jobTitle) {
+        if (candidateUser == null || candidateUser.getEmail() == null || candidateUser.getEmail().isBlank()) return;
+        String name = (candidateUser.getName() == null || candidateUser.getName().isBlank()) ? "Candidate" : candidateUser.getName();
+        String title = (jobTitle == null || jobTitle.isBlank()) ? "the role" : jobTitle;
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(candidateUser.getEmail());
+        message.setSubject("Update on your application - Interview Tracker");
+        message.setFrom(mailUsername);
+        message.setText(
+                "Hello " + name + ",\n\n" +
+                        "Thank you for taking the time to interview for " + title + ".\n\n" +
+                        "At this moment we will not be moving forward with your application.\n\n" +
+                        "We wish you all the best in your job search.\n\n" +
+                        "Best regards,\n" +
+                        "Interview Tracker Team"
+        );
+        mailSender.send(message);
+        log.info("Rejection email sent to: {}", candidateUser.getEmail());
+    }
 }

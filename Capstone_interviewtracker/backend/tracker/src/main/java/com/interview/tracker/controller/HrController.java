@@ -225,7 +225,12 @@ public class HrController {
         c.setStageStatus(StageStatus.COMPLETED);
         c.setHrComments(comments);
         log.info("Candidate rejected by HR: id={}", c.getId());
-        return ResponseEntity.ok(candidateRepository.save(c));
+        Candidate saved = candidateRepository.save(c);
+        if (saved.getUser() != null) {
+            String jobTitle = (saved.getJd() != null && saved.getJd().getTitle() != null) ? saved.getJd().getTitle() : null;
+            emailService.sendCandidateRejectedEmail(saved.getUser(), jobTitle);
+        }
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/candidates/{id}/select")
@@ -242,7 +247,21 @@ public class HrController {
         c.setStageStatus(StageStatus.COMPLETED);
         c.setHrComments(comments);
         log.info("Candidate selected by HR: id={}", c.getId());
-        return ResponseEntity.ok(candidateRepository.save(c));
+        Candidate saved = candidateRepository.save(c);
+        if (saved.getUser() != null) {
+            String jobTitle = (saved.getJd() != null && saved.getJd().getTitle() != null) ? saved.getJd().getTitle() : null;
+            emailService.sendCandidateSelectedEmail(saved.getUser(), jobTitle);
+        }
+        return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/candidates/{id}")
+    public ResponseEntity<?> deleteCandidate(@PathVariable Long id) {
+        Candidate c = candidateRepository.findById(id).orElse(null);
+        if (c == null) return ResponseEntity.status(404).body("Candidate not found");
+        candidateRepository.deleteById(id);
+        log.info("Candidate deleted by HR: id={}", id);
+        return ResponseEntity.ok("Deleted");
     }
 
     private Stage nextStage(Stage stage) {

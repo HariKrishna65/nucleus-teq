@@ -167,5 +167,13 @@ function logout() {
   }
 }
 
+function toggleSidebar() {
+  const shell = document.querySelector(".dashboard-shell");
+  if (!shell) return;
+  shell.classList.toggle("sidebar-collapsed");
+}
+
+window.toggleSidebar = toggleSidebar;
+
 wireStatFilters();
 loadApplications();

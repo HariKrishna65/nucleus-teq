@@ -7,6 +7,14 @@ if (!user) {
   window.location.href = "login.html";
 }
 
+// Only panel can use this page. HR should use the HR feedback page.
+if (user && user.role === "HR") {
+  window.location.href = "hr-feedback.html";
+}
+if (user && user.role !== "PANEL") {
+  window.location.href = "index.html";
+}
+
 if (!interviewId) {
   showAlert("No interview selected", "error");
   setTimeout(() => window.location.href = "panel-dashboard.html", 2000);
