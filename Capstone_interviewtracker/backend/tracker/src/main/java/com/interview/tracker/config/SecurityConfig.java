@@ -29,7 +29,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/verify", "/auth/set-password", "/auth/forgot-password").permitAll()
+                .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login", "/auth/verify", "/auth/set-password", "/auth/forgot-password", "/auth/create-test-user").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/jd", "/jd/*").permitAll()
 

@@ -9,7 +9,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EmailService {
@@ -33,6 +35,8 @@ public class EmailService {
 
     @Value("${spring.mail.username}")
     private String mailUsername;
+
+    private static final DateTimeFormatter EMAIL_DT = DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
 
     public void sendVerificationEmail(User user) {
         String token = UUID.randomUUID().toString();
@@ -134,5 +138,71 @@ public class EmailService {
             System.err.println("Failed to send email: " + e.getMessage());
             throw new RuntimeException("Email sending failed", e);
         }
+    }
+
+    public void sendPanelAssignmentEmails(User candidateUser, java.util.List<com.interview.tracker.entity.Panel> panels, com.interview.tracker.entity.Interview interview) {
+        if (candidateUser == null || candidateUser.getEmail() == null) {
+            throw new IllegalArgumentException("Candidate email not found");
+        }
+        if (panels == null || panels.isEmpty()) {
+            throw new IllegalArgumentException("At least one panel member is required");
+        }
+
+        String candidateName = candidateUser.getName() == null ? "Candidate" : candidateUser.getName();
+        String candidateEmail = candidateUser.getEmail();
+        String jobTitle = (interview != null && interview.getCandidate() != null && interview.getCandidate().getJd() != null && interview.getCandidate().getJd().getTitle() != null)
+                ? interview.getCandidate().getJd().getTitle()
+                : "N/A";
+        String round = interview != null ? (interview.getRound() == null ? "N/A" : interview.getRound()) : "N/A";
+        String focus = interview != null ? (interview.getFocusArea() == null ? "General" : interview.getFocusArea()) : "General";
+        String time = (interview != null && interview.getInterviewTime() != null) ? interview.getInterviewTime().format(EMAIL_DT) : "To be scheduled";
+
+        String panelEmails = panels.stream()
+                .map(com.interview.tracker.entity.Panel::getEmail)
+                .filter(e -> e != null && !e.isBlank())
+                .distinct()
+                .collect(Collectors.joining(", "));
+
+        // Email to panel members
+        for (com.interview.tracker.entity.Panel p : panels) {
+            if (p.getEmail() == null || p.getEmail().isBlank()) continue;
+
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(p.getEmail());
+            message.setSubject("New Interview Assigned - Interview Tracker");
+            message.setFrom(mailUsername);
+
+            message.setText(
+                    "Hello " + (p.getName() == null ? "Panel Member" : p.getName()) + ",\n\n" +
+                    "You have been assigned to an interview.\n\n" +
+                    "Candidate: " + candidateName + " (" + candidateEmail + ")\n" +
+                    "Job: " + jobTitle + "\n" +
+                    "Round: " + round + "\n" +
+                    "Focus area: " + focus + "\n" +
+                    "Time: " + time + "\n\n" +
+                    "Please login to Interview Tracker to view details.\n\n" +
+                    "Best regards,\n" +
+                    "Interview Tracker Team"
+            );
+            mailSender.send(message);
+        }
+
+        // Email to candidate
+        SimpleMailMessage candidateMsg = new SimpleMailMessage();
+        candidateMsg.setTo(candidateEmail);
+        candidateMsg.setSubject("Panel Assigned to Your Application - Interview Tracker");
+        candidateMsg.setFrom(mailUsername);
+        candidateMsg.setText(
+                "Hello " + candidateName + ",\n\n" +
+                "Your application has been assigned to panel member(s): " + panelEmails + ".\n\n" +
+                "Job: " + jobTitle + "\n" +
+                "Round: " + round + "\n" +
+                "Focus area: " + focus + "\n" +
+                "Time: " + time + "\n\n" +
+                "You will be notified if the interview time changes.\n\n" +
+                "Best regards,\n" +
+                "Interview Tracker Team"
+        );
+        mailSender.send(candidateMsg);
     }
 }

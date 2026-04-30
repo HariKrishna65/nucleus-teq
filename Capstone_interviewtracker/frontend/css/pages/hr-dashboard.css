@@ -29,6 +29,18 @@
   border-radius: 12px;
   padding: 14px;
   text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.stat-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+.stat-card.active {
+  border-color: rgba(99, 102, 241, 0.7);
+  background: rgba(99, 102, 241, 0.08);
 }
 .stat-value {
   font-size: 1.6rem;
@@ -44,7 +56,11 @@
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--bg);
+}
+.candidate-top h4,
+.candidate-top .meta {
+  word-break: break-word;
 }
 .candidate-top {
   display: flex;
@@ -66,6 +82,7 @@
   background: var(--bg);
   font-size: 0.8rem;
   margin-right: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 .feedback-block {
   background: var(--bg);
@@ -98,4 +115,48 @@
   text-align: center;
   color: var(--text-light);
   padding: 30px 15px;
+}
+
+.modal-backdrop {
+  position: fixed !important;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  min-height: 100vh;
+  overflow: auto;
+}
+.modal {
+  width: min(760px, 100%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin: auto;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.modal-header h3 {
+  margin: 0;
+}
+.modal-body .input-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
 }

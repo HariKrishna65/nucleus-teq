@@ -1,8 +1,10 @@
 package com.interview.tracker.service;
 
 import com.interview.tracker.entity.Candidate;
+import com.interview.tracker.entity.JobDescription;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
+import com.interview.tracker.repository.JobDescriptionRepository;
 import com.interview.tracker.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +31,16 @@ public class CandidateService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JobDescriptionRepository jobDescriptionRepository;
+
     private static final String UPLOAD_DIR = "uploads/";
 
     public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
+
+        if (candidate == null) {
+            throw new IllegalArgumentException("Candidate payload is required");
+        }
 
         if (candidate.getUser() == null || candidate.getUser().getId() == null) {
             throw new IllegalArgumentException("User is required");
@@ -55,6 +64,10 @@ public class CandidateService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         candidate.setUser(existingUser);
+
+        JobDescription existingJd = jobDescriptionRepository.findById(jdId)
+                .orElseThrow(() -> new IllegalArgumentException("Job description not found"));
+        candidate.setJd(existingJd);
 
         if (candidate.getPhone() != null && !candidate.getPhone().isBlank()) {
             candidateRepository.findByPhone(candidate.getPhone())

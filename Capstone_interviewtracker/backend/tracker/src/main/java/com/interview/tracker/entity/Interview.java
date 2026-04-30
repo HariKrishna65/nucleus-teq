@@ -20,10 +20,14 @@ public class Interview {
     private String round; 
 
     @NotNull(message = "Interview time is required")
+    @Column(name = "scheduled_time", nullable = false)
     private LocalDateTime interviewTime;
 
     @NotBlank(message = "Focus area is required")
     private String focusArea;
+
+    @Column(name = "interviewer_name", nullable = false)
+    private String interviewerName;
 
     private String status;
 
@@ -58,6 +62,9 @@ public class Interview {
 
     public String getFocusArea() { return focusArea; }
     public void setFocusArea(String focusArea) { this.focusArea = focusArea; }
+
+    public String getInterviewerName() { return interviewerName; }
+    public void setInterviewerName(String interviewerName) { this.interviewerName = interviewerName; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

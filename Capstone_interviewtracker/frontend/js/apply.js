@@ -5,7 +5,6 @@ if (!user) {
   window.location.href = "login.html";
 }
 
-// Load JDs into dropdown
 function loadJDs() {
   jdActions.list()
     .then(data => {
@@ -131,7 +130,6 @@ function showAlert(message, type) {
   }
 }
 
-// Apply to job
 function applyJob() {
   if (!user || !user.userId) {
     showAlert("Session expired. Please login again.", "error");
@@ -188,5 +186,4 @@ function showLoading(show) {
   }
 }
 
-// Initialize
 loadJDs();

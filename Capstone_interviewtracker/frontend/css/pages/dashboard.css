@@ -4,6 +4,23 @@
   align-items: center;
   margin-bottom: 30px;
 }
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.apply-more-btn {
+  width: auto;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.apply-more-btn:hover {
+  filter: brightness(1.05);
+}
 .user-info {
   display: flex;
   align-items: center;
@@ -52,6 +69,18 @@
   padding: 20px;
   border-radius: 12px;
   text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.stat-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+.stat-card.active {
+  border-color: rgba(99, 102, 241, 0.7);
+  background: rgba(99, 102, 241, 0.08);
 }
 .stat-card .number {
   font-size: 2rem;

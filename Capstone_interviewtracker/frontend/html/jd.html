@@ -12,6 +12,7 @@
     <h2>Job Opportunities</h2>
     <div class="header-actions">
       <button id="hrDashboardBtn" class="back-btn is-hidden" onclick="window.location.href='hr-dashboard.html'">HR Dashboard</button>
+      <button id="availableJobsBtn" class="back-btn is-hidden" onclick="window.location.href='jd.html?view=available'">Available Jobs</button>
       <button class="back-btn" onclick="window.location.href='index.html'">Home</button>
     </div>
   </div>
@@ -25,17 +26,31 @@
         <input id="title" placeholder="e.g., Software Engineer">
       </div>
       <div class="input-group">
-        <label for="experience">Experience (years)</label>
-        <input id="experience" type="number" min="0" placeholder="e.g., 2">
+        <label for="experienceMin">Min Experience (years)</label>
+        <input id="experienceMin" type="number" min="0" placeholder="e.g., 2">
+      </div>
+      <div class="input-group">
+        <label for="experienceMax">Max Experience (years)</label>
+        <input id="experienceMax" type="number" min="0" placeholder="e.g., 5">
       </div>
     </div>
     <div class="input-group">
       <label for="description">Job Description</label>
-      <input id="description" placeholder="Describe the role and responsibilities">
+      <textarea id="description" rows="3" placeholder="10 to 50 words describing the role and responsibilities"></textarea>
     </div>
     <div class="input-group">
       <label for="skills">Required Skills</label>
       <input id="skills" placeholder="e.g., Java, Spring, React">
+    </div>
+    <div class="form-row">
+      <div class="input-group">
+        <label for="salaryMin">Min Salary</label>
+        <input id="salaryMin" type="number" min="0" placeholder="e.g., 400000">
+      </div>
+      <div class="input-group">
+        <label for="salaryMax">Max Salary</label>
+        <input id="salaryMax" type="number" min="0" placeholder="e.g., 900000">
+      </div>
     </div>
     <button onclick="createJD()">Post Job</button>
   </div>

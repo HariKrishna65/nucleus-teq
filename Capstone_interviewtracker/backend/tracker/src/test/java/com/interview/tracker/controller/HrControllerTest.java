@@ -5,6 +5,7 @@ import com.interview.tracker.entity.Candidate;
 import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.repository.CandidateRepository;
 import com.interview.tracker.repository.FeedbackRepository;
+import com.interview.tracker.repository.InterviewRepository;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.repository.UserRepository;
 import com.interview.tracker.service.EmailService;
@@ -27,13 +28,15 @@ class HrControllerTest {
         UserRepository userRepository = mock(UserRepository.class);
         PanelRepository panelRepository = mock(PanelRepository.class);
         EmailService emailService = mock(EmailService.class);
+        InterviewRepository interviewRepository = mock(InterviewRepository.class);
 
         HrController controller = new HrController(
                 candidateRepository,
                 feedbackRepository,
                 userRepository,
                 panelRepository,
-                emailService
+                emailService,
+                interviewRepository
         );
 
         Candidate c = new Candidate();
@@ -67,13 +70,15 @@ class HrControllerTest {
         UserRepository userRepository = mock(UserRepository.class);
         PanelRepository panelRepository = mock(PanelRepository.class);
         EmailService emailService = mock(EmailService.class);
+        InterviewRepository interviewRepository = mock(InterviewRepository.class);
 
         HrController controller = new HrController(
                 candidateRepository,
                 feedbackRepository,
                 userRepository,
                 panelRepository,
-                emailService
+                emailService,
+                interviewRepository
         );
 
         Candidate c = new Candidate();

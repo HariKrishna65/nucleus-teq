@@ -70,6 +70,20 @@
   border-radius: 12px;
   margin-bottom: 30px;
 }
+.create-jd-form textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 90px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  outline: none;
+}
+.create-jd-form textarea:focus {
+  border-color: var(--primary);
+}
 .is-hidden {
   display: none;
 }

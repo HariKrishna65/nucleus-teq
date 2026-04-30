@@ -3,11 +3,9 @@ function validateLogin() {
   const password = document.getElementById("password");
   let isValid = true;
 
-  // Reset errors
   email.classList.remove("input-error");
   password.classList.remove("input-error");
 
-  // Validate email
   if (!email.value.trim()) {
     showError(email, "Email is required");
     isValid = false;
@@ -16,7 +14,6 @@ function validateLogin() {
     isValid = false;
   }
 
-  // Validate password
   if (!password.value) {
     showError(password, "Password is required");
     isValid = false;
@@ -60,13 +57,10 @@ function login() {
     console.log("SUCCESS:", data);
     showLoading(false);
 
-    // Store user data
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
 
-    // Show success message
     showAlert("Login successful! Redirecting...", "success");
 
-    // Redirect based on role
     setTimeout(() => {
       if (data.role === "HR") {
         window.location.href = "hr-dashboard.html";
@@ -82,7 +76,6 @@ function login() {
     showLoading(false);
     const errorMsg = err.message || "Login failed";
     
-    // Check for specific error types
     if (errorMsg.includes("verify") || errorMsg.includes("verified")) {
       document.getElementById("verificationNotice").style.display = "block";
       showAlert(errorMsg, "error");
@@ -154,7 +147,6 @@ function showAlert(message, type) {
   container.insertBefore(alert, container.firstChild);
 }
 
-// Enter key support
 document.addEventListener("keypress", function(e) {
   if (e.key === "Enter") login();
 });

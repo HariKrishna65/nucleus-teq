@@ -20,9 +20,24 @@ public class JobDescription {
     @NotBlank(message = "Skills are required")
     private String skills;
 
-    @NotNull(message = "Experience is required")
-    private Integer experience;
+    @NotNull(message = "Minimum experience is required")
+    @Min(value = 0, message = "Minimum experience cannot be negative")
+    private Integer experienceMin;
 
+    @NotNull(message = "Maximum experience is required")
+    @Min(value = 0, message = "Maximum experience cannot be negative")
+    private Integer experienceMax;
+
+    @NotNull(message = "Minimum salary is required")
+    @Min(value = 0, message = "Minimum salary cannot be negative")
+    private Integer salaryMin;
+
+    @NotNull(message = "Maximum salary is required")
+    @Min(value = 0, message = "Maximum salary cannot be negative")
+    private Integer salaryMax;
+
+    // Backward compatibility for older data/clients (optional)
+    private Integer experience;
     private String salary;
     private String location;
     private String jobType;
@@ -40,6 +55,18 @@ public class JobDescription {
 
     public String getSkills() { return skills; }
     public void setSkills(String skills) { this.skills = skills; }
+
+    public Integer getExperienceMin() { return experienceMin; }
+    public void setExperienceMin(Integer experienceMin) { this.experienceMin = experienceMin; }
+
+    public Integer getExperienceMax() { return experienceMax; }
+    public void setExperienceMax(Integer experienceMax) { this.experienceMax = experienceMax; }
+
+    public Integer getSalaryMin() { return salaryMin; }
+    public void setSalaryMin(Integer salaryMin) { this.salaryMin = salaryMin; }
+
+    public Integer getSalaryMax() { return salaryMax; }
+    public void setSalaryMax(Integer salaryMax) { this.salaryMax = salaryMax; }
 
     public Integer getExperience() { return experience; }
     public void setExperience(Integer experience) { this.experience = experience; }

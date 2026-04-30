@@ -1,23 +1,90 @@
 const user = getStoredUser();
 
-// Check authentication
 if (!user) {
   window.location.href = "login.html";
 }
 
-// Check role
 if (user && user.role !== "PANEL") {
   showAlert("Access denied. Panel members only.", "error");
   setTimeout(() => window.location.href = "index.html", 2000);
 }
 
-// Update user info
 if (user) {
   document.getElementById("userName").textContent = user.name || "Panel Member";
   document.getElementById("userAvatar").textContent = (user.name || "P").charAt(0).toUpperCase();
 }
 
-// Load interviews assigned to panel
+let allInterviews = [];
+let activeFilter = "all";
+
+function matchesFilter(interview, filter) {
+  if (filter === "pending") return (interview.status || "PENDING") === "PENDING";
+  if (filter === "completed") return (interview.status || "") === "COMPLETED";
+  return true;
+}
+
+function renderInterviews() {
+  const list = document.getElementById("interviewList");
+  const filtered = allInterviews.filter(i => matchesFilter(i, activeFilter));
+  list.innerHTML = "";
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">Interviews</div>
+        <h3>No interviews</h3>
+        <p>Try another filter or check back later.</p>
+      </div>
+    `;
+    return;
+  }
+
+  filtered.forEach(i => {
+    const li = document.createElement("li");
+    li.className = "interview-card";
+    const hasFeedback = i.status === "COMPLETED";
+    
+    li.innerHTML = `
+      <div class="interview-info">
+        <b>${i.candidate ? i.candidate.user ? i.candidate.user.name : 'Unknown' : 'Unknown Candidate'}</b>
+        <span>Round: ${i.round || 'N/A'}</span>
+        <span>Focus: ${i.focusArea || 'General'}</span>
+        <span>Time: ${formatDateTime(i.interviewTime)}</span>
+        <div class="interview-meta">
+          <span class="meta-item status ${i.status || 'PENDING'}">${formatStatus(i.status)}</span>
+        </div>
+      </div>
+      <button class="btn btn-small" onclick="giveFeedback(${i.id})">
+        ${hasFeedback ? 'View Feedback' : 'Submit Feedback'}
+      </button>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+function setActiveFilter(filter) {
+  activeFilter = filter || "all";
+  document.querySelectorAll(".stat-card[data-filter]").forEach(card => {
+    card.classList.toggle("active", String(card.dataset.filter) === String(activeFilter));
+  });
+  renderInterviews();
+}
+
+function wireFilters() {
+  document.querySelectorAll(".stat-card[data-filter]").forEach(card => {
+    const filter = card.dataset.filter;
+    card.addEventListener("click", () => setActiveFilter(filter));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setActiveFilter(filter);
+      }
+    });
+  });
+  setActiveFilter("all");
+}
+
 function loadInterviews() {
   const list = document.getElementById("interviewList");
   if (!user || !user.userId) {
@@ -28,53 +95,20 @@ function loadInterviews() {
   
   interviewActions.listByPanel(panelId)
     .then(data => {
-      list.innerHTML = "";
+      allInterviews = Array.isArray(data) ? data : [];
 
-      if (data.length === 0) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">Interviews</div>
-            <h3>No interviews assigned</h3>
-            <p>You don't have any interviews to conduct yet</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Calculate stats
       let pending = 0, completed = 0;
       
-      data.forEach(i => {
+      allInterviews.forEach(i => {
         if (i.status === "PENDING") pending++;
         if (i.status === "COMPLETED") completed++;
       });
 
-      document.getElementById("totalInterviews").textContent = data.length;
+      document.getElementById("totalInterviews").textContent = allInterviews.length;
       document.getElementById("pendingInterviews").textContent = pending;
       document.getElementById("completedInterviews").textContent = completed;
 
-      data.forEach(i => {
-        const li = document.createElement("li");
-        li.className = "interview-card";
-        const hasFeedback = i.status === "COMPLETED";
-        
-        li.innerHTML = `
-          <div class="interview-info">
-            <b>${i.candidate ? i.candidate.user ? i.candidate.user.name : 'Unknown' : 'Unknown Candidate'}</b>
-            <span>Round: ${i.round || 'N/A'}</span>
-            <span>Focus: ${i.focusArea || 'General'}</span>
-            <span>Time: ${formatDateTime(i.interviewTime)}</span>
-            <div class="interview-meta">
-              <span class="meta-item status ${i.status || 'PENDING'}">${formatStatus(i.status)}</span>
-            </div>
-          </div>
-          <button class="btn btn-small" onclick="giveFeedback(${i.id})">
-            ${hasFeedback ? 'View Feedback' : 'Submit Feedback'}
-          </button>
-        `;
-
-        list.appendChild(li);
-      });
+      renderInterviews();
     })
     .catch(err => {
       console.error(err);
@@ -123,7 +157,6 @@ function showAlert(message, type) {
   }
 }
 
-// Redirect to feedback page
 function giveFeedback(interviewId) {
   localStorage.setItem("interviewId", interviewId);
   window.location.href = "feedback.html";
@@ -136,5 +169,5 @@ function logout() {
   }
 }
 
-// Initialize
+wireFilters();
 loadInterviews();

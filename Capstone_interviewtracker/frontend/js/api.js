@@ -1,4 +1,3 @@
-// Config (constants)
 const API_URL = "http://localhost:8080";
 const STORAGE_KEYS = {
   USER: "user",
@@ -29,7 +28,6 @@ function authHeaders(extra = {}) {
   return headers;
 }
 
-// Reusable fetch handler (centralized errors + auth)
 async function fetchHandler(path, options = {}) {
   const {
     method = "GET",
@@ -60,7 +58,6 @@ async function fetchHandler(path, options = {}) {
   return payload;
 }
 
-// Actions (API calls live here, pages should call actions)
 const authActions = {
   register: (data) => fetchHandler("/auth/register", { method: "POST", body: data }),
   login: (data) => fetchHandler("/auth/login", { method: "POST", body: data }),
@@ -97,6 +94,8 @@ const hrActions = {
     fetchHandler(`/hr/candidates/${candidateId}/reject`, { method: "POST", body: { comments }, requireAuth: true }),
   selectCandidate: (candidateId, comments) =>
     fetchHandler(`/hr/candidates/${candidateId}/select`, { method: "POST", body: { comments }, requireAuth: true }),
-  createPanel: (panel) => fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true })
+  createPanel: (panel) => fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true }),
+  assignPanel: (candidateId, panelEmails) =>
+    fetchHandler(`/hr/candidates/${candidateId}/assign-panel`, { method: "POST", body: { panelEmails }, requireAuth: true })
 };
 

@@ -363,6 +363,8 @@ li b {
    UTILITIES
    ======================================== */
 
+.is-hidden { display: none !important; }
+
 .text-center { text-align: center; }
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }

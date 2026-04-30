@@ -12,19 +12,20 @@
     <h2>HR Pipeline Dashboard</h2>
     <div class="header-actions">
       <button class="secondary-btn" onclick="window.location.href='jd.html'">Job Descriptions</button>
+      <button class="secondary-btn" onclick="window.location.href='jd.html?view=available'">Available Jobs</button>
       <button class="secondary-btn" onclick="logout()">Logout</button>
     </div>
   </div>
 
   <div class="stats">
-    <div class="stat-card"><div class="stat-value" id="totalCount">0</div><div>Total</div></div>
-    <div class="stat-card"><div class="stat-value" id="profilingCount">0</div><div>Profiling</div></div>
-    <div class="stat-card"><div class="stat-value" id="screeningCount">0</div><div>Screening</div></div>
-    <div class="stat-card"><div class="stat-value" id="l1Count">0</div><div>L1</div></div>
-    <div class="stat-card"><div class="stat-value" id="l2Count">0</div><div>L2</div></div>
-    <div class="stat-card"><div class="stat-value" id="hrCount">0</div><div>HR</div></div>
-    <div class="stat-card"><div class="stat-value" id="selectedCount">0</div><div>Selected</div></div>
-    <div class="stat-card"><div class="stat-value" id="rejectedCount">0</div><div>Rejected</div></div>
+    <div class="stat-card" data-filter="ALL" role="button" tabindex="0"><div class="stat-value" id="totalCount">0</div><div>Total</div></div>
+    <div class="stat-card" data-filter="PROFILING" role="button" tabindex="0"><div class="stat-value" id="profilingCount">0</div><div>Profiling</div></div>
+    <div class="stat-card" data-filter="SCREENING" role="button" tabindex="0"><div class="stat-value" id="screeningCount">0</div><div>Screening</div></div>
+    <div class="stat-card" data-filter="L1_TECH" role="button" tabindex="0"><div class="stat-value" id="l1Count">0</div><div>L1</div></div>
+    <div class="stat-card" data-filter="L2_TECH" role="button" tabindex="0"><div class="stat-value" id="l2Count">0</div><div>L2</div></div>
+    <div class="stat-card" data-filter="HR_ROUND" role="button" tabindex="0"><div class="stat-value" id="hrCount">0</div><div>HR</div></div>
+    <div class="stat-card" data-filter="SELECTED" role="button" tabindex="0"><div class="stat-value" id="selectedCount">0</div><div>Selected</div></div>
+    <div class="stat-card" data-filter="REJECTED" role="button" tabindex="0"><div class="stat-value" id="rejectedCount">0</div><div>Rejected</div></div>
   </div>
 
   <p class="pipeline-note">Manage stage progression, view candidate progress, and review latest panel feedback.</p>
@@ -33,6 +34,37 @@
     <div class="loading">
       <div class="spinner"></div>
       <p>Loading candidates...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Panel Modal -->
+<div id="assignPanelModal" class="modal-backdrop is-hidden" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="assignPanelTitle">
+    <div class="modal-header">
+      <h3 id="assignPanelTitle">Assign Panel Members</h3>
+      <button class="secondary-btn" type="button" onclick="closeAssignPanel()">Close</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="pipeline-note">Select 1 or 2 panel members (must already have panel accounts).</p>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label for="panelEmail1">Panel member 1 (required)</label>
+          <select id="panelEmail1"></select>
+        </div>
+        <div class="input-group">
+          <label for="panelEmail2">Panel member 2 (optional)</label>
+          <select id="panelEmail2"></select>
+        </div>
+      </div>
+
+      <div id="assignPanelError" class="alert alert-error is-hidden"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="assignPanelSubmitBtn" type="button" onclick="submitAssignPanel()">Assign & Send Emails</button>
     </div>
   </div>
 </div>

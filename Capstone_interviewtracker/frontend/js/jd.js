@@ -1,17 +1,20 @@
 const user = getStoredUser();
+const urlParams = new URLSearchParams(window.location.search);
+const viewMode = (urlParams.get("view") || "").toLowerCase();
 
-// Check authentication
 if (!user) {
   window.location.href = "login.html";
 }
 
-// Hide form if not HR
 if (user && user.role === "HR") {
-  document.getElementById("jdForm").classList.remove("is-hidden");
   document.getElementById("hrDashboardBtn").classList.remove("is-hidden");
+  document.getElementById("availableJobsBtn").classList.remove("is-hidden");
+
+  if (viewMode !== "available") {
+    document.getElementById("jdForm").classList.remove("is-hidden");
+  }
 }
 
-// Fetch all JDs
 function loadJDs() {
   const list = document.getElementById("jdList");
   
@@ -33,13 +36,20 @@ function loadJDs() {
       data.forEach(jd => {
         const li = document.createElement("li");
         li.className = "jd-card";
+
+        const expMin = jd.experienceMin ?? jd.experience ?? 0;
+        const expMax = jd.experienceMax ?? jd.experience ?? 0;
+        const salaryMin = jd.salaryMin ?? null;
+        const salaryMax = jd.salaryMax ?? null;
+        const salaryLabel = (salaryMin != null && salaryMax != null) ? `${salaryMin} - ${salaryMax}` : (jd.salary || "N/A");
         
         li.innerHTML = `
           <div class="jd-info">
             <b>${jd.title}</b>
             <p>${jd.description || 'No description provided'}</p>
             <div class="jd-meta">
-              <span class="meta-item">${jd.experience} years</span>
+              <span class="meta-item">${expMin} - ${expMax} yrs</span>
+              <span class="meta-item">Salary: ${salaryLabel}</span>
               <span class="meta-item">${jd.skills || 'N/A'}</span>
             </div>
           </div>
@@ -63,10 +73,13 @@ function validateJD() {
   const title = document.getElementById("title");
   const description = document.getElementById("description");
   const skills = document.getElementById("skills");
-  const experience = document.getElementById("experience");
+  const experienceMin = document.getElementById("experienceMin");
+  const experienceMax = document.getElementById("experienceMax");
+  const salaryMin = document.getElementById("salaryMin");
+  const salaryMax = document.getElementById("salaryMax");
   let isValid = true;
 
-  [title, description, skills, experience].forEach(el => {
+  [title, description, skills, experienceMin, experienceMax, salaryMin, salaryMax].forEach(el => {
     el.classList.remove("input-error");
     const err = el.nextElementSibling;
     if (err && err.classList.contains("error-message")) err.style.display = "none";
@@ -80,6 +93,12 @@ function validateJD() {
   if (!description.value.trim()) {
     showError(description, "Description is required");
     isValid = false;
+  } else {
+    const words = description.value.trim().split(/\s+/).filter(Boolean).length;
+    if (words < 10 || words > 50) {
+      showError(description, "Job description must be 10 to 50 words");
+      isValid = false;
+    }
   }
 
   if (!skills.value.trim()) {
@@ -87,8 +106,29 @@ function validateJD() {
     isValid = false;
   }
 
-  if (!experience.value) {
-    showError(experience, "Experience is required");
+  if (!experienceMin.value) {
+    showError(experienceMin, "Min experience is required");
+    isValid = false;
+  }
+  if (!experienceMax.value) {
+    showError(experienceMax, "Max experience is required");
+    isValid = false;
+  }
+  if (experienceMin.value && experienceMax.value && Number(experienceMin.value) > Number(experienceMax.value)) {
+    showError(experienceMax, "Max experience must be >= min experience");
+    isValid = false;
+  }
+
+  if (!salaryMin.value) {
+    showError(salaryMin, "Min salary is required");
+    isValid = false;
+  }
+  if (!salaryMax.value) {
+    showError(salaryMax, "Max salary is required");
+    isValid = false;
+  }
+  if (salaryMin.value && salaryMax.value && Number(salaryMin.value) > Number(salaryMax.value)) {
+    showError(salaryMax, "Max salary must be >= min salary");
     isValid = false;
   }
 
@@ -133,7 +173,10 @@ function createJD() {
     title: document.getElementById("title").value.trim(),
     description: document.getElementById("description").value.trim(),
     skills: document.getElementById("skills").value.trim(),
-    experience: parseInt(document.getElementById("experience").value)
+    experienceMin: parseInt(document.getElementById("experienceMin").value),
+    experienceMax: parseInt(document.getElementById("experienceMax").value),
+    salaryMin: parseInt(document.getElementById("salaryMin").value),
+    salaryMax: parseInt(document.getElementById("salaryMax").value)
   };
 
   jdActions.create(jd)
@@ -145,7 +188,10 @@ function createJD() {
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
     document.getElementById("skills").value = "";
-    document.getElementById("experience").value = "";
+    document.getElementById("experienceMin").value = "";
+    document.getElementById("experienceMax").value = "";
+    document.getElementById("salaryMin").value = "";
+    document.getElementById("salaryMax").value = "";
     
     loadJDs();
   })

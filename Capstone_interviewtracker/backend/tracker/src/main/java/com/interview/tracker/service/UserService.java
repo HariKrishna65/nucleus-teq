@@ -4,6 +4,8 @@ import com.interview.tracker.dto.LoginRequest;
 import com.interview.tracker.dto.RegisterRequest;
 import com.interview.tracker.dto.AuthResponse;
 import com.interview.tracker.dto.SetPasswordRequest;
+import com.interview.tracker.dto.CreateTestUserRequest;
+import com.interview.tracker.dto.VerifyEmailRequest;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.PanelRepository;
@@ -207,5 +209,47 @@ public class UserService {
                     "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
             );
         }
+    }
+
+    // Test endpoint to create users directly with password (bypasses email verification)
+    public AuthResponse createTestUser(CreateTestUserRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+
+        if (request.getRole() == null || !roles.contains(request.getRole())) {
+            throw new IllegalArgumentException("Invalid role. Must be HR, PANEL, or CANDIDATE");
+        }
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(request.getRole());
+        user.setPhone(request.getPhone());
+        user.setCity(request.getCity());
+        user.setState(request.getState());
+        user.setCountry(request.getCountry());
+        user.setEmailVerified(true); // Skip email verification for test users
+
+        User saved = userRepository.save(user);
+
+        // Create panel entry if role is PANEL
+        if ("PANEL".equals(user.getRole())) {
+            Panel panel = new Panel();
+            panel.setName(user.getName());
+            panel.setEmail(user.getEmail());
+            panel.setExpertise("General");
+            panelRepository.save(panel);
+        }
+
+        return new AuthResponse(
+                "Test user created successfully!",
+                saved.getRole(),
+                saved.getId(),
+                saved.getName(),
+                null,
+                null
+        );
     }
 }

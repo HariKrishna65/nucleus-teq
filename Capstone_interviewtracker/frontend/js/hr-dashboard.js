@@ -7,6 +7,11 @@ if (user.role !== "HR") {
   window.location.href = "index.html";
 }
 
+let allRows = [];
+let activeFilter = "ALL";
+let allPanels = [];
+let assignCandidateId = null;
+
 function normalizeStage(candidate) {
   if (candidate.stage) return candidate.stage;
   if (candidate.status === "L1") return "L1_TECH";
@@ -79,12 +84,18 @@ function feedbackHtml(feedback) {
 
 function renderCandidates(rows) {
   const list = document.getElementById("candidateList");
-  if (!rows.length) {
+  const filtered = (rows || []).filter((row) => {
+    if (activeFilter === "ALL") return true;
+    const stage = normalizeStage((row && row.candidate) || {});
+    return stage === activeFilter;
+  });
+
+  if (!filtered.length) {
     list.innerHTML = '<div class="empty-state">No candidates available yet.</div>';
     return;
   }
 
-  list.innerHTML = rows.map((row) => {
+  list.innerHTML = filtered.map((row) => {
     const c = row.candidate || {};
     const stage = normalizeStage(c);
     const name = (c.user && c.user.name) || c.fullName || "Candidate";
@@ -93,6 +104,7 @@ function renderCandidates(rows) {
     const job = c.jd && c.jd.title ? c.jd.title : "Not mapped";
     const latestFeedback = row.latestFeedback || null;
     const isFinal = stage === "SELECTED" || stage === "REJECTED";
+    const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
 
     return `
       <div class="candidate-card">
@@ -110,6 +122,7 @@ function renderCandidates(rows) {
         ${feedbackHtml(latestFeedback)}
         <div class="candidate-actions">
           <button onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Advance Stage</button>
+          ${canAssignPanel ? `<button class="secondary-btn" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign Panel</button>` : ``}
           <button class="btn-success" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
           <button class="btn-danger" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
         </div>
@@ -118,11 +131,35 @@ function renderCandidates(rows) {
   }).join("");
 }
 
+function setActiveFilter(filter) {
+  activeFilter = filter || "ALL";
+  document.querySelectorAll(".stat-card[data-filter]").forEach((card) => {
+    card.classList.toggle("active", String(card.dataset.filter) === String(activeFilter));
+  });
+  renderCandidates(allRows);
+}
+
+function wireStatFilters() {
+  const cards = document.querySelectorAll(".stat-card[data-filter]");
+  cards.forEach((card) => {
+    const filter = card.dataset.filter || "ALL";
+    card.addEventListener("click", () => setActiveFilter(filter));
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setActiveFilter(filter);
+      }
+    });
+  });
+  setActiveFilter("ALL");
+}
+
 function loadCandidates() {
   hrActions.listCandidates()
     .then((rows) => {
-      renderStats(rows);
-      renderCandidates(rows);
+      allRows = Array.isArray(rows) ? rows : [];
+      renderStats(allRows);
+      renderCandidates(allRows);
     })
     .catch((err) => {
       document.getElementById("candidateList").innerHTML = '<div class="alert alert-error">Failed to load candidates.</div>';
@@ -161,9 +198,125 @@ function rejectCandidate(candidateId) {
     .catch((err) => alert(err.message || "Failed to reject candidate"));
 }
 
+function loadPanels() {
+  return interviewActions.listPanels()
+    .then((panels) => {
+      allPanels = Array.isArray(panels) ? panels : [];
+      return allPanels;
+    })
+    .catch(() => {
+      allPanels = [];
+      return [];
+    });
+}
+
+function openAssignPanel(candidateId) {
+  assignCandidateId = candidateId;
+  const modal = document.getElementById("assignPanelModal");
+  const err = document.getElementById("assignPanelError");
+  if (err) {
+    err.textContent = "";
+    err.classList.add("is-hidden");
+  }
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+
+  // Populate selects
+  const s1 = document.getElementById("panelEmail1");
+  const s2 = document.getElementById("panelEmail2");
+  const options = allPanels
+    .filter(p => p && p.email)
+    .map(p => ({ label: `${p.name || "Panel"} (${p.email})`, value: p.email }));
+
+  s1.innerHTML = `<option value="">-- Select panel member --</option>` + options.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+  s2.innerHTML = `<option value="">-- Optional second member --</option>` + options.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+}
+
+function closeAssignPanel() {
+  const modal = document.getElementById("assignPanelModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+  assignCandidateId = null;
+}
+
+function showAssignPanelError(message) {
+  const err = document.getElementById("assignPanelError");
+  if (!err) return;
+  err.textContent = message;
+  err.classList.remove("is-hidden");
+}
+
+function submitAssignPanel() {
+  if (!assignCandidateId) return;
+  const email1 = (document.getElementById("panelEmail1").value || "").trim();
+  const email2 = (document.getElementById("panelEmail2").value || "").trim();
+
+  if (!email1) {
+    showAssignPanelError("Panel member 1 is required");
+    return;
+  }
+  if (email2 && email2 === email1) {
+    showAssignPanelError("Panel member 2 must be different from panel member 1");
+    return;
+  }
+
+  const emails = [email1, email2].filter(Boolean);
+  if (emails.length < 1 || emails.length > 2) {
+    showAssignPanelError("Panel members must be between 1 and 2");
+    return;
+  }
+
+  const btn = document.getElementById("assignPanelSubmitBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Assigning...";
+  }
+
+  hrActions.assignPanel(assignCandidateId, emails)
+    .then(() => {
+      closeAssignPanel();
+      alert("Panel assigned and emails sent successfully.");
+      loadCandidates();
+    })
+    .catch((err) => {
+      showAssignPanelError(err.message || "Failed to assign panel");
+    })
+    .finally(() => {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Assign & Send Emails";
+      }
+    });
+}
+
 function logout() {
   localStorage.removeItem(STORAGE_KEYS.USER);
   window.location.href = "login.html";
 }
 
+// Expose modal functions to HTML onclick handlers
+window.closeAssignPanel = closeAssignPanel;
+window.submitAssignPanel = submitAssignPanel;
+window.openAssignPanel = openAssignPanel;
+
+wireStatFilters();
+loadPanels();
 loadCandidates();
+
+// Ensure modal starts hidden + allow backdrop/Esc close
+(() => {
+  const modal = document.getElementById("assignPanelModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeAssignPanel();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("is-hidden")) {
+      closeAssignPanel();
+    }
+  });
+})();

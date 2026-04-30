@@ -4,6 +4,7 @@ import com.interview.tracker.dto.LoginRequest;
 import com.interview.tracker.dto.RegisterRequest;
 import com.interview.tracker.dto.AuthResponse;
 import com.interview.tracker.dto.SetPasswordRequest;
+import com.interview.tracker.dto.CreateTestUserRequest;
 import com.interview.tracker.dto.VerifyEmailRequest;
 import com.interview.tracker.service.UserService;
 import jakarta.validation.Valid;
@@ -44,5 +45,12 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public AuthResponse forgotPassword(@Valid @RequestBody LoginRequest request) {
         return userService.requestPasswordReset(request.getEmail());
+    }
+
+    // Test endpoint - create user directly with password (bypasses email verification)
+    // WARNING: This endpoint is open for testing purposes only
+    @PostMapping("/create-test-user")
+    public AuthResponse createTestUser(@Valid @RequestBody CreateTestUserRequest request) {
+        return userService.createTestUser(request);
     }
 }
