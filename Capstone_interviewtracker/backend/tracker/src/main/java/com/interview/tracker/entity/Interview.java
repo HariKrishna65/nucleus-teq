@@ -16,8 +16,9 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Round is required")
-    private String round; 
+    @NotNull(message = "Round is required")
+    @Enumerated(EnumType.STRING)
+    private InterviewRound round; 
 
     @NotNull(message = "Interview time is required")
     @Column(name = "scheduled_time", nullable = false)
@@ -54,8 +55,8 @@ public class Interview {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getRound() { return round; }
-    public void setRound(String round) { this.round = round; }
+    public InterviewRound getRound() { return round; }
+    public void setRound(InterviewRound round) { this.round = round; }
 
     public LocalDateTime getInterviewTime() { return interviewTime; }
     public void setInterviewTime(LocalDateTime interviewTime) { this.interviewTime = interviewTime; }

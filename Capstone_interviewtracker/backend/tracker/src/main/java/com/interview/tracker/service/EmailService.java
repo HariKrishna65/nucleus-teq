@@ -197,7 +197,7 @@ public class EmailService {
         String jobTitle = (interview != null && interview.getCandidate() != null && interview.getCandidate().getJd() != null && interview.getCandidate().getJd().getTitle() != null)
                 ? interview.getCandidate().getJd().getTitle()
                 : "N/A";
-        String round = interview != null ? (interview.getRound() == null ? "N/A" : interview.getRound()) : "N/A";
+        String round = interview != null ? (interview.getRound() == null ? "N/A" : interview.getRound().getValue()) : "N/A";
         String focus = interview != null ? (interview.getFocusArea() == null ? "General" : interview.getFocusArea()) : "General";
         String time = (interview != null && interview.getInterviewTime() != null) ? interview.getInterviewTime().format(EMAIL_DT) : "To be scheduled";
 

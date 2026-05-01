@@ -7,6 +7,7 @@ import com.interview.tracker.dto.CreatePanelRequest;
 import com.interview.tracker.entity.Candidate;
 import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.entity.Interview;
+import com.interview.tracker.entity.InterviewRound;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
@@ -171,15 +172,15 @@ public class HrController {
         return ResponseEntity.ok(saved);
     }
 
-    private String mapStageToInterviewRound(Stage stage) {
+    private InterviewRound mapStageToInterviewRound(Stage stage) {
         // DB constraint expects legacy round values: L1/L2/HR
-        if (stage == null) return "L1";
+        if (stage == null) return InterviewRound.L1;
         return switch (stage) {
-            case PROFILING, SCREENING -> "L1";
-            case L1_TECH -> "L1";
-            case L2_TECH -> "L2";
-            case HR_ROUND -> "HR";
-            default -> "L1";
+            case PROFILING, SCREENING -> InterviewRound.L1;
+            case L1_TECH -> InterviewRound.L1;
+            case L2_TECH -> InterviewRound.L2;
+            case HR_ROUND -> InterviewRound.HR;
+            default -> InterviewRound.L1;
         };
     }
 
