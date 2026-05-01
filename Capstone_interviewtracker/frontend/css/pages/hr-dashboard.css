@@ -19,6 +19,15 @@ body.page-dashboard::before {
   min-height: 100vh;
   background: #f6f7fb;
 }
+
+/* Full-width layout for all HR dashboard pages */
+body.page-hr .dashboard-shell {
+  grid-template-columns: 1fr;
+}
+
+body.page-hr .sidebar {
+  display: none;
+}
 .dashboard-shell.sidebar-collapsed {
   grid-template-columns: 72px 1fr;
 }
