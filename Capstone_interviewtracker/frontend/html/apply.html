@@ -5,13 +5,36 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/apply.css">
 </head>
-<body class="page-workflow">
+<body class="page-dashboard page-candidate">
 
-<div class="container">
-  <div class="header">
-    <h2>Apply for Job</h2>
-    <button class="back-btn" onclick="window.location.href='dashboard.html'">Back</button>
-  </div>
+<div class="dashboard-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">IT</div>
+    <div class="sidebar-title">Candidate</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html">My Applications</a>
+      <a class="active" href="apply.html">Apply Jobs</a>
+      <a href="jd.html?view=available">Available Jobs</a>
+      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <div class="user-details">
+            <h3 id="userName">User</h3>
+            <p>Candidate</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+          <a class="btn apply-more-btn" href="dashboard.html">My Applications</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
 
   <div class="jd-info" id="selectedJdInfo">
     <h4>Selected Position</h4>
@@ -48,7 +71,9 @@
     </div>
   </div>
 
-  <button onclick="applyJob()">Submit Application</button>
+      <button onclick="applyJob()">Submit Application</button>
+    </div>
+  </main>
 </div>
 
 <script src="../js/api.js"></script>

@@ -22,10 +22,18 @@ body.page-dashboard::before {
   padding: 10px 10px;
   text-align: center;
 }
+.dashboard-shell.sidebar-collapsed .sidebar-nav .logout-link {
+  padding: 10px 10px;
+  text-align: center;
+}
 .sidebar {
   background: #fff;
   border-right: 1px solid #ececf1;
   padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border-left: 4px solid #8b5cf6;
 }
 .sidebar-brand {
   width: 36px;
@@ -34,10 +42,42 @@ body.page-dashboard::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #4f46e5;
+  background: #8b5cf6;
   color: #fff;
   font-weight: 700;
   margin-bottom: 12px;
+}
+.sidebar-title {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 14px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.sidebar-nav a {
+  text-decoration: none;
+  color: #374151;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+.sidebar-nav a.active,
+.sidebar-nav a:hover {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+.sidebar-nav .logout-link {
+  margin-top: auto;
+  background: #fee2e2;
+  color: #dc2626;
+}
+.sidebar-nav .logout-link:hover {
+  background: #fecaca;
+  color: #b91c1c;
 }
 .header-actions {
   display: flex;
@@ -55,27 +95,6 @@ body.page-dashboard::before {
   box-shadow: none !important;
 }
 .icon-btn:hover { background: #f3f4f6 !important; }
-.sidebar-title {
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 14px;
-}
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sidebar-nav a {
-  text-decoration: none;
-  color: #374151;
-  padding: 10px 12px;
-  border-radius: 10px;
-}
-.sidebar-nav a.active,
-.sidebar-nav a:hover {
-  background: #fef3c7;
-  color: #92400e;
-}
 .content-area {
   padding: 22px;
 }
@@ -102,7 +121,7 @@ body.page-dashboard::before {
   width: 45px;
   height: 45px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -22,10 +22,17 @@ body.page-dashboard::before {
   padding: 10px 10px;
   text-align: center;
 }
+.dashboard-shell.sidebar-collapsed .sidebar-nav .logout-link {
+  padding: 10px 10px;
+  text-align: center;
+}
 .sidebar {
   background: #fff;
   border-right: 1px solid #ececf1;
   padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 .sidebar-brand {
   width: 36px;
@@ -39,6 +46,84 @@ body.page-dashboard::before {
   font-weight: 700;
   margin-bottom: 12px;
 }
+.sidebar-title {
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 14px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.sidebar-nav a {
+  text-decoration: none;
+  color: #374151;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+/* Candidate Dashboard Colors */
+body.page-dashboard.page-candidate .sidebar {
+  border-left: 4px solid #4f46e5;
+}
+body.page-dashboard.page-candidate .sidebar-brand {
+  background: #4f46e5;
+}
+body.page-dashboard.page-candidate .sidebar-nav a.active,
+body.page-dashboard.page-candidate .sidebar-nav a:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+body.page-dashboard.page-candidate .sidebar-nav .logout-link {
+  background: #fee2e2;
+  color: #dc2626;
+}
+body.page-dashboard.page-candidate .sidebar-nav .logout-link:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
+/* Panel Dashboard Colors */
+body.page-dashboard.page-panel .sidebar {
+  border-left: 4px solid #8b5cf6;
+}
+body.page-dashboard.page-panel .sidebar-brand {
+  background: #8b5cf6;
+}
+body.page-dashboard.page-panel .sidebar-nav a.active,
+body.page-dashboard.page-panel .sidebar-nav a:hover {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+body.page-dashboard.page-panel .sidebar-nav .logout-link {
+  background: #fee2e2;
+  color: #dc2626;
+}
+body.page-dashboard.page-panel .sidebar-nav .logout-link:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
+/* HR Dashboard Colors */
+body.page-dashboard.page-hr .sidebar {
+  border-left: 4px solid #10b981;
+}
+body.page-dashboard.page-hr .sidebar-brand {
+  background: #10b981;
+}
+body.page-dashboard.page-hr .sidebar-nav a.active,
+body.page-dashboard.page-hr .sidebar-nav a:hover {
+  background: #d1fae5;
+  color: #059669;
+}
+body.page-dashboard.page-hr .sidebar-nav .logout-link {
+  background: #fee2e2;
+  color: #dc2626;
+}
+body.page-dashboard.page-hr .sidebar-nav .logout-link:hover {
+  background: #fecaca;
+  color: #b91c1c;
+}
 .icon-btn {
   background: transparent !important;
   border: 1px solid #e5e7eb !important;
@@ -50,27 +135,6 @@ body.page-dashboard::before {
   box-shadow: none !important;
 }
 .icon-btn:hover { background: #f3f4f6 !important; }
-.sidebar-title {
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 14px;
-}
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sidebar-nav a {
-  text-decoration: none;
-  color: #374151;
-  padding: 10px 12px;
-  border-radius: 10px;
-}
-.sidebar-nav a.active,
-.sidebar-nav a:hover {
-  background: #fef3c7;
-  color: #92400e;
-}
 .content-area {
   padding: 22px;
 }

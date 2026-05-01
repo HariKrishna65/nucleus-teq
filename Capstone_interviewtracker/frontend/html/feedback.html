@@ -5,13 +5,35 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/feedback.css">
 </head>
-<body class="page-feedback">
+<body class="page-dashboard page-panel">
 
-<div class="container">
-  <div class="header">
-    <h2>Submit Feedback</h2>
-    <button class="back-btn" onclick="goBack()">Back</button>
-  </div>
+<div class="dashboard-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">IT</div>
+    <div class="sidebar-title">Panel Dashboard</div>
+    <nav class="sidebar-nav">
+      <a href="panel-dashboard.html">My Interviews</a>
+      <a class="active" href="feedback.html">Submit Feedback</a>
+      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
+    </nav>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">P</div>
+          <div class="user-details">
+            <h3 id="userName">Panel Member</h3>
+            <p>Interview Panel</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+          <a class="btn apply-more-btn" href="panel-dashboard.html">My Interviews</a>
+          <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+      </div>
 
   <div class="interview-summary" id="interviewSummary">
     <h4>Interview Details</h4>
@@ -75,17 +97,12 @@
     <input type="hidden" id="status" value="">
   </div>
 
-  <button onclick="submitFeedback()">Submit Feedback</button>
+      <button onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+  </main>
 </div>
 
 <script src="../js/api.js"></script>
 <script src="../js/feedback.js"></script>
-<script>
-  function goBack() {
-    const user = (typeof getStoredUser === "function") ? getStoredUser() : null;
-    if (user && user.role === "HR") return window.location.href = "hr-feedback.html";
-    return window.location.href = "panel-dashboard.html";
-  }
-</script>
 </body>
 </html>
