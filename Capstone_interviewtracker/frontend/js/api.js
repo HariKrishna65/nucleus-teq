@@ -98,7 +98,7 @@ const hrActions = {
   deleteCandidate: (candidateId) =>
     fetchHandler(`/hr/candidates/${candidateId}`, { method: "DELETE", requireAuth: true }),
   createPanel: (panel) => fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true }),
-  assignPanel: (candidateId, panelEmails) =>
-    fetchHandler(`/hr/candidates/${candidateId}/assign-panel`, { method: "POST", body: { panelEmails }, requireAuth: true })
+  assignPanel: (candidateId, assignData) =>
+    fetchHandler(`/hr/candidates/${candidateId}/assign-panel`, { method: "POST", body: assignData, requireAuth: true })
 };
 

@@ -150,7 +150,7 @@ function renderCandidates(rows) {
                 <td>${feedbackText}</td>
                 <td>
                   <div class="table-actions">
-                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Advance</button>
+                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Move to Next Round</button>
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
                     <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
@@ -206,6 +206,17 @@ function askComments(actionLabel) {
 }
 
 function advanceStage(candidateId) {
+  // Find the candidate to check current stage
+  const candidate = allRows.find(row => (row.candidate || {}).id === candidateId);
+  const stage = candidate ? normalizeStage(candidate.candidate) : null;
+  
+  // If L1 or L2 stage, navigate to assign panel page
+  if (stage === 'L1_TECH' || stage === 'L2_TECH') {
+    window.location.href = `assign-panel.html?candidateId=${candidateId}`;
+    return;
+  }
+  
+  // For other stages, proceed with normal advancement
   const comments = prompt("Optional HR comments for stage movement:") || "";
   hrActions.advanceCandidate(candidateId, comments)
     .then(() => loadCandidates())
@@ -304,6 +315,10 @@ function submitAssignPanel() {
   if (!assignCandidateId) return;
   const email1 = (document.getElementById("panelEmail1").value || "").trim();
   const email2 = (document.getElementById("panelEmail2").value || "").trim();
+  const interviewDate = document.getElementById("interviewDate").value;
+  const interviewTime = document.getElementById("interviewTime").value;
+  const focusArea = (document.getElementById("focusArea").value || "").trim();
+  const interviewNotes = (document.getElementById("interviewNotes").value || "").trim();
 
   if (!email1) {
     showAssignPanelError("Panel member 1 is required");
@@ -313,10 +328,25 @@ function submitAssignPanel() {
     showAssignPanelError("Panel member 2 must be different from panel member 1");
     return;
   }
+  if (!interviewDate) {
+    showAssignPanelError("Interview date is required");
+    return;
+  }
+  if (!interviewTime) {
+    showAssignPanelError("Interview time is required");
+    return;
+  }
 
   const emails = [email1, email2].filter(Boolean);
   if (emails.length < 1 || emails.length > 2) {
     showAssignPanelError("Panel members must be between 1 and 2");
+    return;
+  }
+
+  // Combine date and time into a proper datetime
+  const interviewDateTime = new Date(`${interviewDate}T${interviewTime}`);
+  if (isNaN(interviewDateTime)) {
+    showAssignPanelError("Invalid date or time");
     return;
   }
 
@@ -326,7 +356,14 @@ function submitAssignPanel() {
     btn.textContent = "Assigning...";
   }
 
-  hrActions.assignPanel(assignCandidateId, emails)
+  const assignData = {
+    panelEmails: emails,
+    interviewTime: interviewDateTime.toISOString(),
+    focusArea: focusArea || null,
+    notes: interviewNotes || null
+  };
+
+  hrActions.assignPanel(assignCandidateId, assignData)
     .then(() => {
       closeAssignPanel();
       alert("Panel assigned and emails sent successfully.");

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Assign Panel - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
+</head>
+<body class="page-dashboard page-hr">
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-title">HR Dashboard</div>
+    <nav class="sidebar-nav">
+      <a href="hr-main-dashboard.html" class="sidebar-link jd-link">Dashboard</a>
+      <a href="candidates.html" class="sidebar-link candidates-link">Candidates</a>
+      <a href="onboard-candidate.html" class="sidebar-link onboard-link">Onboard Candidate</a>
+      <a href="hr-dashboard.html#panelMembersSection" class="sidebar-link panel-link">Panel Members</a>
+      <a href="hr-feedback.html" class="sidebar-link feedback-link">Feedback</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <button class="back-btn" onclick="window.location.href='candidates.html'">← Back to Candidates</button>
+          <h2 id="candidateName">Assign Panel</h2>
+          <p class="pipeline-note">Select panel members and schedule interview details.</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
+        </div>
+      </div>
+
+      <div class="assign-panel-form">
+        <div class="candidate-info-card">
+          <h3>Candidate Information</h3>
+          <div id="candidateDetails">
+            <div class="loading">
+              <div class="spinner"></div>
+              <p>Loading candidate details...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-selection-card">
+          <h3>Panel Member Selection</h3>
+          <div class="form-row">
+            <div class="input-group">
+              <label for="panelEmail1">Panel Member 1 (required)</label>
+              <select id="panelEmail1" required>
+                <option value="">-- Select panel member --</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="panelEmail2">Panel Member 2 (optional)</label>
+              <select id="panelEmail2">
+                <option value="">-- Optional second member --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="interview-details-card">
+          <h3>Interview Details</h3>
+          <div class="form-row">
+            <div class="input-group">
+              <label for="interviewDate">Interview Date (required)</label>
+              <input type="date" id="interviewDate" required>
+            </div>
+            <div class="input-group">
+              <label for="interviewTime">Interview Time (required)</label>
+              <input type="time" id="interviewTime" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="input-group">
+              <label for="interviewDuration">Duration (minutes)</label>
+              <select id="interviewDuration">
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60" selected>60 minutes</option>
+                <option value="90">90 minutes</option>
+                <option value="120">120 minutes</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="interviewType">Interview Type</label>
+              <select id="interviewType">
+                <option value="TECHNICAL">Technical Interview</option>
+                <option value="BEHAVIORAL">Behavioral Interview</option>
+                <option value="SYSTEM_DESIGN">System Design</option>
+                <option value="CODING">Coding Test</option>
+                <option value="HR_ROUND">HR Round</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="input-group full-width">
+              <label for="focusArea">Focus Area (optional)</label>
+              <input type="text" id="focusArea" placeholder="e.g., JavaScript, System Design, Database, Algorithms">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="input-group full-width">
+              <label for="interviewNotes">Interview Notes (optional)</label>
+              <textarea id="interviewNotes" rows="4" placeholder="Additional notes for panel members about the candidate or interview focus..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="assignPanelError" class="alert alert-error is-hidden"></div>
+
+        <div class="form-actions">
+          <button class="secondary-btn" onclick="window.location.href='candidates.html'">Cancel</button>
+          <button id="assignPanelSubmitBtn" class="btn-primary" onclick="submitAssignPanel()">Assign Panel & Send Emails</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/api.js"></script>
+<script src="../js/assign-panel.js"></script>
+</body>
+</html>

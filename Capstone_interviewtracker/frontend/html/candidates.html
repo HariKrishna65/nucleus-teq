@@ -29,6 +29,7 @@
           <p class="pipeline-note">Manage all candidates and track interview progression.</p>
         </div>
         <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
           <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
           <button onclick="window.location.href='jd.html'">Create JD</button>
         </div>
@@ -74,7 +75,7 @@
     </div>
 
     <div class="modal-body">
-      <p class="pipeline-note">Select 1 or 2 panel members (must already have panel accounts).</p>
+      <p class="pipeline-note">Select 1 or 2 panel members and schedule interview details.</p>
 
       <div class="form-row">
         <div class="input-group">
@@ -84,6 +85,31 @@
         <div class="input-group">
           <label for="panelEmail2">Panel member 2 (optional)</label>
           <select id="panelEmail2"></select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label for="interviewDate">Interview Date (required)</label>
+          <input type="date" id="interviewDate" required>
+        </div>
+        <div class="input-group">
+          <label for="interviewTime">Interview Time (required)</label>
+          <input type="time" id="interviewTime" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group full-width">
+          <label for="focusArea">Focus Area (optional)</label>
+          <input type="text" id="focusArea" placeholder="e.g., JavaScript, System Design, Database">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group full-width">
+          <label for="interviewNotes">Interview Notes (optional)</label>
+          <textarea id="interviewNotes" rows="3" placeholder="Additional notes for panel members..."></textarea>
         </div>
       </div>
 

@@ -6,6 +6,20 @@ if (!user) {
   window.location.href = "login.html";
 }
 
+// Only HR users can access job creation functionality
+if (user && user.role !== "HR") {
+  // Hide all HR-only elements for non-HR users
+  const createJobBtn = document.getElementById("createJobBtn");
+  const hrDashboardBtn = document.getElementById("hrDashboardBtn");
+  if (createJobBtn) createJobBtn.style.display = "none";
+  if (hrDashboardBtn) hrDashboardBtn.style.display = "none";
+  
+  // If trying to access create view, redirect to available jobs
+  if (viewMode === "create") {
+    setView("available");
+  }
+}
+
 if (user && user.role === "HR") {
   document.getElementById("hrDashboardBtn").classList.remove("is-hidden");
   document.getElementById("availableJobsBtn").classList.remove("is-hidden");
