@@ -63,7 +63,7 @@ function login() {
 
     setTimeout(() => {
       if (data.role === "HR") {
-        window.location.href = "hr-dashboard.html";
+        window.location.href = "hr-main-dashboard.html";
       } else if (data.role === "PANEL") {
         window.location.href = "panel-dashboard.html";
       } else {
