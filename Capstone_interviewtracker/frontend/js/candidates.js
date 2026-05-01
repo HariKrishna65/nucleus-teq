@@ -1,15 +1,25 @@
-const user = getStoredUser();
+// Wait for DOM to be loaded before checking authentication
+document.addEventListener('DOMContentLoaded', function() {
+  const user = getStoredUser();
 
-console.log("User data:", user);
+  console.log("User data:", user);
 
-if (!user) {
-  console.log("No user found, redirecting to login");
-  window.location.href = "login.html";
-}
-if (user.role !== "HR") {
-  console.log("User role is not HR, role is:", user.role);
-  window.location.href = "index.html";
-}
+  if (!user) {
+    console.log("No user found, redirecting to login");
+    window.location.href = "login.html";
+    return;
+  }
+  if (user.role !== "HR") {
+    console.log("User role is not HR, role is:", user.role);
+    window.location.href = "index.html";
+    return;
+  }
+
+  // Initialize the page after authentication check
+  initializeCandidatesPage();
+});
+
+function initializeCandidatesPage() {
 
 let allRows = [];
 let activeFilter = "ALL";
@@ -411,3 +421,6 @@ loadCandidates();
     }
   });
 })();
+
+// Close the initializeCandidatesPage function
+}
