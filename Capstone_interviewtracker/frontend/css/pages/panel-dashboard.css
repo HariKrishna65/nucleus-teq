@@ -15,9 +15,6 @@ body.page-dashboard::before {
 .dashboard-shell.sidebar-collapsed {
   grid-template-columns: 72px 1fr;
 }
-.dashboard-shell.sidebar-collapsed .sidebar-title {
-  display: none;
-}
 .dashboard-shell.sidebar-collapsed .sidebar-nav a {
   padding: 10px 10px;
   text-align: center;
@@ -34,23 +31,6 @@ body.page-dashboard::before {
   flex-direction: column;
   height: 100vh;
   border-left: 4px solid #8b5cf6;
-}
-.sidebar-brand {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #8b5cf6;
-  color: #fff;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-.sidebar-title {
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 14px;
 }
 .sidebar-nav {
   display: flex;

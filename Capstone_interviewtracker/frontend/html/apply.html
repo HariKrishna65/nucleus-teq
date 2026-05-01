@@ -8,17 +8,7 @@
 <body class="page-dashboard page-candidate">
 
 <div class="dashboard-shell">
-  <aside class="sidebar">
-    <div class="sidebar-brand">IT</div>
-    <div class="sidebar-title">Candidate</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html">My Applications</a>
-      <a class="active" href="apply.html">Apply Jobs</a>
-      <a href="jd.html?view=available">Available Jobs</a>
-      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
-    </nav>
-  </aside>
-
+  
   <main class="content-area">
     <div class="container">
       <div class="header">
@@ -30,7 +20,6 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
           <a class="btn apply-more-btn" href="dashboard.html">My Applications</a>
           <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
@@ -42,33 +31,43 @@
   </div>
 
   <div class="input-group">
-    <label for="jdSelect">Select Job</label>
-    <select id="jdSelect" onchange="updateJdInfo()">
+    <label for="jdSelect">Select Job <span class="required">*</span></label>
+    <select id="jdSelect" onchange="updateJdInfo()" required>
       <option value="">-- Select a job --</option>
     </select>
+    <small class="help-text">Choose the position you want to apply for</small>
   </div>
 
   <div class="input-group">
-    <label for="phone">Phone Number</label>
-    <input id="phone" type="tel" placeholder="Enter your phone number">
+    <label for="phone">Phone Number <span class="required">*</span></label>
+    <input id="phone" type="tel" placeholder="Enter your phone number" 
+           pattern="[0-9]{10}" maxlength="10" required
+           title="Please enter a valid 10-digit phone number">
+    <small class="help-text">Enter 10-digit mobile number without country code</small>
   </div>
 
   <div class="input-group">
-    <label for="experience">Years of Experience</label>
-    <input id="experience" type="number" min="0" max="30" placeholder="Enter years of experience">
+    <label for="experience">Years of Experience <span class="required">*</span></label>
+    <input id="experience" type="number" min="0" max="50" step="0.5" 
+           placeholder="Enter years of experience" required
+           title="Experience must be between 0 and 50 years">
+    <small class="help-text">Include decimal for months (e.g., 2.5 for 2 years 6 months)</small>
   </div>
 
   <div class="input-group">
-    <label>Resume (PDF)</label>
+    <label>Resume (PDF) <span class="required">*</span></label>
     <div class="file-input-wrapper">
-      <input type="file" id="resume" accept=".pdf,application/pdf" onchange="updateFileName()">
+      <input type="file" id="resume" accept=".pdf,application/pdf" 
+             onchange="updateFileName()" required
+             title="Please upload your resume in PDF format (Max 5MB)">
       <div class="file-display">
-        <div class="icon">Resume File</div>
+        <div class="icon">📄 Resume File</div>
         <p>Click to upload or drag and drop</p>
-        <p class="file-hint-text">PDF only (Max 5MB)</p>
+        <p class="file-hint-text">PDF only (Max 5MB) - Required for application</p>
         <div class="file-name" id="fileName"></div>
       </div>
     </div>
+    <small class="help-text">Upload your latest resume in PDF format</small>
   </div>
 
       <button onclick="applyJob()">Submit Application</button>

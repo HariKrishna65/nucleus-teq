@@ -55,7 +55,9 @@ function renderApplications() {
         <b>${c.jd ? c.jd.title : 'Unknown Position'}</b>
         <span>Applied on: ${formatDate(c.applicationDate)}</span>
       </div>
-      <span class="status ${normalizeStage(c)}">${formatStatus(c)}</span>
+      <div class="application-actions">
+        <span class="status-badge ${normalizeStage(c)}">${formatStatus(c)}</span>
+      </div>
     `;
 
     list.appendChild(li);

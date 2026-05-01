@@ -36,6 +36,10 @@ body.page-dashboard::before {
   background: #fff;
   border-right: 1px solid #ececf1;
   padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
 }
 .sidebar-brand {
   width: 36px;
@@ -58,17 +62,56 @@ body.page-dashboard::before {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1 1 auto;
 }
-.sidebar-nav a {
+.sidebar-link {
   text-decoration: none;
   color: #374151;
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-radius: 10px;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.sidebar-nav a.active,
-.sidebar-nav a:hover {
-  background: #fef3c7;
-  color: #92400e;
+.sidebar-link.jd-link { background: linear-gradient(90deg, #e0e7ff 0%, #f0fdfa 100%); color: #3730a3; }
+.sidebar-link.candidates-link { background: linear-gradient(90deg, #fef3c7 0%, #f3e8ff 100%); color: #92400e; }
+.sidebar-link.onboard-link { background: linear-gradient(90deg, #f0fdfa 0%, #e0e7ff 100%); color: #047857; }
+.sidebar-link.panel-link { background: linear-gradient(90deg, #f3e8ff 0%, #fef3c7 100%); color: #7c3aed; }
+.sidebar-link.feedback-link { background: linear-gradient(90deg, #fef2f2 0%, #f0fdfa 100%); color: #be185d; }
+.sidebar-link.active, .sidebar-link:hover {
+  background: linear-gradient(90deg, #ede9fe 0%, #fef3c7 100%);
+  color: #4f46e5;
+  font-weight: 700;
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding-bottom: 10px;
+}
+.logout-link {
+  background: linear-gradient(90deg, #fee2e2 0%, #f3e8ff 100%);
+  color: #b91c1c !important;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: block;
+  text-align: left;
+}
+.sidebar-toggle {
+  background: #f3f4f6;
+  border: none;
+  color: #4f46e5;
+  font-size: 1.5rem;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background 0.2s;
+}
+.sidebar-toggle:hover {
+  background: #ede9fe;
 }
 .content-area {
   padding: 22px;
@@ -418,5 +461,20 @@ body.page-dashboard::before {
   .toolbar-right { justify-content: space-between; }
   .panel-form-grid {
     grid-template-columns: 1fr;
+  }
+  .sidebar {
+    min-width: 72px;
+    padding: 10px 4px;
+  }
+  .sidebar-title {
+    font-size: 1rem;
+  }
+  .sidebar-link {
+    padding: 10px 8px;
+    font-size: 0.95rem;
+  }
+  .sidebar-toggle {
+    font-size: 1.2rem;
+    padding: 4px 8px;
   }
 }

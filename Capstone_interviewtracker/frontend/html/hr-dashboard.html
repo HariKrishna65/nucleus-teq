@@ -7,17 +7,18 @@
 </head>
 <body class="page-dashboard page-hr">
 <div class="dashboard-shell">
-  <aside class="sidebar">
-    <div class="sidebar-brand">IT</div>
-    <div class="sidebar-title">HR Dashboard</div>
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
     <nav class="sidebar-nav">
-      <a href="jd.html?view=available">Job Descriptions</a>
-      <a class="active" href="#candidatesSection" data-section="candidatesSection">Candidates</a>
-      <a href="onboard-candidate.html">Onboard Candidate</a>
-      <a href="#panelMembersSection" data-section="panelMembersSection">Panel Members</a>
-      <a href="hr-feedback.html">Feedback</a>
-      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
+      <a href="jd.html?view=available" class="sidebar-link jd-link">Job Descriptions</a>
+      <a class="active sidebar-link candidates-link" href="#candidatesSection" data-section="candidatesSection">Candidates</a>
+      <a href="onboard-candidate.html" class="sidebar-link onboard-link">Onboard Candidate</a>
+      <a href="#panelMembersSection" data-section="panelMembersSection" class="sidebar-link panel-link">Panel Members</a>
+      <a href="hr-feedback.html" class="sidebar-link feedback-link">Feedback</a>
     </nav>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
   </aside>
 
   <main class="content-area">
@@ -167,5 +168,11 @@
 
 <script src="../js/api.js"></script>
 <script src="../js/hr-dashboard.js"></script>
+<script>
+function toggleSidebar() {
+  const shell = document.querySelector('.dashboard-shell');
+  shell.classList.toggle('sidebar-collapsed');
+}
+</script>
 </body>
 </html>

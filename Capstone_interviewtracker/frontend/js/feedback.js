@@ -16,8 +16,121 @@ if (user && user.role !== "PANEL") {
 }
 
 if (!interviewId) {
-  showAlert("No interview selected", "error");
-  setTimeout(() => window.location.href = "panel-dashboard.html", 2000);
+  // Show interview selection interface instead of redirecting
+  showInterviewSelection();
+  return;
+}
+
+// Show interview selection interface
+function showInterviewSelection() {
+  const container = document.querySelector(".container");
+  container.innerHTML = `
+    <div class="header">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">P</div>
+        <div class="user-details">
+          <h3 id="userName">${user.name || "Panel Member"}</h3>
+          <p>Interview Panel</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
+        <a class="btn apply-more-btn" href="panel-dashboard.html">My Interviews</a>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="interview-selection">
+      <h2>Select an Interview for Feedback</h2>
+      <div id="interviewList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading interviews...</p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Load interviews for selection
+  loadInterviewsForSelection();
+}
+
+function loadInterviewsForSelection() {
+  if (!user || !user.userId) {
+    document.getElementById("interviewList").innerHTML = `
+      <div class="alert alert-error">Session expired. Please login again.</div>
+    `;
+    return;
+  }
+  
+  const panelId = user.panelId || user.userId;
+  
+  interviewActions.listByPanel(panelId)
+    .then(data => {
+      const interviews = Array.isArray(data) ? data : [];
+      const list = document.getElementById("interviewList");
+      
+      if (interviews.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">Interviews</div>
+            <h3>No interviews available</h3>
+            <p>You don't have any assigned interviews that need feedback.</p>
+            <a href="panel-dashboard.html" class="btn">Back to Dashboard</a>
+          </div>
+        `;
+        return;
+      }
+      
+      list.innerHTML = interviews.map(interview => `
+        <div class="interview-card selectable" onclick="selectInterview(${interview.id})">
+          <div class="interview-info">
+            <b>${interview.candidate ? interview.candidate.user ? interview.candidate.user.name : 'Unknown' : 'Unknown Candidate'}</b>
+            <span>Round: ${interview.round || 'N/A'}</span>
+            <span>Focus: ${interview.focusArea || 'General'}</span>
+            <span>Time: ${formatDateTime(interview.interviewTime)}</span>
+            <div class="interview-meta">
+              <span class="meta-item status ${interview.status || 'PENDING'}">${formatStatus(interview.status)}</span>
+            </div>
+          </div>
+          <button class="btn btn-small">Select</button>
+        </div>
+      `).join('');
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("interviewList").innerHTML = `
+        <div class="alert alert-error">
+          Error loading interviews. Please try again.
+        </div>
+      `;
+    });
+}
+
+function selectInterview(id) {
+  localStorage.setItem("interviewId", id);
+  window.location.reload(); // Reload to show feedback form
+}
+
+function formatDateTime(dateTime) {
+  if (!dateTime) return "Not scheduled";
+  const date = new Date(dateTime);
+  return date.toLocaleString("en-US", { 
+    month: "short", 
+    day: "numeric", 
+    hour: "2-digit", 
+    minute: "2-digit" 
+  });
+}
+
+function formatStatus(status) {
+  const statusMap = {
+    "PENDING": "Pending",
+    "IN_PROGRESS": "In Progress",
+    "COMPLETED": "Completed",
+    "CANCELLED": "Cancelled"
+  };
+  return statusMap[status] || status || "Pending";
 }
 
 // Load interview details
@@ -48,7 +161,7 @@ function loadExistingFeedback() {
     .then(existing => {
       if (!existing) return;
       if (existing.rating) selectRating(existing.rating);
-      if (existing.status) selectStatus(existing.status);
+      if (existing.result || existing.status) selectStatus(existing.result || existing.status);
       document.getElementById("comments").value = existing.comments || "";
 
       document.getElementById("comments").setAttribute("readonly", "readonly");
@@ -162,7 +275,7 @@ function submitFeedback() {
   const feedback = {
     rating: parseInt(document.getElementById("rating").value),
     comments: document.getElementById("comments").value.trim(),
-    status: document.getElementById("status").value,
+    result: document.getElementById("status").value,
     interview: {
       id: parseInt(interviewId)
     }
@@ -183,7 +296,9 @@ function submitFeedback() {
   })
   .catch(err => {
     showLoading(false);
-    showAlert("Error submitting feedback. Please try again.", "error");
+    console.error("Feedback submission error:", err);
+    const errorMessage = err.message || "Error submitting feedback. Please try again.";
+    showAlert(errorMessage, "error");
   });
 }
 
@@ -198,5 +313,20 @@ function showLoading(show) {
   }
 }
 
+function logout() {
+  if (confirm("Are you sure you want to logout?")) {
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    window.location.href = "login.html";
+  }
+}
+
+function toggleSidebar() {
+  const shell = document.querySelector(".dashboard-shell");
+  if (!shell) return;
+  shell.classList.toggle("sidebar-collapsed");
+}
+
 // Initialize
-loadInterviewDetails();
+if (interviewId) {
+  loadInterviewDetails();
+}

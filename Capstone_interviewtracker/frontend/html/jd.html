@@ -23,34 +23,52 @@
     <h3>Create New Job</h3>
     <div class="form-row">
       <div class="input-group">
-        <label for="title">Job Title</label>
-        <input id="title" placeholder="e.g., Software Engineer">
+        <label for="title">Job Title <span class="required">*</span></label>
+        <input id="title" type="text" required minlength="3" maxlength="100" 
+               placeholder="e.g., Software Engineer" 
+               title="Job title must be between 3 and 100 characters">
       </div>
       <div class="input-group">
-        <label for="experienceMin">Min Experience (years)</label>
-        <input id="experienceMin" type="number" min="0" placeholder="e.g., 2">
+        <label for="experienceMin">Min Experience (years) <span class="required">*</span></label>
+        <input id="experienceMin" type="number" min="0" max="50" step="0.5" required
+               placeholder="e.g., 2" 
+               title="Minimum experience must be between 0 and 50 years">
       </div>
       <div class="input-group">
-        <label for="experienceMax">Max Experience (years)</label>
-        <input id="experienceMax" type="number" min="0" placeholder="e.g., 5">
+        <label for="experienceMax">Max Experience (years) <span class="required">*</span></label>
+        <input id="experienceMax" type="number" min="0" max="50" step="0.5" required
+               placeholder="e.g., 5" 
+               title="Maximum experience must be between 0 and 50 years">
       </div>
     </div>
     <div class="input-group">
-      <label for="description">Job Description</label>
-      <textarea id="description" rows="3" placeholder="10 to 50 words describing the role and responsibilities"></textarea>
+      <label for="description">Job Description <span class="required">*</span></label>
+      <textarea id="description" rows="4" minlength="50" maxlength="500" required
+                placeholder="Describe the role, responsibilities, and requirements (50-500 characters)"
+                title="Job description must be between 50 and 500 characters"></textarea>
+      <small class="help-text">Provide a detailed description of the role and responsibilities</small>
     </div>
     <div class="input-group">
-      <label for="skills">Required Skills</label>
-      <input id="skills" placeholder="e.g., Java, Spring, React">
+      <label for="skills">Required Skills <span class="required">*</span></label>
+      <input id="skills" type="text" required minlength="5" maxlength="200"
+             placeholder="e.g., Java Spring React" 
+             title="Skills must be between 5 and 200 characters">
+      <small class="help-text">Enter skills separated by spaces (e.g., Java Spring React)</small>
     </div>
     <div class="form-row">
       <div class="input-group">
-        <label for="salaryMin">Min Salary</label>
-        <input id="salaryMin" type="number" min="0" placeholder="e.g., 400000">
+        <label for="salaryMin">Min Salary (Annual) <span class="required">*</span></label>
+        <input id="salaryMin" type="number" min="100000" max="5000000" step="10000" required
+               placeholder="e.g., 400000" 
+               title="Minimum salary must be between ₹1,00,000 and ₹50,00,000">
+        <small class="help-text">Enter annual salary in rupees</small>
       </div>
       <div class="input-group">
-        <label for="salaryMax">Max Salary</label>
-        <input id="salaryMax" type="number" min="0" placeholder="e.g., 900000">
+        <label for="salaryMax">Max Salary (Annual) <span class="required">*</span></label>
+        <input id="salaryMax" type="number" min="100000" max="5000000" step="10000" required
+               placeholder="e.g., 900000" 
+               title="Maximum salary must be between ₹1,00,000 and ₹50,00,000">
+        <small class="help-text">Enter annual salary in rupees</small>
       </div>
     </div>
     <button onclick="createJD()">Post Job</button>

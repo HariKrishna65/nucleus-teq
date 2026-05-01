@@ -124,31 +124,53 @@ function validateJD() {
   if (!skills.value.trim()) {
     showError(skills, "Skills are required");
     isValid = false;
+  } else if (skills.value.trim().length === 0) {
+    showError(skills, "Skills cannot be empty or contain only spaces");
+    isValid = false;
+  } else if (skills.value.trim().split(/\s+/).length < 2) {
+    showError(skills, "Please enter at least 2 skills separated by spaces");
+    isValid = false;
   }
 
   if (!experienceMin.value) {
     showError(experienceMin, "Min experience is required");
     isValid = false;
+  } else if (Number(experienceMin.value) <= 0) {
+    showError(experienceMin, "Min experience must be greater than 0");
+    isValid = false;
   }
+  
   if (!experienceMax.value) {
     showError(experienceMax, "Max experience is required");
     isValid = false;
+  } else if (Number(experienceMax.value) <= 0) {
+    showError(experienceMax, "Max experience must be greater than 0");
+    isValid = false;
   }
-  if (experienceMin.value && experienceMax.value && Number(experienceMin.value) > Number(experienceMax.value)) {
-    showError(experienceMax, "Max experience must be >= min experience");
+  
+  if (experienceMin.value && experienceMax.value && Number(experienceMin.value) >= Number(experienceMax.value)) {
+    showError(experienceMax, "Max experience must be greater than min experience");
     isValid = false;
   }
 
   if (!salaryMin.value) {
     showError(salaryMin, "Min salary is required");
     isValid = false;
+  } else if (Number(salaryMin.value) <= 0) {
+    showError(salaryMin, "Min salary must be greater than 0");
+    isValid = false;
   }
+  
   if (!salaryMax.value) {
     showError(salaryMax, "Max salary is required");
     isValid = false;
+  } else if (Number(salaryMax.value) <= 0) {
+    showError(salaryMax, "Max salary must be greater than 0");
+    isValid = false;
   }
-  if (salaryMin.value && salaryMax.value && Number(salaryMin.value) > Number(salaryMax.value)) {
-    showError(salaryMax, "Max salary must be >= min salary");
+  
+  if (salaryMin.value && salaryMax.value && Number(salaryMin.value) >= Number(salaryMax.value)) {
+    showError(salaryMax, "Max salary must be greater than min salary");
     isValid = false;
   }
 

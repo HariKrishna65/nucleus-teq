@@ -9,13 +9,6 @@
 
 <div class="dashboard-shell">
   <aside class="sidebar">
-    <div class="sidebar-brand">IT</div>
-    <div class="sidebar-title">Panel Dashboard</div>
-    <nav class="sidebar-nav">
-      <a href="panel-dashboard.html">My Interviews</a>
-      <a class="active" href="feedback.html">Submit Feedback</a>
-      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
-    </nav>
   </aside>
 
   <main class="content-area">
@@ -29,7 +22,6 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
           <a class="btn apply-more-btn" href="panel-dashboard.html">My Interviews</a>
           <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
@@ -89,6 +81,10 @@
         <div class="icon">HR</div>
         <div class="label">HR Round</div>
       </div>
+      <div class="status-option" data-value="SELECTED" onclick="selectStatus('SELECTED')">
+        <div class="icon">Select</div>
+        <div class="label">Selected</div>
+      </div>
       <div class="status-option rejected" data-value="REJECTED" onclick="selectStatus('REJECTED')">
         <div class="icon">Reject</div>
         <div class="label">Reject</div>
@@ -97,7 +93,7 @@
     <input type="hidden" id="status" value="">
   </div>
 
-      <button onclick="submitFeedback()">Submit Feedback</button>
+      <button id="submitFeedbackBtn" onclick="submitFeedback()">Submit Feedback</button>
     </div>
   </main>
 </div>
