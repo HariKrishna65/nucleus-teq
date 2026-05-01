@@ -48,6 +48,8 @@ function setView(mode) {
 function loadJDs() {
   const list = document.getElementById("jdList");
   
+  console.log("Starting JD load...");
+  
   if (!list) {
     console.error("JD list container not found");
     return;
@@ -61,8 +63,27 @@ function loadJDs() {
     </div>
   `;
   
+  console.log("Calling JD API...");
+  
+  // Add timeout to prevent infinite loading
+  const timeout = setTimeout(() => {
+    console.log("JD loading timeout reached");
+    if (list.innerHTML.includes('Loading jobs...')) {
+      list.innerHTML = `
+        <div class="alert alert-error">
+          <strong>Loading timeout</strong><br>
+          The request is taking too long. Please check your connection and try again.
+          <br><br>
+          <button class="btn-small" onclick="loadJDs()">Retry</button>
+        </div>
+      `;
+    }
+  }, 10000); // 10 second timeout
+  
   jdActions.list()
     .then(data => {
+      clearTimeout(timeout);
+      console.log("JD API response:", data);
       list.innerHTML = "";
 
       if (!data || data.length === 0) {
@@ -107,6 +128,7 @@ function loadJDs() {
       });
     })
     .catch(err => {
+      clearTimeout(timeout);
       console.error("Error loading JDs", err);
       list.innerHTML = `
         <div class="alert alert-error">

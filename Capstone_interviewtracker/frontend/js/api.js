@@ -65,7 +65,7 @@ const authActions = {
 };
 
 const jdActions = {
-  list: () => fetchHandler("/jd"),
+  list: () => fetchHandler("/jd", { requireAuth: true }),
   create: (jd) => fetchHandler("/jd", { method: "POST", body: jd, requireAuth: true })
 };
 
