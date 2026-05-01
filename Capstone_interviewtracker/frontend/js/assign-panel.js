@@ -179,29 +179,12 @@ function submitAssignPanel() {
   
   const panelEmails = [panelEmail1, panelEmail2].filter(Boolean);
 
-  // Get panel member details for interviewer_name and panel_id
-  const panelMembers = allPanels.filter(panel => panelEmails.includes(panel.email));
-  const interviewerNames = panelMembers.map(p => p.name || 'Panel Member').join(', ');
-  const panelIds = panelMembers.map(p => p.id).join(',');
-
-  // Determine round based on candidate stage
-  const round = candidateData && candidateData.candidate ? 
-    (candidateData.candidate.stage === 'L1_TECH' ? 'L1' : 
-     candidateData.candidate.stage === 'L2_TECH' ? 'L2' : 
-     candidateData.candidate.stage === 'HR_ROUND' ? 'HR' : 'L1') : 'L1';
-
   const assignData = {
-    candidate_id: candidateId,
-    focus_area: focusArea || 'General',
-    scheduled_time: interviewDateTime.toISOString(),
-    interviewer_name: interviewerNames,
-    panel_id: panelIds,
-    round: round,
-    status: 'SCHEDULED',
     panelEmails: panelEmails,
     interviewTime: interviewDateTime.toISOString(),
     duration: parseInt(duration),
     interviewType: interviewType,
+    focusArea: focusArea || null,
     notes: interviewNotes || null
   };
 

@@ -195,39 +195,3 @@
     grid-template-columns: 1fr;
   }
 }
-
-/* Dashboard Navigation Section */
-.dashboard-nav-section {
-  margin: 20px 0;
-  text-align: center;
-}
-
-.dashboard-nav-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
-}
-
-.dashboard-nav-btn:hover {
-  background: #4338ca;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
-}
-
-.nav-icon {
-  font-size: 18px;
-}
-
-.nav-text {
-  font-weight: 600;
-}
