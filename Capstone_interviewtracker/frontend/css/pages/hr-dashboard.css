@@ -453,6 +453,18 @@ body.page-dashboard::before {
 }
 .stage-line.done { background: #22c55e; }
 
+.candidate-link {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.candidate-link:hover {
+  color: #7c3aed;
+  text-decoration: underline;
+}
+
 @media (max-width: 980px) {
   .dashboard-shell {
     grid-template-columns: 1fr;

@@ -251,84 +251,11 @@ function loadPanels() {
   return interviewActions.listPanels()
     .then((panels) => {
       allPanels = Array.isArray(panels) ? panels : [];
-      renderPanelMembers(allPanels);
       return allPanels;
     })
     .catch(() => {
       allPanels = [];
-      renderPanelMembers(allPanels);
       return [];
-    });
-}
-
-function renderPanelMembers(panels) {
-  const body = document.getElementById("panelMembersBody");
-  if (!body) return;
-  if (!panels || panels.length === 0) {
-    body.innerHTML = '<tr><td colspan="6" class="empty-state">No panel members added yet.</td></tr>';
-    return;
-  }
-
-  body.innerHTML = panels.map((p) => `
-    <tr>
-      <td>${p.name || "-"}</td>
-      <td>${p.email || "-"}</td>
-      <td>${p.mobile || "-"}</td>
-      <td>${p.organization || "-"}</td>
-      <td>${p.designation || "-"}</td>
-      <td>${p.expertise || "-"}</td>
-    </tr>
-  `).join("");
-}
-
-function showPanelAlert(message, type) {
-  const alert = document.getElementById("panelAlert");
-  if (!alert) return;
-  alert.className = `alert alert-${type}`;
-  alert.textContent = message;
-  alert.classList.remove("is-hidden");
-}
-
-function clearPanelForm() {
-  document.getElementById("panelName").value = "";
-  document.getElementById("panelEmail").value = "";
-  document.getElementById("panelPhone").value = "";
-  document.getElementById("panelOrganization").value = "";
-  document.getElementById("panelDesignation").value = "";
-  document.getElementById("panelExpertise").value = "";
-}
-
-function createPanelMember() {
-  const payload = {
-    name: document.getElementById("panelName").value.trim(),
-    email: document.getElementById("panelEmail").value.trim(),
-    phone: document.getElementById("panelPhone").value.trim(),
-    organization: document.getElementById("panelOrganization").value.trim(),
-    designation: document.getElementById("panelDesignation").value.trim(),
-    expertise: document.getElementById("panelExpertise").value.trim()
-  };
-
-  if (!payload.name || !payload.email || !payload.organization || !payload.designation || !payload.expertise) {
-    showPanelAlert("Please fill all required panel details.", "error");
-    return;
-  }
-
-  const btn = document.getElementById("createPanelBtn");
-  btn.disabled = true;
-  btn.textContent = "Creating...";
-
-  hrActions.createPanel(payload)
-    .then(() => {
-      showPanelAlert("Panel member created. Password setup email sent successfully.", "success");
-      clearPanelForm();
-      return loadPanels();
-    })
-    .catch((err) => {
-      showPanelAlert(err.message || "Failed to create panel member.", "error");
-    })
-    .finally(() => {
-      btn.disabled = false;
-      btn.textContent = "Create Panel";
     });
 }
 
@@ -417,53 +344,22 @@ function logout() {
   window.location.href = "login.html";
 }
 
-function wireSidebarNavigation() {
-  const links = Array.from(document.querySelectorAll(".sidebar-nav a"));
-  links.forEach((link) => {
-    link.addEventListener("click", () => {
-      links.forEach((l) => l.classList.remove("active"));
-      link.classList.add("active");
-    });
-  });
-}
-
-function showHrSection(sectionId) {
-  const sections = Array.from(document.querySelectorAll(".hr-section"));
-  sections.forEach((s) => s.classList.add("is-hidden"));
-  const target = document.getElementById(sectionId);
-  if (target) {
-    target.classList.remove("is-hidden");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}
-
-function wireSidebarSectionSwitching() {
-  const links = Array.from(document.querySelectorAll(".sidebar-nav a[data-section]"));
-  links.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      const sectionId = link.dataset.section;
-      if (!sectionId) return;
-      e.preventDefault();
-      showHrSection(sectionId);
-    });
-  });
-  showHrSection("candidatesSection");
-}
-
 // Expose modal functions to HTML onclick handlers
 window.closeAssignPanel = closeAssignPanel;
 window.submitAssignPanel = submitAssignPanel;
 window.openAssignPanel = openAssignPanel;
-window.createPanelMember = createPanelMember;
 window.deleteCandidate = deleteCandidate;
 window.clearCandidateFilters = clearCandidateFilters;
 window.toggleSidebar = toggleSidebar;
+window.advanceStage = advanceStage;
+window.selectCandidate = selectCandidate;
+window.rejectCandidate = rejectCandidate;
+window.logout = logout;
 
+// Initialize page
 wireFilters();
 loadPanels();
 loadCandidates();
-wireSidebarNavigation();
-wireSidebarSectionSwitching();
 
 // Ensure modal starts hidden + allow backdrop/Esc close
 (() => {

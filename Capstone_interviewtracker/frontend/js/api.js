@@ -88,6 +88,7 @@ const feedbackActions = {
 
 const hrActions = {
   listCandidates: () => fetchHandler("/hr/candidates", { requireAuth: true }),
+  getCandidateDetails: (candidateId) => fetchHandler(`/hr/candidates/${candidateId}`, { requireAuth: true }),
   advanceCandidate: (candidateId, comments) =>
     fetchHandler(`/hr/candidates/${candidateId}/advance`, { method: "POST", body: { comments }, requireAuth: true }),
   rejectCandidate: (candidateId, comments) =>
