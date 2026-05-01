@@ -1,30 +1,42 @@
-const user = getStoredUser();
-const urlParams = new URLSearchParams(window.location.search);
-const viewMode = (urlParams.get("view") || "").toLowerCase();
+// Wait for DOM to be loaded before checking authentication
+document.addEventListener('DOMContentLoaded', function() {
+  const user = getStoredUser();
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewMode = (urlParams.get("view") || "").toLowerCase();
 
-if (!user) {
-  window.location.href = "login.html";
-}
-
-// Only HR users can access job creation functionality
-if (user && user.role !== "HR") {
-  // Hide all HR-only elements for non-HR users
-  const createJobBtn = document.getElementById("createJobBtn");
-  const hrDashboardBtn = document.getElementById("hrDashboardBtn");
-  if (createJobBtn) createJobBtn.style.display = "none";
-  if (hrDashboardBtn) hrDashboardBtn.style.display = "none";
-  
-  // If trying to access create view, redirect to available jobs
-  if (viewMode === "create") {
-    setView("available");
+  if (!user) {
+    window.location.href = "login.html";
+    return;
   }
-}
 
-if (user && user.role === "HR") {
-  document.getElementById("hrDashboardBtn").classList.remove("is-hidden");
-  document.getElementById("availableJobsBtn").classList.remove("is-hidden");
-  document.getElementById("createJobBtn").classList.remove("is-hidden");
-}
+  // Only HR users can access job creation functionality
+  if (user && user.role !== "HR") {
+    // Hide all HR-only elements for non-HR users
+    const createJobBtn = document.getElementById("createJobBtn");
+    const hrDashboardBtn = document.getElementById("hrDashboardBtn");
+    if (createJobBtn) createJobBtn.style.display = "none";
+    if (hrDashboardBtn) hrDashboardBtn.style.display = "none";
+    
+    // If trying to access create view, redirect to available jobs
+    if (viewMode === "create") {
+      setView("available");
+    }
+  }
+
+  if (user && user.role === "HR") {
+    document.getElementById("hrDashboardBtn").classList.remove("is-hidden");
+    document.getElementById("availableJobsBtn").classList.remove("is-hidden");
+    document.getElementById("createJobBtn").classList.remove("is-hidden");
+  }
+
+  // Initialize the page
+  initializeJDPage();
+});
+
+function initializeJDPage() {
+  const user = getStoredUser();
+  const urlParams = new URLSearchParams(window.location.search);
+  const viewMode = (urlParams.get("view") || "").toLowerCase();
 
 function setView(mode) {
   const form = document.getElementById("jdForm");
@@ -278,13 +290,13 @@ function applyToJob(jdId, jdTitle) {
   }
 }
 
-// Load JDs on page load
+// Load JDs and initialize view
 loadJDs();
 
 // Init view
-(() => {
-  const initial = (viewMode === "create") ? "create" : "available";
-  if (user && user.role === "HR") {
-    setView(initial);
-  }
-})();
+const initial = (viewMode === "create") ? "create" : "available";
+if (user && user.role === "HR") {
+  setView(initial);
+}
+
+} // Close the initializeJDPage function
