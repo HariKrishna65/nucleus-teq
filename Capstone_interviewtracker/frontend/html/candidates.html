@@ -13,7 +13,7 @@
       <a href="hr-main-dashboard.html" class="sidebar-link jd-link">Dashboard</a>
       <a href="candidates.html" class="sidebar-link candidates-link active">Candidates</a>
       <a href="onboard-candidate.html" class="sidebar-link onboard-link">Onboard Candidate</a>
-      <a href="hr-dashboard.html#panelMembersSection" class="sidebar-link panel-link">Panel Members</a>
+      <a href="panel-management.html" class="sidebar-link panel-link">Panel Members</a>
       <a href="hr-feedback.html" class="sidebar-link feedback-link">Feedback</a>
     </nav>
     <div class="sidebar-footer">
@@ -30,7 +30,6 @@
         </div>
         <div class="header-actions">
           <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
-          <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
           <button onclick="window.location.href='jd.html'">Create JD</button>
         </div>
       </div>
@@ -40,19 +39,6 @@
           <div class="toolbar-field">
             <input id="candidateSearch" type="text" placeholder="Search by name, email, phone, job title...">
           </div>
-        </div>
-        <div class="toolbar-right">
-          <select id="stageFilter" aria-label="Filter by stage">
-            <option value="ALL">All stages</option>
-            <option value="PROFILING">Profiling</option>
-            <option value="SCREENING">Screening</option>
-            <option value="L1_TECH">L1</option>
-            <option value="L2_TECH">L2</option>
-            <option value="HR_ROUND">HR</option>
-            <option value="SELECTED">Selected</option>
-            <option value="REJECTED">Rejected</option>
-          </select>
-          <button class="secondary-btn" type="button" onclick="clearCandidateFilters()">Clear</button>
         </div>
       </div>
 

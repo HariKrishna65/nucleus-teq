@@ -150,7 +150,7 @@ function renderCandidates(rows) {
                 <td>${feedbackText}</td>
                 <td>
                   <div class="table-actions">
-                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Move to Next Round</button>
+                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Move to Next Stage</button>
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
                     <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
@@ -172,11 +172,7 @@ function setActiveFilter(filter) {
 }
 
 function wireFilters() {
-  const stageSel = document.getElementById("stageFilter");
   const search = document.getElementById("candidateSearch");
-  if (stageSel) {
-    stageSel.addEventListener("change", () => setActiveFilter(stageSel.value || "ALL"));
-  }
   if (search) {
     search.addEventListener("input", () => {
       searchQuery = search.value || "";
@@ -247,11 +243,8 @@ function deleteCandidate(candidateId) {
 }
 
 function clearCandidateFilters() {
-  activeFilter = "ALL";
   searchQuery = "";
-  const stageSel = document.getElementById("stageFilter");
   const search = document.getElementById("candidateSearch");
-  if (stageSel) stageSel.value = "ALL";
   if (search) search.value = "";
   renderCandidates(allRows);
 }
