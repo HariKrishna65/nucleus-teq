@@ -2,7 +2,6 @@ const user = getStoredUser();
 let interviewStatus = "PENDING";
 let interviewId = localStorage.getItem(STORAGE_KEYS.INTERVIEW_ID);
 
-// Check authentication
 if (!user) {
   window.location.href = "login.html";
 }
@@ -15,7 +14,6 @@ if (user && user.role !== "PANEL") {
   window.location.href = "index.html";
 }
 
-// ✅ FIX: return ki jagah yeh use karo
 window.addEventListener("DOMContentLoaded", function () {
   if (!interviewId) {
     showInterviewSelection();
@@ -23,10 +21,6 @@ window.addEventListener("DOMContentLoaded", function () {
     loadInterviewDetails();
   }
 });
-
-// ==========================================
-// INTERVIEW SELECTION PAGE
-// ==========================================
 
 function showInterviewSelection() {
   const container = document.querySelector(".container");
@@ -90,7 +84,6 @@ function loadInterviewsForSelection() {
         return;
       }
 
-      // ✅ FIX: Only show PENDING interviews for feedback
       const pending = interviews.filter(i => i.status !== "COMPLETED");
       const completed = interviews.filter(i => i.status === "COMPLETED");
 
@@ -163,7 +156,6 @@ function loadInterviewDetails() {
     .then(data => {
       interviewStatus = data.status || "PENDING";
 
-      // ✅ FIX: Check elements exist before setting
       const candidateNameEl = document.getElementById("candidateName");
       const roundInfoEl = document.getElementById("roundInfo");
       const focusAreaEl = document.getElementById("focusArea");
@@ -179,7 +171,6 @@ function loadInterviewDetails() {
         focusAreaEl.textContent = data.focusArea || "General";
       }
 
-      // ✅ Show form if elements exist
       const form = document.getElementById("feedbackForm");
       if (form) form.classList.remove("is-hidden");
 
@@ -216,7 +207,6 @@ function loadExistingFeedback() {
         el.style.pointerEvents = "none";
       });
 
-      // ✅ FIX: Correct button selector
       const submitBtn = document.getElementById("submitFeedbackBtn");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -225,14 +215,8 @@ function loadExistingFeedback() {
 
       showAlert("Feedback already submitted — view only.", "success");
     })
-    .catch(() => {
-      // No feedback yet — form stays enabled
-    });
+    .catch(() => {});
 }
-
-// ==========================================
-// RATING & STATUS SELECTION
-// ==========================================
 
 function selectRating(value) {
   document.querySelectorAll(".rating-option").forEach(el => {
@@ -251,10 +235,6 @@ function selectStatus(value) {
   if (selected) selected.classList.add("selected");
   document.getElementById("status").value = value;
 }
-
-// ==========================================
-// SUBMIT FEEDBACK
-// ==========================================
 
 function validateFeedback() {
   const rating = document.getElementById("rating").value;
@@ -313,10 +293,6 @@ function submitFeedback() {
       showAlert(err.message || "Error submitting feedback.", "error");
     });
 }
-
-// ==========================================
-// HELPERS
-// ==========================================
 
 function showLoading(show) {
   const btn = document.getElementById("submitFeedbackBtn");

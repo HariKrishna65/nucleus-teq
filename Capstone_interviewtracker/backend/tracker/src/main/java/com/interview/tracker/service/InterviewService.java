@@ -32,7 +32,6 @@ public class InterviewService {
             interview.setStatus("PENDING");
         }
 
-        // ✅ Round auto-set based on candidate stage
         if (interview.getRound() == null || interview.getRound().isBlank()) {
             if (interview.getCandidate() != null && interview.getCandidate().getStage() != null) {
                 String stage = interview.getCandidate().getStage().toString();

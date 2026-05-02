@@ -50,8 +50,6 @@ public class Candidate {
     private String preferredLocation;
     private String source;
 
-    
-    // REMOVE both @Lob and columnDefinition — sirf yeh rakho:
     @Column(name = "resume_data")
     private byte[] resumeData;
 
@@ -128,7 +126,6 @@ public class Candidate {
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
 
-    // ✅ CHANGED: resumeUrl getters/setters removed, new ones added
     public byte[] getResumeData() { return resumeData; }
     public void setResumeData(byte[] resumeData) { this.resumeData = resumeData; }
 

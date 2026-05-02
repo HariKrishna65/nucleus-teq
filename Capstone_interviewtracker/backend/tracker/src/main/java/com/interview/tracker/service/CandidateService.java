@@ -93,7 +93,6 @@ public class CandidateService {
             candidate.setStageStatus(StageStatus.COMPLETED);
         }
 
-        // ✅ CHANGED: file ko directly database mein store karo
         if (file != null && !file.isEmpty()) {
             String originalName = file.getOriginalFilename() == null ? "" 
                                   : file.getOriginalFilename().toLowerCase();
@@ -127,7 +126,6 @@ public class CandidateService {
         return candidateRepository.findByUser_Id(requestedUserId);
     }
 
-    // ✅ NEW: resume download ke liye
     public Candidate getCandidateById(Long id) {
         return candidateRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));

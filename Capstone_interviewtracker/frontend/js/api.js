@@ -6,8 +6,6 @@ const STORAGE_KEYS = {
   SELECTED_JD_ID: "selectedJdId"
 };
 
-/* ---------------- USER ---------------- */
-
 function getStoredUser() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USER);
@@ -23,14 +21,10 @@ function getAuthToken() {
   return user?.token || null;
 }
 
-/* ---------------- HEADERS ---------------- */
-
 function authHeaders() {
   const token = getAuthToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
-
-/* ---------------- FETCH HANDLER ---------------- */
 
 async function fetchHandler(path, options = {}) {
   const {
@@ -73,8 +67,6 @@ async function fetchHandler(path, options = {}) {
   }
 }
 
-/* ---------------- AUTH ---------------- */
-
 const authActions = {
   register: (data) =>
     fetchHandler("/auth/register", { method: "POST", body: data }),
@@ -85,8 +77,6 @@ const authActions = {
   forgotPassword: (data) =>
     fetchHandler("/auth/forgot-password", { method: "POST", body: data })
 };
-
-/* ---------------- JOB DESCRIPTION ---------------- */
 
 const jdActions = {
   list: () => fetchHandler("/jd"),
@@ -100,8 +90,6 @@ const jdActions = {
     fetchHandler(`/jd/${id}`, { method: "DELETE", requireAuth: true })
 };
 
-/* ---------------- CANDIDATE ---------------- */
-
 const candidateActions = {
   listByUser: (userId) =>
     fetchHandler(`/candidates?userId=${userId}`, { requireAuth: true }),
@@ -109,8 +97,6 @@ const candidateActions = {
   apply: (formData) =>
     fetchHandler("/candidates", { method: "POST", body: formData, requireAuth: true })
 };
-
-/* ---------------- INTERVIEW ---------------- */
 
 const interviewActions = {
   listByPanel: (panelId) =>
@@ -126,8 +112,6 @@ const interviewActions = {
     fetchHandler("/interviews", { method: "POST", body: payload, requireAuth: true })
 };
 
-/* ---------------- FEEDBACK ---------------- */
-
 const feedbackActions = {
   submit: (feedback) =>
     fetchHandler("/feedback", { method: "POST", body: feedback, requireAuth: true }),
@@ -135,8 +119,6 @@ const feedbackActions = {
   getByInterview: (id) =>
     fetchHandler(`/feedback/interview/${id}`, { requireAuth: true })
 };
-
-/* ---------------- HR ---------------- */
 
 const hrActions = {
   listCandidates: () =>
@@ -179,8 +161,6 @@ const hrActions = {
       requireAuth: true
     })
 };
-
-/* ---------------- UTILS ---------------- */
 
 function logout() {
   localStorage.removeItem(STORAGE_KEYS.USER);

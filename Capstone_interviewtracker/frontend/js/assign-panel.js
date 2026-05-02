@@ -11,13 +11,11 @@ let candidateId = null;
 let candidateData = null;
 let allPanels = [];
 
-// Get candidate ID from URL parameters
 function getCandidateId() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('candidateId');
 }
 
-// Load candidate details
 function loadCandidateDetails() {
   candidateId = getCandidateId();
   if (!candidateId) {
@@ -37,7 +35,6 @@ function loadCandidateDetails() {
     });
 }
 
-// Display candidate information
 function displayCandidateInfo() {
   const detailsDiv = document.getElementById('candidateDetails');
   const candidateName = document.getElementById('candidateName');
