@@ -1,16 +1,18 @@
 const API_URL = "http://localhost:8080";
+
 const STORAGE_KEYS = {
   USER: "user",
   INTERVIEW_ID: "interviewId",
   SELECTED_JD_ID: "selectedJdId"
 };
 
+/* ---------------- USER ---------------- */
+
 function getStoredUser() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USER);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (e) {
+    return raw ? JSON.parse(raw) : null;
+  } catch {
     localStorage.removeItem(STORAGE_KEYS.USER);
     return null;
   }
@@ -18,20 +20,22 @@ function getStoredUser() {
 
 function getAuthToken() {
   const user = getStoredUser();
-  return user && user.token ? user.token : null;
+  return user?.token || null;
 }
 
-function authHeaders(extra = {}) {
+/* ---------------- HEADERS ---------------- */
+
+function authHeaders() {
   const token = getAuthToken();
-  const headers = { ...extra };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  return headers;
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
+/* ---------------- FETCH HANDLER ---------------- */
 
 async function fetchHandler(path, options = {}) {
   const {
     method = "GET",
-    body,
+    body = null,
     requireAuth = false,
     headers: extraHeaders = {}
   } = options;
@@ -42,63 +46,143 @@ async function fetchHandler(path, options = {}) {
     ...extraHeaders
   };
 
-  const res = await fetch(`${API_URL}${path}`, {
-    method,
-    headers,
-    body: body == null ? null : (body instanceof FormData ? body : JSON.stringify(body))
-  });
+  const url = `${API_URL}${path}`;
+  console.log("📡 API CALL:", method, url);
 
-  const contentType = res.headers.get("content-type") || "";
-  const payload = contentType.includes("application/json") ? await res.json() : await res.text();
+  try {
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body instanceof FormData ? body : body ? JSON.stringify(body) : null
+    });
 
-  if (!res.ok) {
-    const msg = typeof payload === "string" ? payload : (payload.message || "Request failed");
-    throw new Error(msg);
+    const contentType = res.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? await res.json()
+      : await res.text();
+
+    if (!res.ok) {
+      const message = typeof data === "string" ? data : data.message || `Error ${res.status}`;
+      throw new Error(message);
+    }
+
+    return data;
+  } catch (error) {
+    console.error("❌ API ERROR:", error.message);
+    throw error;
   }
-  return payload;
 }
 
+/* ---------------- AUTH ---------------- */
+
 const authActions = {
-  register: (data) => fetchHandler("/auth/register", { method: "POST", body: data }),
-  login: (data) => fetchHandler("/auth/login", { method: "POST", body: data }),
-  forgotPassword: (data) => fetchHandler("/auth/forgot-password", { method: "POST", body: data })
+  register: (data) =>
+    fetchHandler("/auth/register", { method: "POST", body: data }),
+
+  login: (data) =>
+    fetchHandler("/auth/login", { method: "POST", body: data }),
+
+  forgotPassword: (data) =>
+    fetchHandler("/auth/forgot-password", { method: "POST", body: data })
 };
+
+/* ---------------- JOB DESCRIPTION ---------------- */
 
 const jdActions = {
   list: () => fetchHandler("/jd"),
-  create: (jd) => fetchHandler("/jd", { method: "POST", body: jd, requireAuth: true })
+
+  create: (jd) =>
+    fetchHandler("/jd", { method: "POST", body: jd, requireAuth: true }),
+
+  getById: (id) => fetchHandler(`/jd/${id}`),
+
+  delete: (id) =>
+    fetchHandler(`/jd/${id}`, { method: "DELETE", requireAuth: true })
 };
+
+/* ---------------- CANDIDATE ---------------- */
 
 const candidateActions = {
-  listByUser: (userId) => fetchHandler(`/candidates?userId=${userId}`, { requireAuth: true }),
-  apply: (formData) => fetchHandler("/candidates", { method: "POST", body: formData, requireAuth: true })
+  listByUser: (userId) =>
+    fetchHandler(`/candidates?userId=${userId}`, { requireAuth: true }),
+
+  apply: (formData) =>
+    fetchHandler("/candidates", { method: "POST", body: formData, requireAuth: true })
 };
+
+/* ---------------- INTERVIEW ---------------- */
 
 const interviewActions = {
-  listByPanel: (panelId) => fetchHandler(`/interviews?panelId=${panelId}`, { requireAuth: true }),
-  getById: (id) => fetchHandler(`/interviews/${id}`, { requireAuth: true }),
-  listPanels: () => fetchHandler("/interviews/panel", { requireAuth: true }),
-  schedule: (payload) => fetchHandler("/interviews", { method: "POST", body: payload, requireAuth: true })
+  listByPanel: (panelId) =>
+    fetchHandler(`/interviews?panelId=${panelId}`, { requireAuth: true }),
+
+  getById: (id) =>
+    fetchHandler(`/interviews/${id}`, { requireAuth: true }),
+
+  listPanels: () =>
+    fetchHandler("/interviews/panel", { requireAuth: true }),
+
+  schedule: (payload) =>
+    fetchHandler("/interviews", { method: "POST", body: payload, requireAuth: true })
 };
+
+/* ---------------- FEEDBACK ---------------- */
 
 const feedbackActions = {
-  submit: (feedback) => fetchHandler("/feedback", { method: "POST", body: feedback, requireAuth: true }),
-  getByInterview: (interviewId) => fetchHandler(`/feedback/interview/${interviewId}`, { requireAuth: true })
+  submit: (feedback) =>
+    fetchHandler("/feedback", { method: "POST", body: feedback, requireAuth: true }),
+
+  getByInterview: (id) =>
+    fetchHandler(`/feedback/interview/${id}`, { requireAuth: true })
 };
+
+/* ---------------- HR ---------------- */
 
 const hrActions = {
-  listCandidates: () => fetchHandler("/hr/candidates", { requireAuth: true }),
-  getCandidateDetails: (candidateId) => fetchHandler(`/hr/candidates/${candidateId}`, { requireAuth: true }),
-  advanceCandidate: (candidateId, comments) =>
-    fetchHandler(`/hr/candidates/${candidateId}/advance`, { method: "POST", body: { comments }, requireAuth: true }),
-  rejectCandidate: (candidateId, comments) =>
-    fetchHandler(`/hr/candidates/${candidateId}/reject`, { method: "POST", body: { comments }, requireAuth: true }),
-  selectCandidate: (candidateId, comments) =>
-    fetchHandler(`/hr/candidates/${candidateId}/select`, { method: "POST", body: { comments }, requireAuth: true }),
-  deleteCandidate: (candidateId) =>
-    fetchHandler(`/hr/candidates/${candidateId}`, { method: "DELETE", requireAuth: true }),
-  createPanel: (panel) => fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true }),
-  assignPanel: (candidateId, assignData) =>
-    fetchHandler(`/hr/candidates/${candidateId}/assign-panel`, { method: "POST", body: assignData, requireAuth: true })
+  listCandidates: () =>
+    fetchHandler("/hr/candidates", { requireAuth: true }),
+
+  getCandidateDetails: (id) =>
+    fetchHandler(`/hr/candidates/${id}`, { requireAuth: true }),
+
+  advanceCandidate: (id, comments) =>
+    fetchHandler(`/hr/candidates/${id}/advance`, {
+      method: "POST",
+      body: { comments },
+      requireAuth: true
+    }),
+
+  rejectCandidate: (id, comments) =>
+    fetchHandler(`/hr/candidates/${id}/reject`, {
+      method: "POST",
+      body: { comments },
+      requireAuth: true
+    }),
+
+  selectCandidate: (id, comments) =>
+    fetchHandler(`/hr/candidates/${id}/select`, {
+      method: "POST",
+      body: { comments },
+      requireAuth: true
+    }),
+
+  deleteCandidate: (id) =>
+    fetchHandler(`/hr/candidates/${id}`, { method: "DELETE", requireAuth: true }),
+
+  createPanel: (panel) =>
+    fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true }),
+
+  assignPanel: (id, data) =>
+    fetchHandler(`/hr/candidates/${id}/assign-panel`, {
+      method: "POST",
+      body: data,
+      requireAuth: true
+    })
 };
 
+/* ---------------- UTILS ---------------- */
+
+function logout() {
+  localStorage.removeItem(STORAGE_KEYS.USER);
+  window.location.href = "login.html";
+}

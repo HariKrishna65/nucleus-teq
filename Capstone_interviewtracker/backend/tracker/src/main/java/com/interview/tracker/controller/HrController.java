@@ -7,7 +7,6 @@ import com.interview.tracker.dto.CreatePanelRequest;
 import com.interview.tracker.entity.Candidate;
 import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.entity.Interview;
-import com.interview.tracker.entity.InterviewRound;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
@@ -74,6 +73,29 @@ public class HrController {
         return ResponseEntity.ok(payload);
     }
 
+    /**
+     * Get detailed info for a single candidate including feedback and interview history.
+     */
+    @GetMapping("/candidates/{id}")
+    public ResponseEntity<?> getCandidateDetails(@PathVariable Long id) {
+        Candidate candidate = candidateRepository.findById(id).orElse(null);
+        if (candidate == null) {
+            return ResponseEntity.status(404).body("Candidate not found");
+        }
+
+        List<Feedback> feedbackList = feedbackRepository.findByInterview_Candidate_IdOrderByIdDesc(id);
+        List<Interview> interviewList = interviewRepository.findByCandidate_Id(id);
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("candidate", candidate);
+        payload.put("feedbackHistory", feedbackList);
+        payload.put("interviewHistory", interviewList);
+        payload.put("feedbackCount", feedbackList.size());
+        payload.put("latestFeedback", feedbackList.isEmpty() ? null : feedbackList.get(0));
+
+        return ResponseEntity.ok(payload);
+    }
+
     @PostMapping("/panels")
     public ResponseEntity<?> createPanel(@Valid @RequestBody CreatePanelRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -113,7 +135,6 @@ public class HrController {
         Candidate c = candidateRepository.findById(id).orElse(null);
         if (c == null) return ResponseEntity.status(404).body("Candidate not found");
 
-        // Allow assigning panels only for L1/L2/HR stages
         Stage stage = c.getStage();
         if (stage != Stage.L1_TECH && stage != Stage.L2_TECH && stage != Stage.HR_ROUND) {
             return ResponseEntity.badRequest().body("Panel can be assigned only for L1, L2, or HR round candidates");
@@ -134,7 +155,6 @@ public class HrController {
             return ResponseEntity.badRequest().body("Panel members must be between 1 and 2");
         }
 
-        // Must exist in panel dashboard (Panel profile) and must have a PANEL user account
         List<Panel> panelEntities = panels.stream()
                 .map(email -> {
                     User panelUser = userRepository.findByEmail(email)
@@ -152,10 +172,18 @@ public class HrController {
         interview.setPanels(panelEntities);
         interview.setPanel(panelEntities.get(0));
         interview.setStatus("PENDING");
-        interview.setFocusArea((c.getJd() != null && c.getJd().getSkills() != null && !c.getJd().getSkills().isBlank()) ? c.getJd().getSkills() : "General");
-        // interviews.round is constrained in DB; use interview rounds (not pipeline stages)
+        interview.setFocusArea(
+            (request.getFocusArea() != null && !request.getFocusArea().isBlank()) ? request.getFocusArea() :
+            (c.getJd() != null && c.getJd().getSkills() != null && !c.getJd().getSkills().isBlank()) ? c.getJd().getSkills() : "General"
+        );
         interview.setRound(mapStageToInterviewRound(c.getStage()));
-        interview.setInterviewTime(LocalDateTime.now().plusDays(1));
+
+        // Use provided interview time or default to tomorrow
+        LocalDateTime interviewTime = request.getInterviewTime() != null
+            ? request.getInterviewTime()
+            : LocalDateTime.now().plusDays(1);
+        interview.setInterviewTime(interviewTime);
+
         interview.setInterviewerName(panelEntities.stream()
                 .map(p -> (p.getName() != null && !p.getName().isBlank()) ? p.getName() : p.getEmail())
                 .filter(s -> s != null && !s.isBlank())
@@ -172,15 +200,14 @@ public class HrController {
         return ResponseEntity.ok(saved);
     }
 
-    private InterviewRound mapStageToInterviewRound(Stage stage) {
-        // DB constraint expects legacy round values: L1/L2/HR
-        if (stage == null) return InterviewRound.L1;
+    private String mapStageToInterviewRound(Stage stage) {
+        if (stage == null) return "L1";
         return switch (stage) {
-            case PROFILING, SCREENING -> InterviewRound.L1;
-            case L1_TECH -> InterviewRound.L1;
-            case L2_TECH -> InterviewRound.L2;
-            case HR_ROUND -> InterviewRound.HR;
-            default -> InterviewRound.L1;
+            case PROFILING, SCREENING -> "L1";
+            case L1_TECH -> "L1";
+            case L2_TECH -> "L2";
+            case HR_ROUND -> "HR";
+            default -> "L1";
         };
     }
 
@@ -276,4 +303,3 @@ public class HrController {
         };
     }
 }
-

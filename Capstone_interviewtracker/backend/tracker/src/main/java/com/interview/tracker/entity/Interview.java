@@ -1,5 +1,5 @@
 package com.interview.tracker.entity;
-
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.persistence.*;
@@ -16,9 +16,9 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Round is required")
-    @Enumerated(EnumType.STRING)
-    private InterviewRound round; 
+    @NotBlank(message = "Round is required")
+    @Pattern(regexp = "^(L1|L2|HR|FINAL)$", message = "Round must be L1, L2, HR or FINAL")
+    private String round;
 
     @NotNull(message = "Interview time is required")
     @Column(name = "scheduled_time", nullable = false)
@@ -55,8 +55,8 @@ public class Interview {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public InterviewRound getRound() { return round; }
-    public void setRound(InterviewRound round) { this.round = round; }
+    public String getRound() { return round; }
+    public void setRound(String round) { this.round = round; }
 
     public LocalDateTime getInterviewTime() { return interviewTime; }
     public void setInterviewTime(LocalDateTime interviewTime) { this.interviewTime = interviewTime; }

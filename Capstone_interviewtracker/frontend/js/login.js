@@ -31,7 +31,6 @@ function isValidEmail(email) {
 
 function showError(input, message) {
   input.classList.add("input-error");
-  // Create or update error message
   let errorDiv = input.nextElementSibling;
   if (!errorDiv || !errorDiv.classList.contains("error-message")) {
     errorDiv = document.createElement("div");
@@ -54,11 +53,8 @@ function login() {
 
   authActions.login(data)
   .then(data => {
-    console.log("SUCCESS:", data);
     showLoading(false);
-
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
-
     showAlert("Login successful! Redirecting...", "success");
 
     setTimeout(() => {
@@ -72,12 +68,11 @@ function login() {
     }, 1000);
   })
   .catch(err => {
-    console.error(err);
     showLoading(false);
     const errorMsg = err.message || "Login failed";
-    
+
     if (errorMsg.includes("verify") || errorMsg.includes("verified")) {
-      document.getElementById("verificationNotice").style.display = "block";
+      document.getElementById("verificationNotice").classList.remove("is-hidden");
       showAlert(errorMsg, "error");
     } else if (errorMsg.includes("Password not set") || errorMsg.includes("password")) {
       showAlert(errorMsg + " Use Forgot password to reset.", "error");
@@ -89,7 +84,7 @@ function login() {
 
 function showForgotPassword() {
   let email = document.getElementById("email").value.trim();
-  
+
   if (!email) {
     email = prompt("Enter your email address to reset password:");
     if (!email) return;
@@ -102,7 +97,7 @@ function showForgotPassword() {
 
   if (confirm(`Send password reset link to ${email}?`)) {
     showLoading(true);
-    
+
     authActions.forgotPassword({ email })
     .then(() => {
       showLoading(false);
@@ -124,7 +119,8 @@ function togglePassword(inputId, btn) {
 }
 
 function showLoading(show) {
-  const btn = document.querySelector("button");
+  const btn = document.querySelector(".auth-card button");
+  if (!btn) return;
   if (show) {
     btn.innerHTML = '<span class="spinner"></span> Loading...';
     btn.disabled = true;
@@ -135,7 +131,6 @@ function showLoading(show) {
 }
 
 function showAlert(message, type) {
-  // Remove existing alerts
   const existing = document.querySelector(".alert");
   if (existing) existing.remove();
 
@@ -143,10 +138,18 @@ function showAlert(message, type) {
   alert.className = `alert alert-${type}`;
   alert.textContent = message;
 
-  const container = document.querySelector(".container");
+  const container = document.querySelector(".auth-card");
   container.insertBefore(alert, container.firstChild);
 }
 
 document.addEventListener("keypress", function(e) {
   if (e.key === "Enter") login();
 });
+
+// Redirect if already logged in
+const existingUser = getStoredUser();
+if (existingUser) {
+  if (existingUser.role === "HR") window.location.href = "hr-main-dashboard.html";
+  else if (existingUser.role === "PANEL") window.location.href = "panel-dashboard.html";
+  else window.location.href = "dashboard.html";
+}

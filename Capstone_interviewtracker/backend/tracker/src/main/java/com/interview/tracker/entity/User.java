@@ -25,6 +25,7 @@ public class User {
 
     private String gender;
 
+    @Column(unique = true)
     private String phone;
 
     private String address;

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Job Descriptions - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/jd.css">
@@ -11,65 +13,50 @@
   <div class="header">
     <h2>Job Opportunities</h2>
     <div class="header-actions">
-      <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
       <button id="hrDashboardBtn" class="back-btn is-hidden" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
       <button id="availableJobsBtn" class="back-btn is-hidden" onclick="setView('available')">Available Jobs</button>
-      <button id="createJobBtn" class="back-btn is-hidden" onclick="setView('create')">Create Job</button>
-      <button class="back-btn" onclick="window.location.href='index.html'">Home</button>
+      <button id="createJobBtn" class="back-btn is-hidden" onclick="setView('create')">+ Create Job</button>
+      <button id="homeBtn" class="back-btn" onclick="window.location.href='dashboard.html'">Home</button>
     </div>
   </div>
 
   <!-- CREATE JD FORM (HR ONLY) -->
   <div id="jdForm" class="create-jd-form is-hidden">
-    <h3>Create New Job</h3>
+    <h3>Post New Job</h3>
     <div class="form-row">
       <div class="input-group">
         <label for="title">Job Title <span class="required">*</span></label>
-        <input id="title" type="text" required minlength="3" maxlength="100" 
-               placeholder="e.g., Software Engineer" 
-               title="Job title must be between 3 and 100 characters">
+        <input id="title" type="text" required minlength="3" maxlength="100"
+               placeholder="e.g., Software Engineer">
       </div>
       <div class="input-group">
         <label for="experienceMin">Min Experience (years) <span class="required">*</span></label>
-        <input id="experienceMin" type="number" min="0" max="50" step="0.5" required
-               placeholder="e.g., 2" 
-               title="Minimum experience must be between 0 and 50 years">
+        <input id="experienceMin" type="number" min="0" max="50" step="0.5" required placeholder="e.g., 2">
       </div>
       <div class="input-group">
         <label for="experienceMax">Max Experience (years) <span class="required">*</span></label>
-        <input id="experienceMax" type="number" min="0" max="50" step="0.5" required
-               placeholder="e.g., 5" 
-               title="Maximum experience must be between 0 and 50 years">
+        <input id="experienceMax" type="number" min="0" max="50" step="0.5" required placeholder="e.g., 5">
       </div>
     </div>
     <div class="input-group">
       <label for="description">Job Description <span class="required">*</span></label>
       <textarea id="description" rows="4" minlength="50" maxlength="500" required
-                placeholder="Describe the role, responsibilities, and requirements (50-500 characters)"
-                title="Job description must be between 50 and 500 characters"></textarea>
-      <small class="help-text">Provide a detailed description of the role and responsibilities</small>
+                placeholder="Describe the role, responsibilities, and requirements (50-500 characters)"></textarea>
+      <small class="help-text">Minimum 10 words, maximum 50 words</small>
     </div>
     <div class="input-group">
       <label for="skills">Required Skills <span class="required">*</span></label>
-      <input id="skills" type="text" required minlength="5" maxlength="200"
-             placeholder="e.g., Java Spring React" 
-             title="Skills must be between 5 and 200 characters">
-      <small class="help-text">Enter skills separated by spaces (e.g., Java Spring React)</small>
+      <input id="skills" type="text" required placeholder="e.g., Java Spring React">
+      <small class="help-text">Enter skills separated by spaces or commas</small>
     </div>
     <div class="form-row">
       <div class="input-group">
-        <label for="salaryMin">Min Salary (Annual) <span class="required">*</span></label>
-        <input id="salaryMin" type="number" min="100000" max="5000000" step="10000" required
-               placeholder="e.g., 400000" 
-               title="Minimum salary must be between ₹1,00,000 and ₹50,00,000">
-        <small class="help-text">Enter annual salary in rupees</small>
+        <label for="salaryMin">Min Salary (Annual ₹) <span class="required">*</span></label>
+        <input id="salaryMin" type="number" min="100000" max="5000000" step="10000" required placeholder="e.g., 400000">
       </div>
       <div class="input-group">
-        <label for="salaryMax">Max Salary (Annual) <span class="required">*</span></label>
-        <input id="salaryMax" type="number" min="100000" max="5000000" step="10000" required
-               placeholder="e.g., 900000" 
-               title="Maximum salary must be between ₹1,00,000 and ₹50,00,000">
-        <small class="help-text">Enter annual salary in rupees</small>
+        <label for="salaryMax">Max Salary (Annual ₹) <span class="required">*</span></label>
+        <input id="salaryMax" type="number" min="100000" max="5000000" step="10000" required placeholder="e.g., 900000">
       </div>
     </div>
     <button onclick="createJD()">Post Job</button>

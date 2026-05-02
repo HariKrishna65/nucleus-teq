@@ -41,7 +41,7 @@ function loadCandidateDetails() {
 function displayCandidateInfo() {
   const detailsDiv = document.getElementById('candidateDetails');
   const candidateName = document.getElementById('candidateName');
-  
+
   if (!candidateData) return;
 
   const candidate = candidateData.candidate || {};
@@ -52,7 +52,7 @@ function displayCandidateInfo() {
   const stage = normalizeStage(candidate);
 
   candidateName.textContent = `Assign Panel - ${name}`;
-  
+
   detailsDiv.innerHTML = `
     <div class="candidate-info-grid">
       <div class="info-item">
@@ -96,7 +96,7 @@ function loadPanels() {
 function populatePanelSelects() {
   const select1 = document.getElementById('panelEmail1');
   const select2 = document.getElementById('panelEmail2');
-  
+
   const panelOptions = allPanels
     .filter(panel => panel && panel.email)
     .map(panel => ({
@@ -104,7 +104,7 @@ function populatePanelSelects() {
       label: `${panel.name || 'Panel Member'} (${panel.email})`
     }));
 
-  const optionsHTML = panelOptions.map(option => 
+  const optionsHTML = panelOptions.map(option =>
     `<option value="${option.value}">${option.label}</option>`
   ).join('');
 
@@ -119,6 +119,17 @@ function normalizeStage(candidate) {
   if (candidate.status === "L2") return "L2_TECH";
   if (candidate.status === "HR") return "HR_ROUND";
   return candidate.stage || "UNKNOWN";
+}
+
+// ✅ Get round based on candidate stage
+function getRoundFromStage(candidate) {
+  const stage = normalizeStage(candidate);
+  switch (stage) {
+    case "L1_TECH": return "L1";
+    case "L2_TECH": return "L2";
+    case "HR_ROUND": return "HR";
+    default: return "L1";
+  }
 }
 
 // Validate form inputs
@@ -174,10 +185,14 @@ function submitAssignPanel() {
   const focusArea = document.getElementById('focusArea').value.trim();
   const interviewNotes = document.getElementById('interviewNotes').value.trim();
 
-  // Combine date and time into a proper datetime
+  // Combine date and time
   const interviewDateTime = new Date(`${interviewDate}T${interviewTime}`);
-  
+
   const panelEmails = [panelEmail1, panelEmail2].filter(Boolean);
+
+  // ✅ Get round from candidate stage
+  const candidate = candidateData ? (candidateData.candidate || {}) : {};
+  const round = getRoundFromStage(candidate);
 
   const assignData = {
     panelEmails: panelEmails,
@@ -185,8 +200,11 @@ function submitAssignPanel() {
     duration: parseInt(duration),
     interviewType: interviewType,
     focusArea: focusArea || null,
-    notes: interviewNotes || null
+    notes: interviewNotes || null,
+    round: round  // ✅ Round auto-set from stage
   };
+
+  console.log("Assigning panel with data:", assignData);
 
   const submitBtn = document.getElementById('assignPanelSubmitBtn');
   submitBtn.disabled = true;
@@ -194,7 +212,7 @@ function submitAssignPanel() {
 
   hrActions.assignPanel(candidateId, assignData)
     .then(() => {
-      alert('Panel assigned successfully and emails have been sent to panel members and candidate.');
+      alert(`Panel assigned successfully! Round: ${round}. Emails sent to panel members and candidate.`);
       window.location.href = 'candidates.html';
     })
     .catch(err => {
@@ -230,13 +248,12 @@ function logout() {
   window.location.href = "login.html";
 }
 
-// Expose logout function to HTML
 window.logout = logout;
 
 // Initialize page
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   loadCandidateDetails();
-  
+
   // Set minimum date to today
   const dateInput = document.getElementById('interviewDate');
   if (dateInput) {

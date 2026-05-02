@@ -4,7 +4,6 @@ import com.interview.tracker.constants.Stage;
 import com.interview.tracker.constants.StageStatus;
 import com.interview.tracker.entity.Candidate;
 import com.interview.tracker.entity.Interview;
-import com.interview.tracker.entity.InterviewRound;
 import com.interview.tracker.entity.JobDescription;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
@@ -94,13 +93,13 @@ public class DemoDataSeeder implements CommandLineRunner {
 
         // Seed multiple interviews assigned to panels (so panel dashboard shows duplicates)
         // round values follow legacy DB constraint: L1/L2/HR
-        ensureInterview(candidate, List.of(p1), InterviewRound.L1, "PENDING", LocalDateTime.now().plusDays(1));
-        ensureInterview(candidate, List.of(p1), InterviewRound.L1, "PENDING", LocalDateTime.now().plusDays(2));
-        ensureInterview(candidate, List.of(p1), InterviewRound.L2, "PENDING", LocalDateTime.now().plusDays(3));
-        ensureInterview(candidate, List.of(p1), InterviewRound.HR, "COMPLETED", LocalDateTime.now().minusDays(2));
+        ensureInterview(candidate, List.of(p1), "L1", "PENDING", LocalDateTime.now().plusDays(1));
+        ensureInterview(candidate, List.of(p1), "L1", "PENDING", LocalDateTime.now().plusDays(2));
+        ensureInterview(candidate, List.of(p1), "L2", "PENDING", LocalDateTime.now().plusDays(3));
+        ensureInterview(candidate, List.of(p1), "HR", "COMPLETED", LocalDateTime.now().minusDays(2));
 
-        ensureInterview(candidate, List.of(p2), InterviewRound.L2, "COMPLETED", LocalDateTime.now().minusDays(1));
-        ensureInterview(candidate, List.of(p2), InterviewRound.L1, "PENDING", LocalDateTime.now().plusDays(4));
+        ensureInterview(candidate, List.of(p2), "L2", "COMPLETED", LocalDateTime.now().minusDays(1));
+        ensureInterview(candidate, List.of(p2), "L1", "PENDING", LocalDateTime.now().plusDays(4));
     }
 
     private Panel ensurePanel(String name, String email, String expertise) {
@@ -123,7 +122,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         });
     }
 
-    private void ensureInterview(Candidate candidate, List<Panel> panels, InterviewRound round, String status, LocalDateTime when) {
+    private void ensureInterview(Candidate candidate, List<Panel> panels, String round, String status, LocalDateTime when) {
         boolean exists = interviewRepository.findAll().stream().anyMatch(i ->
                 i.getCandidate() != null &&
                 i.getCandidate().getId().equals(candidate.getId()) &&

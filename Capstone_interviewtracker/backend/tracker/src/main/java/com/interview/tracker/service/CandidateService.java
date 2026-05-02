@@ -11,11 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import com.interview.tracker.constants.Stage;
 import com.interview.tracker.constants.StageStatus;
@@ -38,8 +36,6 @@ public class CandidateService {
         this.jobDescriptionRepository = jobDescriptionRepository;
     }
 
-    private static final String UPLOAD_DIR = "uploads/";
-
     public Candidate createCandidate(Candidate candidate, MultipartFile file) throws IOException {
 
         if (candidate == null) {
@@ -57,7 +53,7 @@ public class CandidateService {
         Long userId = candidate.getUser().getId();
         Long jdId = candidate.getJd().getId();
 
-        // Access control: candidates can only apply for themselves
+        // Access control
         String role = SecurityUtil.currentRole();
         Long currentUserId = SecurityUtil.currentUserId();
         if (com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE.equals(role)
@@ -83,7 +79,9 @@ public class CandidateService {
 
         if (candidate.getPhone() != null && !candidate.getPhone().isBlank()) {
             candidateRepository.findByPhone(candidate.getPhone())
-                    .ifPresent(existing -> { throw new IllegalArgumentException("Mobile number already exists"); });
+                    .ifPresent(existing -> {
+                        throw new IllegalArgumentException("Mobile number already exists");
+                    });
         }
 
         if (candidate.getStatus() == null || candidate.getStatus().isBlank()) {
@@ -95,25 +93,21 @@ public class CandidateService {
             candidate.setStageStatus(StageStatus.COMPLETED);
         }
 
-        
+        // ✅ CHANGED: file ko directly database mein store karo
         if (file != null && !file.isEmpty()) {
-            String originalName = file.getOriginalFilename() == null ? "" : file.getOriginalFilename().toLowerCase();
+            String originalName = file.getOriginalFilename() == null ? "" 
+                                  : file.getOriginalFilename().toLowerCase();
             if (!originalName.endsWith(".pdf")) {
                 throw new IllegalArgumentException("Resume must be a PDF file");
             }
 
-            File dir = new File(UPLOAD_DIR);
-            if (!dir.exists()) dir.mkdirs();
-
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            String filePath = UPLOAD_DIR + fileName;
-
-            file.transferTo(new File(filePath));
-
-            candidate.setResumeUrl(filePath);
+            candidate.setResumeData(file.getBytes());
+            candidate.setResumeFileName(file.getOriginalFilename());
         }
+
         Candidate saved = candidateRepository.save(candidate);
-        log.info("Candidate application submitted: candidateId={}, userId={}, jdId={}", saved.getId(), userId, jdId);
+        log.info("Candidate application submitted: candidateId={}, userId={}, jdId={}", 
+                 saved.getId(), userId, jdId);
         return saved;
     }
 
@@ -126,9 +120,16 @@ public class CandidateService {
         Long currentUserId = SecurityUtil.currentUserId();
 
         if (com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE.equals(role)
-                && (currentUserId == null || requestedUserId == null || !requestedUserId.equals(currentUserId))) {
+                && (currentUserId == null || requestedUserId == null 
+                    || !requestedUserId.equals(currentUserId))) {
             throw new IllegalArgumentException("You can only view your own applications");
         }
         return candidateRepository.findByUser_Id(requestedUserId);
+    }
+
+    // ✅ NEW: resume download ke liye
+    public Candidate getCandidateById(Long id) {
+        return candidateRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
     }
 }

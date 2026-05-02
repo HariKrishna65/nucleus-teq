@@ -9,7 +9,6 @@ if (user.role !== "HR") {
 
 let allPanels = [];
 
-// Load panel members
 function loadPanelMembers() {
   interviewActions.listPanels()
     .then(panels => {
@@ -18,15 +17,14 @@ function loadPanelMembers() {
     })
     .catch(err => {
       console.error("Error loading panels:", err);
-      document.getElementById("panelMembersBody").innerHTML = 
+      document.getElementById("panelMembersBody").innerHTML =
         '<tr><td colspan="6" class="empty-state">Error loading panel members</td></tr>';
     });
 }
 
-// Render panel members table
 function renderPanelMembers() {
   const tbody = document.getElementById("panelMembersBody");
-  
+
   if (!allPanels || allPanels.length === 0) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No panel members found</td></tr>';
     return;
@@ -36,7 +34,7 @@ function renderPanelMembers() {
     <tr>
       <td>${panel.name || 'N/A'}</td>
       <td>${panel.email || 'N/A'}</td>
-      <td>${panel.phone || 'N/A'}</td>
+      <td>${panel.mobile || panel.phone || 'N/A'}</td>
       <td>${panel.organization || 'N/A'}</td>
       <td>${panel.designation || 'N/A'}</td>
       <td>${panel.expertise || 'N/A'}</td>
@@ -44,7 +42,6 @@ function renderPanelMembers() {
   `).join('');
 }
 
-// Create new panel member
 function createPanelMember() {
   const name = document.getElementById("panelName").value.trim();
   const email = document.getElementById("panelEmail").value.trim();
@@ -53,7 +50,6 @@ function createPanelMember() {
   const designation = document.getElementById("panelDesignation").value.trim();
   const expertise = document.getElementById("panelExpertise").value.trim();
 
-  // Validation
   if (!name || !email || !phone || !organization || !designation || !expertise) {
     showPanelAlert("All fields are required", "error");
     return;
@@ -65,7 +61,7 @@ function createPanelMember() {
   }
 
   if (!isValidPhone(phone)) {
-    showPanelAlert("Please enter a valid phone number", "error");
+    showPanelAlert("Please enter a valid 10-digit phone number", "error");
     return;
   }
 
@@ -73,18 +69,11 @@ function createPanelMember() {
   btn.disabled = true;
   btn.textContent = "Creating...";
 
-  const panelData = {
-    name,
-    email,
-    phone,
-    organization,
-    designation,
-    expertise
-  };
+  const panelData = { name, email, phone, organization, designation, expertise };
 
   hrActions.createPanel(panelData)
     .then(() => {
-      showPanelAlert("Panel member created successfully and password setup email sent!", "success");
+      showPanelAlert("Panel member created successfully! Password setup email sent.", "success");
       clearPanelForm();
       loadPanelMembers();
     })
@@ -97,52 +86,43 @@ function createPanelMember() {
     });
 }
 
-// Email validation
 function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Phone validation
 function isValidPhone(phone) {
-  const phoneRegex = /^[0-9]{10}$/;
-  return phoneRegex.test(phone.replace(/[^0-9]/g, ''));
+  return /^[0-9]{10}$/.test(phone.replace(/[^0-9]/g, ''));
 }
 
-// Show panel alert
 function showPanelAlert(message, type) {
   const alertDiv = document.getElementById("panelAlert");
   alertDiv.textContent = message;
   alertDiv.className = `alert alert-${type}`;
   alertDiv.classList.remove("is-hidden");
-  
+
   if (type === "success") {
-    setTimeout(() => {
-      alertDiv.classList.add("is-hidden");
-    }, 3000);
+    setTimeout(() => alertDiv.classList.add("is-hidden"), 4000);
   }
 }
 
-// Clear panel form
 function clearPanelForm() {
-  document.getElementById("panelName").value = "";
-  document.getElementById("panelEmail").value = "";
-  document.getElementById("panelPhone").value = "";
-  document.getElementById("panelOrganization").value = "";
-  document.getElementById("panelDesignation").value = "";
-  document.getElementById("panelExpertise").value = "";
+  ["panelName", "panelEmail", "panelPhone", "panelOrganization", "panelDesignation", "panelExpertise"]
+    .forEach(id => { document.getElementById(id).value = ""; });
 }
 
-// Logout function
+function toggleSidebar() {
+  const shell = document.querySelector(".dashboard-shell");
+  if (!shell) return;
+  shell.classList.toggle("sidebar-collapsed");
+}
+
 function logout() {
   localStorage.removeItem(STORAGE_KEYS.USER);
   window.location.href = "login.html";
 }
 
-// Expose logout function to HTML
+window.createPanelMember = createPanelMember;
+window.toggleSidebar = toggleSidebar;
 window.logout = logout;
 
-// Initialize page
-document.addEventListener('DOMContentLoaded', function() {
-  loadPanelMembers();
-});
+document.addEventListener('DOMContentLoaded', loadPanelMembers);

@@ -21,7 +21,8 @@ public class InterviewService {
         if (interview.getPanels() != null && interview.getPanels().size() > 2) {
             throw new IllegalArgumentException("Maximum 2 panel members allowed per interview");
         }
-        if (interview.getPanels() != null && interview.getPanels().size() == 1 && interview.getPanel() == null) {
+        if (interview.getPanels() != null && interview.getPanels().size() == 1 
+            && interview.getPanel() == null) {
             interview.setPanel(interview.getPanels().get(0));
         }
         if (interview.getInterviewerName() == null || interview.getInterviewerName().isBlank()) {
@@ -30,6 +31,22 @@ public class InterviewService {
         if (interview.getStatus() == null || interview.getStatus().isBlank()) {
             interview.setStatus("PENDING");
         }
+
+        // ✅ Round auto-set based on candidate stage
+        if (interview.getRound() == null || interview.getRound().isBlank()) {
+            if (interview.getCandidate() != null && interview.getCandidate().getStage() != null) {
+                String stage = interview.getCandidate().getStage().toString();
+                switch (stage) {
+                    case "L1_TECH" -> interview.setRound("L1");
+                    case "L2_TECH" -> interview.setRound("L2");
+                    case "HR_ROUND" -> interview.setRound("HR");
+                    default -> interview.setRound("L1");
+                }
+            } else {
+                interview.setRound("L1");
+            }
+        }
+
         return interviewRepository.save(interview);
     }
 
@@ -45,7 +62,8 @@ public class InterviewService {
         List<Panel> panels = interview.getPanels();
         if (panels != null && !panels.isEmpty()) {
             String joined = panels.stream()
-                    .map(p -> p.getName() != null && !p.getName().isBlank() ? p.getName() : p.getEmail())
+                    .map(p -> p.getName() != null && !p.getName().isBlank() 
+                              ? p.getName() : p.getEmail())
                     .filter(s -> s != null && !s.isBlank())
                     .distinct()
                     .collect(Collectors.joining(", "));

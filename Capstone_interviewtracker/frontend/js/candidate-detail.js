@@ -245,7 +245,7 @@ function loadCandidateDetails() {
 
 function advanceStage(candidateId) {
   const comments = prompt("Optional HR comments for stage movement:") || "";
-  hrActions.advanceCandidate(candidateId, comments)
+  hrActions.(candidateId, comments)
     .then(() => loadCandidateDetails())
     .catch((err) => alert(err.message || "Failed to advance stage"));
 }

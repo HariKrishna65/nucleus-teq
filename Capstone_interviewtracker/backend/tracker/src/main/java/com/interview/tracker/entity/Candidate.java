@@ -11,11 +11,6 @@ import java.time.LocalDateTime;
 import com.interview.tracker.constants.Stage;
 import com.interview.tracker.constants.StageStatus;
 
-/**
- * Candidate application entity.
- *
- * <p>Represents a user's application to a job description and its pipeline stage.</p>
- */
 @Entity
 @Table(name = "candidates")
 public class Candidate {
@@ -55,14 +50,18 @@ public class Candidate {
     private String preferredLocation;
     private String source;
 
-    @Column(name = "resume_url")
-    private String resumeUrl;
+    
+    // REMOVE both @Lob and columnDefinition — sirf yeh rakho:
+    @Column(name = "resume_data")
+    private byte[] resumeData;
+
+    @Column(name = "resume_file_name")
+    private String resumeFileName;
 
     @ManyToOne
     @JoinColumn(name = "jd_id")
     private JobDescription jd;
 
-    
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
@@ -129,8 +128,12 @@ public class Candidate {
     public String getSource() { return source; }
     public void setSource(String source) { this.source = source; }
 
-    public String getResumeUrl() { return resumeUrl; }
-    public void setResumeUrl(String resumeUrl) { this.resumeUrl = resumeUrl; }
+    // ✅ CHANGED: resumeUrl getters/setters removed, new ones added
+    public byte[] getResumeData() { return resumeData; }
+    public void setResumeData(byte[] resumeData) { this.resumeData = resumeData; }
+
+    public String getResumeFileName() { return resumeFileName; }
+    public void setResumeFileName(String resumeFileName) { this.resumeFileName = resumeFileName; }
 
     public JobDescription getJd() { return jd; }
     public void setJd(JobDescription jd) { this.jd = jd; }

@@ -1,40 +1,47 @@
 const user = getStoredUser();
-const interviewId = localStorage.getItem(STORAGE_KEYS.INTERVIEW_ID);
 let interviewStatus = "PENDING";
+let interviewId = localStorage.getItem(STORAGE_KEYS.INTERVIEW_ID);
 
 // Check authentication
 if (!user) {
   window.location.href = "login.html";
 }
 
-// Only panel can use this page. HR should use the HR feedback page.
 if (user && user.role === "HR") {
   window.location.href = "hr-feedback.html";
 }
+
 if (user && user.role !== "PANEL") {
   window.location.href = "index.html";
 }
 
-if (!interviewId) {
-  // Show interview selection interface instead of redirecting
-  showInterviewSelection();
-  return;
-}
+// ✅ FIX: return ki jagah yeh use karo
+window.addEventListener("DOMContentLoaded", function () {
+  if (!interviewId) {
+    showInterviewSelection();
+  } else {
+    loadInterviewDetails();
+  }
+});
 
-// Show interview selection interface
+// ==========================================
+// INTERVIEW SELECTION PAGE
+// ==========================================
+
 function showInterviewSelection() {
   const container = document.querySelector(".container");
+  if (!container) return;
+
   container.innerHTML = `
     <div class="header">
       <div class="user-info">
-        <div class="user-avatar" id="userAvatar">P</div>
+        <div class="user-avatar">${(user.name || "P").charAt(0).toUpperCase()}</div>
         <div class="user-details">
-          <h3 id="userName">${user.name || "Panel Member"}</h3>
+          <h3>${user.name || "Panel Member"}</h3>
           <p>Interview Panel</p>
         </div>
       </div>
       <div class="header-actions">
-        <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
         <a class="btn apply-more-btn" href="panel-dashboard.html">My Interviews</a>
         <button class="logout-btn" onclick="logout()">Logout</button>
       </div>
@@ -50,8 +57,7 @@ function showInterviewSelection() {
       </div>
     </div>
   `;
-  
-  // Load interviews for selection
+
   loadInterviewsForSelection();
 }
 
@@ -62,97 +68,128 @@ function loadInterviewsForSelection() {
     `;
     return;
   }
-  
+
   const panelId = user.panelId || user.userId;
-  
+
   interviewActions.listByPanel(panelId)
     .then(data => {
       const interviews = Array.isArray(data) ? data : [];
       const list = document.getElementById("interviewList");
-      
+
+      if (!list) return;
+
       if (interviews.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
-            <div class="icon">Interviews</div>
+            <div class="icon">📋</div>
             <h3>No interviews available</h3>
-            <p>You don't have any assigned interviews that need feedback.</p>
+            <p>You don't have any assigned interviews.</p>
             <a href="panel-dashboard.html" class="btn">Back to Dashboard</a>
           </div>
         `;
         return;
       }
-      
-      list.innerHTML = interviews.map(interview => `
-        <div class="interview-card selectable" onclick="selectInterview(${interview.id})">
-          <div class="interview-info">
-            <b>${interview.candidate ? interview.candidate.user ? interview.candidate.user.name : 'Unknown' : 'Unknown Candidate'}</b>
-            <span>Round: ${interview.round || 'N/A'}</span>
-            <span>Focus: ${interview.focusArea || 'General'}</span>
-            <span>Time: ${formatDateTime(interview.interviewTime)}</span>
-            <div class="interview-meta">
-              <span class="meta-item status ${interview.status || 'PENDING'}">${formatStatus(interview.status)}</span>
+
+      // ✅ FIX: Only show PENDING interviews for feedback
+      const pending = interviews.filter(i => i.status !== "COMPLETED");
+      const completed = interviews.filter(i => i.status === "COMPLETED");
+
+      list.innerHTML = `
+        ${pending.length > 0 ? `
+          <h3 style="margin-bottom:12px; color:#1f2937;">Pending Feedback</h3>
+          ${pending.map(interview => `
+            <div class="interview-card selectable" onclick="selectInterview(${interview.id})">
+              <div class="interview-info">
+                <b>${interview.candidate?.user?.name || 'Unknown Candidate'}</b>
+                <span>Round: ${interview.round || 'N/A'}</span>
+                <span>Focus: ${interview.focusArea || 'General'}</span>
+                <span>Time: ${formatDateTime(interview.interviewTime)}</span>
+                <div class="interview-meta">
+                  <span class="meta-item">⏳ Pending</span>
+                </div>
+              </div>
+              <button class="btn btn-small">Submit Feedback</button>
             </div>
-          </div>
-          <button class="btn btn-small">Select</button>
-        </div>
-      `).join('');
+          `).join('')}
+        ` : '<p style="color:#6b7280;">No pending interviews.</p>'}
+
+        ${completed.length > 0 ? `
+          <h3 style="margin:20px 0 12px; color:#1f2937;">Completed</h3>
+          ${completed.map(interview => `
+            <div class="interview-card" style="opacity:0.7;">
+              <div class="interview-info">
+                <b>${interview.candidate?.user?.name || 'Unknown Candidate'}</b>
+                <span>Round: ${interview.round || 'N/A'}</span>
+                <span>Time: ${formatDateTime(interview.interviewTime)}</span>
+                <div class="interview-meta">
+                  <span class="meta-item">✅ Completed</span>
+                </div>
+              </div>
+              <button class="btn btn-small btn-secondary" 
+                onclick="selectInterview(${interview.id})">View Feedback</button>
+            </div>
+          `).join('')}
+        ` : ''}
+      `;
     })
     .catch(err => {
       console.error(err);
-      document.getElementById("interviewList").innerHTML = `
-        <div class="alert alert-error">
-          Error loading interviews. Please try again.
-        </div>
-      `;
+      const list = document.getElementById("interviewList");
+      if (list) {
+        list.innerHTML = `
+          <div class="alert alert-error">Error loading interviews. Please try again.</div>
+        `;
+      }
     });
 }
 
 function selectInterview(id) {
-  localStorage.setItem("interviewId", id);
-  window.location.reload(); // Reload to show feedback form
+  localStorage.setItem(STORAGE_KEYS.INTERVIEW_ID, id);
+  interviewId = id;
+  loadInterviewDetails();
 }
 
-function formatDateTime(dateTime) {
-  if (!dateTime) return "Not scheduled";
-  const date = new Date(dateTime);
-  return date.toLocaleString("en-US", { 
-    month: "short", 
-    day: "numeric", 
-    hour: "2-digit", 
-    minute: "2-digit" 
-  });
-}
+// ==========================================
+// FEEDBACK FORM
+// ==========================================
 
-function formatStatus(status) {
-  const statusMap = {
-    "PENDING": "Pending",
-    "IN_PROGRESS": "In Progress",
-    "COMPLETED": "Completed",
-    "CANCELLED": "Cancelled"
-  };
-  return statusMap[status] || status || "Pending";
-}
-
-// Load interview details
 function loadInterviewDetails() {
   if (!user || !user.userId) {
     showAlert("Session expired. Please login again.", "error");
     return;
   }
+
   interviewActions.getById(interviewId)
     .then(data => {
       interviewStatus = data.status || "PENDING";
-      document.getElementById("candidateName").textContent = 
-        data.candidate && data.candidate.user ? data.candidate.user.name : "Unknown";
-      document.getElementById("roundInfo").textContent = data.round || "N/A";
-      document.getElementById("focusArea").textContent = data.focusArea || "General";
+
+      // ✅ FIX: Check elements exist before setting
+      const candidateNameEl = document.getElementById("candidateName");
+      const roundInfoEl = document.getElementById("roundInfo");
+      const focusAreaEl = document.getElementById("focusArea");
+
+      if (candidateNameEl) {
+        candidateNameEl.textContent =
+          data.candidate?.user?.name || "Unknown";
+      }
+      if (roundInfoEl) {
+        roundInfoEl.textContent = data.round || "N/A";
+      }
+      if (focusAreaEl) {
+        focusAreaEl.textContent = data.focusArea || "General";
+      }
+
+      // ✅ Show form if elements exist
+      const form = document.getElementById("feedbackForm");
+      if (form) form.classList.remove("is-hidden");
+
       if (interviewStatus === "COMPLETED") {
         loadExistingFeedback();
       }
     })
     .catch(err => {
       console.error(err);
-      document.getElementById("candidateName").textContent = "Error loading";
+      showAlert("Error loading interview details.", "error");
     });
 }
 
@@ -160,11 +197,18 @@ function loadExistingFeedback() {
   feedbackActions.getByInterview(interviewId)
     .then(existing => {
       if (!existing) return;
-      if (existing.rating) selectRating(existing.rating);
-      if (existing.result || existing.status) selectStatus(existing.result || existing.status);
-      document.getElementById("comments").value = existing.comments || "";
 
-      document.getElementById("comments").setAttribute("readonly", "readonly");
+      if (existing.rating) selectRating(existing.rating);
+      if (existing.result || existing.status) {
+        selectStatus(existing.result || existing.status);
+      }
+
+      const commentsEl = document.getElementById("comments");
+      if (commentsEl) {
+        commentsEl.value = existing.comments || "";
+        commentsEl.setAttribute("readonly", "readonly");
+      }
+
       document.querySelectorAll(".rating-option").forEach(el => {
         el.style.pointerEvents = "none";
       });
@@ -172,102 +216,75 @@ function loadExistingFeedback() {
         el.style.pointerEvents = "none";
       });
 
-      const submitBtn = document.querySelector(".container > button");
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Feedback Already Submitted";
-      showAlert("Existing feedback loaded in view mode.", "success");
+      // ✅ FIX: Correct button selector
+      const submitBtn = document.getElementById("submitFeedbackBtn");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Feedback Already Submitted";
+      }
+
+      showAlert("Feedback already submitted — view only.", "success");
     })
     .catch(() => {
-      // Keep form enabled if no previous feedback exists.
+      // No feedback yet — form stays enabled
     });
 }
 
+// ==========================================
+// RATING & STATUS SELECTION
+// ==========================================
+
 function selectRating(value) {
-  // Update UI
   document.querySelectorAll(".rating-option").forEach(el => {
     el.classList.remove("selected");
   });
-  document.querySelector(`.rating-option[data-value="${value}"]`).classList.add("selected");
-  
-  // Set hidden input
+  const selected = document.querySelector(`.rating-option[data-value="${value}"]`);
+  if (selected) selected.classList.add("selected");
   document.getElementById("rating").value = value;
 }
 
 function selectStatus(value) {
-  // Update UI
   document.querySelectorAll(".status-option").forEach(el => {
     el.classList.remove("selected");
   });
-  document.querySelector(`.status-option[data-value="${value}"]`).classList.add("selected");
-  
-  // Set hidden input
+  const selected = document.querySelector(`.status-option[data-value="${value}"]`);
+  if (selected) selected.classList.add("selected");
   document.getElementById("status").value = value;
 }
 
+// ==========================================
+// SUBMIT FEEDBACK
+// ==========================================
+
 function validateFeedback() {
-  const rating = document.getElementById("rating");
-  const status = document.getElementById("status");
-  const comments = document.getElementById("comments");
+  const rating = document.getElementById("rating").value;
+  const status = document.getElementById("status").value;
+  const comments = document.getElementById("comments").value.trim();
   let isValid = true;
 
-  // Clear errors
-  [rating, status, comments].forEach(el => el.classList.remove("input-error"));
-
-  if (!rating.value) {
-    showError(rating, "Please select a rating");
+  if (!rating) {
+    showAlert("Please select a rating", "error");
     isValid = false;
-  }
-
-  if (!status.value) {
-    showError(status, "Please select a decision");
+  } else if (!status) {
+    showAlert("Please select a decision", "error");
     isValid = false;
-  }
-
-  if (!comments.value.trim()) {
-    showError(comments, "Please provide comments");
+  } else if (!comments) {
+    showAlert("Please provide comments", "error");
     isValid = false;
-  } else if (comments.value.trim().length < 10) {
-    showError(comments, "Please provide more detailed feedback (at least 10 characters)");
+  } else if (comments.length < 10) {
+    showAlert("Comments must be at least 10 characters", "error");
     isValid = false;
   }
 
   return isValid;
 }
 
-function showError(input, message) {
-  input.classList.add("input-error");
-  let errorDiv = input.nextElementSibling;
-  if (!errorDiv || !errorDiv.classList.contains("error-message")) {
-    errorDiv = document.createElement("div");
-    errorDiv.className = "error-message";
-    input.parentNode.insertBefore(errorDiv, input.nextSibling);
-  }
-  errorDiv.textContent = message;
-  errorDiv.style.display = "block";
-}
-
-function showAlert(message, type) {
-  const existing = document.querySelector(".alert");
-  if (existing) existing.remove();
-
-  const alert = document.createElement("div");
-  alert.className = `alert alert-${type}`;
-  alert.textContent = message;
-
-  const container = document.querySelector(".container");
-  container.insertBefore(alert, container.firstChild);
-  
-  if (type === "error") {
-    setTimeout(() => alert.remove(), 5000);
-  }
-}
-
-// Submit feedback
 function submitFeedback() {
   if (interviewStatus === "COMPLETED") {
     showAlert("This interview is already completed. Feedback is view-only.", "error");
     return;
   }
+
   if (!validateFeedback()) return;
 
   showLoading(true);
@@ -282,28 +299,28 @@ function submitFeedback() {
   };
 
   feedbackActions.submit(feedback)
-  .then(data => {
-    showLoading(false);
-    showAlert("Feedback submitted successfully!", "success");
-    
-    // Clear interview ID
-    localStorage.removeItem(STORAGE_KEYS.INTERVIEW_ID);
-    
-    // Redirect after delay
-    setTimeout(() => {
-      window.location.href = "panel-dashboard.html";
-    }, 1500);
-  })
-  .catch(err => {
-    showLoading(false);
-    console.error("Feedback submission error:", err);
-    const errorMessage = err.message || "Error submitting feedback. Please try again.";
-    showAlert(errorMessage, "error");
-  });
+    .then(() => {
+      showLoading(false);
+      showAlert("Feedback submitted successfully! ✅", "success");
+      localStorage.removeItem(STORAGE_KEYS.INTERVIEW_ID);
+      setTimeout(() => {
+        window.location.href = "panel-dashboard.html";
+      }, 1500);
+    })
+    .catch(err => {
+      showLoading(false);
+      console.error("Feedback error:", err);
+      showAlert(err.message || "Error submitting feedback.", "error");
+    });
 }
 
+// ==========================================
+// HELPERS
+// ==========================================
+
 function showLoading(show) {
-  const btn = document.querySelector("button");
+  const btn = document.getElementById("submitFeedbackBtn");
+  if (!btn) return;
   if (show) {
     btn.innerHTML = '<span class="spinner"></span> Submitting...';
     btn.disabled = true;
@@ -311,6 +328,43 @@ function showLoading(show) {
     btn.textContent = "Submit Feedback";
     btn.disabled = false;
   }
+}
+
+function showAlert(message, type) {
+  const existing = document.querySelector(".alert");
+  if (existing) existing.remove();
+
+  const alert = document.createElement("div");
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+
+  const container = document.querySelector(".container");
+  if (container) container.insertBefore(alert, container.firstChild);
+
+  if (type === "error") {
+    setTimeout(() => alert.remove(), 5000);
+  }
+}
+
+function formatDateTime(dateTime) {
+  if (!dateTime) return "Not scheduled";
+  const date = new Date(dateTime);
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function formatStatus(status) {
+  const map = {
+    PENDING: "Pending",
+    IN_PROGRESS: "In Progress",
+    COMPLETED: "Completed",
+    CANCELLED: "Cancelled"
+  };
+  return map[status] || status || "Pending";
 }
 
 function logout() {
@@ -326,7 +380,9 @@ function toggleSidebar() {
   shell.classList.toggle("sidebar-collapsed");
 }
 
-// Initialize
-if (interviewId) {
-  loadInterviewDetails();
-}
+window.selectRating = selectRating;
+window.selectStatus = selectStatus;
+window.submitFeedback = submitFeedback;
+window.logout = logout;
+window.toggleSidebar = toggleSidebar;
+window.selectInterview = selectInterview;

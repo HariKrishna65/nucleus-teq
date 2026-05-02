@@ -1,58 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Signup - Interview Tracker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/register.css">
 </head>
 <body class="page-auth">
 <div class="auth-layout">
   <section class="auth-visual">
-    <div class="brand">Interview Tracker</div>
-    <h1>Create Your Candidate Account</h1>
-    <p>Join the interview process with a seamless setup and secure account activation.</p>
+    <div class="brand">🎯 Interview Tracker</div>
+    <h1>Start Your Career Journey</h1>
+    <p>Create your candidate account to apply for open positions and track your interviews.</p>
     <div class="visual-cards">
       <div class="visual-card">
-        <h3>Candidate Ready</h3>
-        <p>Apply to open roles and track interview progress in one place.</p>
+        <h3>✅ Easy Apply</h3>
+        <p>Browse and apply to open positions in one click.</p>
       </div>
       <div class="visual-card">
-        <h3>Quick Verification</h3>
-        <p>Receive email verification and set password instantly.</p>
+        <h3>📬 Email Verification</h3>
+        <p>Secure account activation via email link.</p>
+      </div>
+      <div class="visual-card">
+        <h3>📈 Track Progress</h3>
+        <p>Follow your application through every stage.</p>
+      </div>
+      <div class="visual-card">
+        <h3>🔔 Stay Informed</h3>
+        <p>Get notified about interview schedules and decisions.</p>
       </div>
     </div>
   </section>
 
   <section class="auth-panel">
-    <div class="container auth-card">
-      <div class="top-nav">
-        <a href="index.html" class="btn btn-small btn-secondary">Home</a>
+    <div class="auth-card">
+      <div class="back-nav">
+        <a href="login.html" class="back-link">← Back to Login</a>
       </div>
-      <h2>Activate Account</h2>
-      <p class="subtitle">Set your profile to complete candidate signup</p>
+      <h2>Create Account</h2>
+      <p class="subtitle">Fill in your details to register as a candidate</p>
 
       <div class="info-box">
-        <p>After registration, you will receive a verification email. Click the link to verify your email, then set your password to complete signup.</p>
+        <p>After registration, you will receive a verification email. Click the link to verify and set your password.</p>
       </div>
 
       <div class="form-section">
         <div class="form-section-title">Basic Information</div>
-        
+
         <div class="input-group">
           <label for="name">Full Name <span class="text-danger">*</span></label>
-          <input id="name" type="text" placeholder="Enter your full name">
+          <input id="name" type="text" placeholder="Enter your full name" autocomplete="name">
         </div>
 
         <div class="input-group">
           <label for="email">Email Address <span class="text-danger">*</span></label>
-          <input id="email" type="email" placeholder="Enter your email">
+          <input id="email" type="email" placeholder="Enter your email" autocomplete="email">
         </div>
-
       </div>
 
       <div class="form-section">
         <div class="form-section-title">Personal Details</div>
-        
+
         <div class="form-row">
           <div class="input-group">
             <label for="dateOfBirth">Date of Birth</label>
@@ -60,7 +69,7 @@
           </div>
           <div class="input-group">
             <label for="phone">Phone Number <span class="text-danger">*</span></label>
-            <input id="phone" type="tel" placeholder="Enter phone number">
+            <input id="phone" type="tel" placeholder="10-digit mobile number" autocomplete="tel">
           </div>
         </div>
 
@@ -77,7 +86,7 @@
 
       <div class="form-section">
         <div class="form-section-title">Address (Optional)</div>
-        
+
         <div class="input-group">
           <label for="address">Street Address</label>
           <input id="address" type="text" placeholder="Enter street address">
@@ -100,13 +109,13 @@
         </div>
       </div>
 
-      <button onclick="register()">Register</button>
+      <button onclick="register()">Create Account</button>
 
       <div class="login-link">
-        Already activated? <a href="login.html">Sign in</a>
+        Already have an account? <a href="login.html">Sign in</a>
       </div>
     </div>
-  </div>
+  </section>
 </div>
 
 <script src="../js/api.js"></script>
