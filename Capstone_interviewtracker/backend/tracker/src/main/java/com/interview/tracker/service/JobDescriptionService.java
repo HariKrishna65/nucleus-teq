@@ -24,7 +24,6 @@ public class JobDescriptionService {
         validateRange("Experience", jd.getExperienceMin(), jd.getExperienceMax());
         validateRange("Salary", jd.getSalaryMin(), jd.getSalaryMax());
 
-        // Backward-compat convenience fields
         if (jd.getExperience() == null && jd.getExperienceMin() != null) {
             jd.setExperience(jd.getExperienceMin());
         }

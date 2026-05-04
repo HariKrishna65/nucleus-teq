@@ -29,7 +29,7 @@ public class JwtService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(issuer)
                 .issuedAt(now)
-                .expiresAt(now.plusSeconds(60 * 60 * 8)) // 8 hours
+                .expiresAt(now.plusSeconds(60 * 60 * 8))
                 .subject(user.getEmail())
                 .claim("role", user.getRole())
                 .claim("userId", user.getId())

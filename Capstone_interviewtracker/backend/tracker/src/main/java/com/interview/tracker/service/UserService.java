@@ -172,10 +172,6 @@ public class UserService {
         );
     }
 
-    /**
-     * New combined endpoint: Verify email and prepare for password setup in one step
-     * This is called from the new combined verify-password page
-     */
     public Map<String, Object> verifyAndPreparePasswordSetup(String token) {
         User user = userRepository.findAll().stream()
                 .filter(u -> token.equals(u.getVerificationToken()))
@@ -186,9 +182,7 @@ public class UserService {
             throw new IllegalArgumentException("Verification token has expired");
         }
 
-        // Mark email as verified
         user.setEmailVerified(true);
-        // Keep the token for password setup
         userRepository.save(user);
 
         Map<String, Object> response = new java.util.HashMap<>();
@@ -266,7 +260,6 @@ public class UserService {
             throw new IllegalArgumentException("Account is already verified and active");
         }
 
-        // Send combined verification + password email
         emailService.sendVerificationAndPasswordEmail(user);
 
         return new AuthResponse(
@@ -287,7 +280,6 @@ public class UserService {
         }
     }
 
-    // Test endpoint to create users directly with password (bypasses email verification)
     public AuthResponse createTestUser(CreateTestUserRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
@@ -306,11 +298,10 @@ public class UserService {
         user.setCity(request.getCity());
         user.setState(request.getState());
         user.setCountry(request.getCountry());
-        user.setEmailVerified(true); // Skip email verification for test users
+        user.setEmailVerified(true);
 
         User saved = userRepository.save(user);
 
-        // Create panel entry if role is PANEL
         if (ROLE_PANEL.equals(user.getRole())) {
             Panel panel = new Panel();
             panel.setName(user.getName());

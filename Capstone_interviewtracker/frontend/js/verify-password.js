@@ -1,7 +1,6 @@
 let currentToken = null;
 let currentEmail = null;
 
-// Get token from URL
 const urlParams = new URLSearchParams(window.location.search);
 const token = urlParams.get('token');
 
@@ -13,7 +12,6 @@ if (token) {
 }
 
 function startVerificationAndPasswordFlow() {
-  // Step 1: Verify Email
   verifyEmail(currentToken);
 }
 
@@ -31,8 +29,8 @@ function verifyEmail(token) {
 function showPasswordStep() {
   document.getElementById("verifyStep").classList.add("is-hidden");
   document.getElementById("passwordStep").classList.remove("is-hidden");
-  document.getElementById("icon").className = "icon";
-  document.getElementById("icon").textContent = "Security";
+  document.getElementById("icon").className = "status-icon";
+  document.getElementById("icon").textContent = "SEC";
   document.getElementById("title").textContent = "Set Your Password";
   document.getElementById("message").textContent = "Create a secure password to complete your registration.";
 }
@@ -41,7 +39,6 @@ function handleSetPassword() {
   const password = document.getElementById("newPassword").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
-  // Validation
   if (!password || !confirmPassword) {
     alert("Please fill in all password fields");
     return;
@@ -90,7 +87,6 @@ function togglePassword(fieldId, button) {
   }
 }
 
-// Password strength checker
 document.getElementById("newPassword")?.addEventListener("input", function() {
   const password = this.value;
   const requirements = {
@@ -101,14 +97,12 @@ document.getElementById("newPassword")?.addEventListener("input", function() {
     special: /[!@#$%^&*]/.test(password)
   };
 
-  // Update requirement indicators
   updateRequirement("req-length", requirements.length);
   updateRequirement("req-upper", requirements.upper);
   updateRequirement("req-lower", requirements.lower);
   updateRequirement("req-number", requirements.number);
   updateRequirement("req-special", requirements.special);
 
-  // Update strength bar
   const strength = Object.values(requirements).filter(Boolean).length;
   const strengthFill = document.getElementById("strengthFill");
   const strengthText = document.getElementById("strengthText");
@@ -135,7 +129,6 @@ function updateRequirement(elementId, met) {
   if (element) {
     if (met) {
       element.classList.add("met");
-      element.textContent = element.textContent.replace("✓", "✓");
     } else {
       element.classList.remove("met");
     }
@@ -150,8 +143,8 @@ function isValidPassword(password) {
 function showSuccess(message) {
   document.getElementById("passwordStep").classList.add("is-hidden");
   document.getElementById("successStep").classList.remove("is-hidden");
-  document.getElementById("icon").className = "icon success-icon";
-  document.getElementById("icon").textContent = "✓";
+  document.getElementById("icon").className = "status-icon success-icon";
+  document.getElementById("icon").textContent = "OK";
   document.getElementById("title").textContent = "Registration Complete!";
   document.getElementById("successMessage").textContent = message;
 }
@@ -161,8 +154,8 @@ function showError(message) {
   document.getElementById("passwordStep").classList.add("is-hidden");
   document.getElementById("successStep").classList.add("is-hidden");
   document.getElementById("errorSection").classList.remove("is-hidden");
-  document.getElementById("icon").className = "icon error-icon";
-  document.getElementById("icon").textContent = "✗";
+  document.getElementById("icon").className = "status-icon error-icon";
+  document.getElementById("icon").textContent = "!";
   document.getElementById("title").textContent = "Registration Error";
   document.getElementById("errorMessage").textContent = message;
 }

@@ -68,8 +68,6 @@ public class AuthController {
         return userService.requestPasswordReset(request.getEmail());
     }
 
-    // Test endpoint - create user directly with password (bypasses email verification)
-    // WARNING: This endpoint is open for testing purposes only
     @PostMapping(CREATE_TEST_USER)
     public AuthResponse createTestUser(@Valid @RequestBody CreateTestUserRequest request) {
         return userService.createTestUser(request);

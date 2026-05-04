@@ -50,11 +50,9 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Seed panels (user + panel profile)
         Panel p1 = ensurePanel("Panel User", "panel1@test.com", "Java");
         Panel p2 = ensurePanel("Panel Two", "panel2@test.com", "Spring");
 
-        // Seed a JD
         JobDescription jd = jobDescriptionRepository.findAll().stream().findFirst().orElseGet(() -> {
             JobDescription j = new JobDescription();
             j.setTitle("Java Developer");
@@ -67,7 +65,6 @@ public class DemoDataSeeder implements CommandLineRunner {
             return jobDescriptionRepository.save(j);
         });
 
-        // Seed a candidate user + candidate application
         User candidateUser = userRepository.findByEmail("candidate@test.com").orElseGet(() -> {
             User u = new User();
             u.setName("Candidate User");
@@ -91,8 +88,6 @@ public class DemoDataSeeder implements CommandLineRunner {
             return candidateRepository.save(c);
         });
 
-        // Seed multiple interviews assigned to panels (so panel dashboard shows duplicates)
-        // round values follow legacy DB constraint: L1/L2/HR
         ensureInterview(candidate, List.of(p1), "L1", "PENDING", LocalDateTime.now().plusDays(1));
         ensureInterview(candidate, List.of(p1), "L1", "PENDING", LocalDateTime.now().plusDays(2));
         ensureInterview(candidate, List.of(p1), "L2", "PENDING", LocalDateTime.now().plusDays(3));
@@ -147,4 +142,3 @@ public class DemoDataSeeder implements CommandLineRunner {
         interviewRepository.save(i);
     }
 }
-

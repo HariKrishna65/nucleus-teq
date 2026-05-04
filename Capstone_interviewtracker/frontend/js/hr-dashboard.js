@@ -343,7 +343,6 @@ function openAssignPanel(candidateId) {
   modal.classList.remove("is-hidden");
   modal.setAttribute("aria-hidden", "false");
 
-  // Populate selects
   const s1 = document.getElementById("panelEmail1");
   const s2 = document.getElementById("panelEmail2");
   const options = allPanels
@@ -450,7 +449,6 @@ function wireSidebarSectionSwitching() {
   showHrSection("candidatesSection");
 }
 
-// Expose modal functions to HTML onclick handlers
 window.closeAssignPanel = closeAssignPanel;
 window.submitAssignPanel = submitAssignPanel;
 window.openAssignPanel = openAssignPanel;
@@ -465,7 +463,6 @@ loadCandidates();
 wireSidebarNavigation();
 wireSidebarSectionSwitching();
 
-// Ensure modal starts hidden + allow backdrop/Esc close
 (() => {
   const modal = document.getElementById("assignPanelModal");
   if (!modal) return;

@@ -89,7 +89,6 @@ function displayCandidateInfo() {
   }
 }
 
-// Load available panel members
 function loadPanels() {
   interviewActions.listPanels()
     .then(panels => {
@@ -102,7 +101,6 @@ function loadPanels() {
     });
 }
 
-// Populate panel member select dropdowns
 function populatePanelSelects() {
   const select1 = document.getElementById('panelEmail1');
   const select2 = document.getElementById('panelEmail2');
@@ -122,7 +120,6 @@ function populatePanelSelects() {
   select2.innerHTML = '<option value="">-- Optional second member --</option>' + optionsHTML;
 }
 
-// Normalize stage names
 function normalizeStage(candidate) {
   if (candidate.stage) return candidate.stage;
   if (candidate.status === "L1") return "L1_TECH";
@@ -131,7 +128,6 @@ function normalizeStage(candidate) {
   return candidate.stage || "UNKNOWN";
 }
 
-// ✅ Get round based on candidate stage
 function getRoundFromStage(candidate) {
   const stage = normalizeStage(candidate);
   switch (stage) {
@@ -142,7 +138,6 @@ function getRoundFromStage(candidate) {
   }
 }
 
-// Validate form inputs
 function validateForm() {
   const panelEmail1 = document.getElementById('panelEmail1').value.trim();
   const panelEmail2 = document.getElementById('panelEmail2').value.trim();
@@ -169,7 +164,6 @@ function validateForm() {
     return false;
   }
 
-  // Validate date is not in the past
   const selectedDate = new Date(`${interviewDate}T${interviewTime}`);
   const now = new Date();
   if (selectedDate <= now) {
@@ -184,7 +178,6 @@ function buildLocalDateTime(interviewDate, interviewTime) {
   return `${interviewDate}T${interviewTime}:00`;
 }
 
-// Submit panel assignment
 function submitAssignPanel() {
   if (candidateData && candidateData.canAssignPanel === false) {
     showError("Panel already assigned for this round");
@@ -207,7 +200,6 @@ function submitAssignPanel() {
 
   const panelEmails = [panelEmail1, panelEmail2].filter(Boolean);
 
-  // ✅ Get round from candidate stage
   const candidate = candidateData ? (candidateData.candidate || {}) : {};
   const round = getRoundFromStage(candidate);
 
@@ -219,7 +211,7 @@ function submitAssignPanel() {
     focusArea: focusArea || null,
     meetingLink: meetingLink || null,
     notes: interviewNotes || null,
-    round: round  // ✅ Round auto-set from stage
+    round: round
   };
 
   console.log("Assigning panel with data:", assignData);
@@ -243,7 +235,6 @@ function submitAssignPanel() {
     });
 }
 
-// Show error message
 function showError(message) {
   const errorDiv = document.getElementById('assignPanelError');
   if (errorDiv) {
@@ -252,7 +243,6 @@ function showError(message) {
   }
 }
 
-// Clear error message
 function clearError() {
   const errorDiv = document.getElementById('assignPanelError');
   if (errorDiv) {
@@ -260,7 +250,6 @@ function clearError() {
   }
 }
 
-// Logout function
 function logout() {
   localStorage.removeItem(STORAGE_KEYS.USER);
   window.location.href = "login.html";
@@ -268,18 +257,15 @@ function logout() {
 
 window.logout = logout;
 
-// Initialize page
 document.addEventListener('DOMContentLoaded', function () {
   loadCandidateDetails();
 
-  // Set minimum date to today
   const dateInput = document.getElementById('interviewDate');
   if (dateInput) {
     const today = new Date().toISOString().split('T')[0];
     dateInput.setAttribute('min', today);
   }
 
-  // Clear error on input change
   const inputs = document.querySelectorAll('input, select, textarea');
   inputs.forEach(input => {
     input.addEventListener('change', clearError);

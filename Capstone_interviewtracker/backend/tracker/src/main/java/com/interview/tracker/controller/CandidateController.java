@@ -34,7 +34,6 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.getByUserScoped(userId));
     }
 
-    // ✅ NEW: Resume download endpoint
     @GetMapping("/{id}/resume")
     public ResponseEntity<byte[]> downloadResume(@PathVariable Long id) {
         Candidate candidate = candidateService.getCandidateById(id);

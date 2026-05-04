@@ -53,7 +53,6 @@ public class CandidateService {
         Long userId = candidate.getUser().getId();
         Long jdId = candidate.getJd().getId();
 
-        // Access control
         String role = SecurityUtil.currentRole();
         Long currentUserId = SecurityUtil.currentUserId();
         if (com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE.equals(role)

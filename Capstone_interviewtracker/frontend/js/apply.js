@@ -59,7 +59,6 @@ function validateApply() {
   const resume = document.getElementById("resume");
   let isValid = true;
 
-  // Clear errors
   [jdSelect, phone, experience].forEach(el => {
     el.classList.remove("input-error");
     const err = el.nextElementSibling;

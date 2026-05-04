@@ -12,14 +12,12 @@ function validateRegister() {
   const phone = document.getElementById("phone");
   let isValid = true;
 
-  // Clear previous errors
   [name, email, phone].forEach(el => {
     el.classList.remove("input-error");
     const err = el.nextElementSibling;
     if (err && err.classList.contains("error-message")) err.style.display = "none";
   });
 
-  // Validate name
   if (!name.value.trim()) {
     showError(name, "Name is required");
     isValid = false;
@@ -28,7 +26,6 @@ function validateRegister() {
     isValid = false;
   }
 
-  // Validate email
   if (!email.value.trim()) {
     showError(email, "Email is required");
     isValid = false;
@@ -37,7 +34,6 @@ function validateRegister() {
     isValid = false;
   }
 
-  // Validate phone
   if (!phone.value.trim()) {
     showError(phone, "Phone number is required");
     isValid = false;
@@ -85,7 +81,6 @@ function register() {
     city: document.getElementById("city").value.trim() || null,
     state: document.getElementById("state").value.trim() || null,
     country: document.getElementById("country").value.trim() || null
-    // Note: password is NOT included - will be set after email verification
   };
 
   authActions.register(data)
@@ -93,7 +88,6 @@ function register() {
     showLoading(false);
     
     const msg = (data && data.message) ? data.message : String(data || "");
-    // Check if registration was successful
     if (msg.includes("success") || msg.includes("verification") || msg.includes("email")) {
       showAlert("Registration successful! Please check your email to verify your account.", "success");
       setTimeout(() => window.location.href = "login.html", 800);
@@ -141,7 +135,6 @@ function showAlert(message, type) {
   container.insertBefore(alert, container.firstChild);
 }
 
-// Enter key support
 document.addEventListener("keypress", function(e) {
   if (e.key === "Enter") register();
 });

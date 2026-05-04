@@ -80,7 +80,6 @@ public class InterviewController {
         if (ROLE_PANEL.equals(role)) {
             Panel panel = panelRepository.findByEmail(currentEmail).orElse(null);
             if (panel == null) return ResponseEntity.status(403).body("Panel profile not found");
-            // For panel users, always scope to their own panel id (ignore request param)
             return ResponseEntity.ok(interviewService.getByPanel(panel.getId()));
         } else if (!ROLE_HR.equals(role)) {
             return ResponseEntity.status(403).body("Access denied");

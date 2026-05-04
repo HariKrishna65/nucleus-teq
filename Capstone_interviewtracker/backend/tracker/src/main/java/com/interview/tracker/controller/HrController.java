@@ -75,9 +75,6 @@ public class HrController {
         return ResponseEntity.ok(payload);
     }
 
-    /**
-     * Get detailed info for a single candidate including feedback and interview history.
-     */
     @GetMapping("/candidates/{id}")
     public ResponseEntity<?> getCandidateDetails(@PathVariable Long id) {
         Candidate candidate = candidateRepository.findById(id).orElse(null);

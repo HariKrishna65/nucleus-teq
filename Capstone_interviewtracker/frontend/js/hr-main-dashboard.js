@@ -12,5 +12,4 @@ function logout() {
   window.location.href = "login.html";
 }
 
-// Expose logout function to HTML
 window.logout = logout;

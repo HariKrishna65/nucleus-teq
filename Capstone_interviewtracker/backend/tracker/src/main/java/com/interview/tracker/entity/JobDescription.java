@@ -36,7 +36,6 @@ public class JobDescription {
     @Min(value = 0, message = "Maximum salary cannot be negative")
     private Integer salaryMax;
 
-    // Backward compatibility for older data/clients (optional)
     private Integer experience;
     private String salary;
     private String location;

@@ -77,9 +77,6 @@ public class EmailService {
         }
     }
 
-    /**
-     * New combined method: Send single email for both verification and password setup
-     */
     public void sendVerificationAndPasswordEmail(User user) {
         String token = UUID.randomUUID().toString();
         LocalDate expiry = LocalDate.now().plusDays(7);
@@ -211,7 +208,6 @@ public class EmailService {
                 .distinct()
                 .collect(Collectors.joining(", "));
 
-        // Email to panel members
         for (com.interview.tracker.entity.Panel p : panels) {
             if (p.getEmail() == null || p.getEmail().isBlank()) continue;
 
@@ -239,7 +235,6 @@ public class EmailService {
             mailSender.send(message);
         }
 
-        // Email to candidate
         SimpleMailMessage candidateMsg = new SimpleMailMessage();
         candidateMsg.setTo(candidateEmail);
         candidateMsg.setSubject("Panel Assigned to Your Application - Interview Tracker");

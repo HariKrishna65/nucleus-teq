@@ -1,4 +1,3 @@
-// JD Page Management
 document.addEventListener('DOMContentLoaded', function() {
   const user = getStoredUser();
 
@@ -7,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  // Handle Home/Dashboard button based on user role
   const homeBtn = document.getElementById("homeBtn");
   if (homeBtn) {
     if (user && user.role === "HR") {

@@ -273,7 +273,6 @@ function rejectCandidate(candidateId) {
 }
 
 function viewResume(resumePath) {
-  // Implementation for viewing resume would go here
   alert("Resume viewing functionality to be implemented");
 }
 
@@ -288,7 +287,6 @@ function logout() {
   window.location.href = "login.html";
 }
 
-// Expose functions to HTML
 window.advanceStage = advanceStage;
 window.selectCandidate = selectCandidate;
 window.rejectCandidate = rejectCandidate;
@@ -296,5 +294,4 @@ window.viewResume = viewResume;
 window.toggleSidebar = toggleSidebar;
 window.logout = logout;
 
-// Load candidate details on page load
 loadCandidateDetails();

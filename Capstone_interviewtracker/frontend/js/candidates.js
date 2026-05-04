@@ -1,4 +1,3 @@
-// Wait for DOM to be loaded before checking authentication
 document.addEventListener('DOMContentLoaded', function() {
   const user = getStoredUser();
 
@@ -15,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
-  // Initialize the page after authentication check
   initializeCandidatesPage();
 });
 
@@ -233,7 +231,6 @@ function askComments(actionLabel) {
 }
 
 function advanceStage(candidateId) {
-  // Find the candidate to check current stage
   const row = allRows.find(row => (row.candidate || {}).id === candidateId);
   const stage = row ? normalizeStage(row.candidate) : null;
   const isPanelRound = stage === 'L1_TECH' || stage === 'L2_TECH' || stage === 'HR_ROUND';
@@ -248,7 +245,6 @@ function advanceStage(candidateId) {
     return;
   }
   
-  // For other stages, proceed with normal advancement
   const comments = prompt("Optional HR comments for stage movement:") || "";
   hrActions.advanceCandidate(candidateId, comments)
     .then(() => loadCandidates())
@@ -314,7 +310,6 @@ function openAssignPanel(candidateId) {
   modal.classList.remove("is-hidden");
   modal.setAttribute("aria-hidden", "false");
 
-  // Populate selects
   const s1 = document.getElementById("panelEmail1");
   const s2 = document.getElementById("panelEmail2");
   const options = allPanels
@@ -372,7 +367,6 @@ function submitAssignPanel() {
     return;
   }
 
-  // Combine date and time into a proper datetime
   const interviewDateTime = new Date(`${interviewDate}T${interviewTime}`);
   if (isNaN(interviewDateTime)) {
     showAssignPanelError("Invalid date or time");
@@ -418,7 +412,6 @@ function logout() {
   window.location.href = "login.html";
 }
 
-// Expose modal functions to HTML onclick handlers
 window.closeAssignPanel = closeAssignPanel;
 window.submitAssignPanel = submitAssignPanel;
 window.openAssignPanel = openAssignPanel;
@@ -430,12 +423,10 @@ window.selectCandidate = selectCandidate;
 window.rejectCandidate = rejectCandidate;
 window.logout = logout;
 
-// Initialize page
 wireFilters();
 loadPanels();
 loadCandidates();
 
-// Ensure modal starts hidden + allow backdrop/Esc close
 (() => {
   const modal = document.getElementById("assignPanelModal");
   if (!modal) return;
@@ -452,5 +443,4 @@ loadCandidates();
   });
 })();
 
-// Close the initializeCandidatesPage function
 }
