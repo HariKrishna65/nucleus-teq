@@ -35,7 +35,7 @@ function renderOnboard(rows) {
     });
 
   if (!filtered.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="icon">🎯</div><h3>No HR round candidates</h3><p>Candidates in the HR round will appear here for final decision.</p></div>';
+    wrap.innerHTML = '<div class="empty-state"><h3>No HR round candidates</h3><p>Candidates in the HR round will appear here for final decision.</p></div>';
     return;
   }
 

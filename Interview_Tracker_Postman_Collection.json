@@ -1,0 +1,554 @@
+{
+  "info": {
+    "name": "Interview Tracker API",
+    "description": "Complete API collection for the Interview Tracker application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "auth_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"CANDIDATE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', response.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"verification_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "verify"]
+            }
+          }
+        },
+        {
+          "name": "Set Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"password_setup_token\",\n  \"password\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/set-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "set-password"]
+            }
+          }
+        },
+        {
+          "name": "Create Test User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"test123\",\n  \"role\": \"CANDIDATE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/create-test-user",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "create-test-user"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Job Descriptions",
+      "item": [
+        {
+          "name": "Get All Job Descriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jd",
+              "host": ["{{base_url}}"],
+              "path": ["jd"]
+            }
+          }
+        },
+        {
+          "name": "Get Job Description by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jd/1",
+              "host": ["{{base_url}}"],
+              "path": ["jd", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Job Description",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop and maintain software applications\",\n  \"skills\": \"Java, Spring Boot, PostgreSQL\",\n  \"experience\": \"3-5 years\",\n  \"location\": \"Remote\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/jd",
+              "host": ["{{base_url}}"],
+              "path": ["jd"]
+            }
+          }
+        },
+        {
+          "name": "Delete Job Description",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/jd/1",
+              "host": ["{{base_url}}"],
+              "path": ["jd", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Candidates",
+      "item": [
+        {
+          "name": "Create Candidate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "candidate",
+                  "value": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"experience\": \"3 years\",\n  \"skills\": \"Java, Spring\",\n  \"currentCompany\": \"Tech Corp\",\n  \"expectedSalary\": 80000,\n  \"noticePeriod\": \"30 days\",\n  \"userId\": 1,\n  \"jdId\": 1\n}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/candidates",
+              "host": ["{{base_url}}"],
+              "path": ["candidates"]
+            }
+          }
+        },
+        {
+          "name": "Get Candidates by User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/candidates?userId=1",
+              "host": ["{{base_url}}"],
+              "path": ["candidates"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download Resume",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/candidates/1/resume",
+              "host": ["{{base_url}}"],
+              "path": ["candidates", "1", "resume"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "HR Operations",
+      "item": [
+        {
+          "name": "Get All Candidates with Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hr/candidates",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates"]
+            }
+          }
+        },
+        {
+          "name": "Get Candidate Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hr/candidates/1",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create Panel Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"+1234567890\",\n  \"expertise\": \"Java, Spring Boot\",\n  \"organization\": \"Tech Corp\",\n  \"designation\": \"Senior Developer\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hr/panels",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "panels"]
+            }
+          }
+        },
+        {
+          "name": "Assign Panel to Candidate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"panelEmails\": [\"jane.smith@example.com\"],\n  \"interviewTime\": \"2024-05-10T10:00:00\",\n  \"focusArea\": \"Java, Spring Boot\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hr/candidates/1/assign-panel",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates", "1", "assign-panel"]
+            }
+          }
+        },
+        {
+          "name": "Advance Candidate Stage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comments\": \"Good performance in screening round\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hr/candidates/1/advance",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates", "1", "advance"]
+            }
+          }
+        },
+        {
+          "name": "Reject Candidate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comments\": \"Not suitable for the role\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hr/candidates/1/reject",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates", "1", "reject"]
+            }
+          }
+        },
+        {
+          "name": "Select Candidate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comments\": \"Excellent fit for the team\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hr/candidates/1/select",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates", "1", "select"]
+            }
+          }
+        },
+        {
+          "name": "Delete Candidate",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hr/candidates/1",
+              "host": ["{{base_url}}"],
+              "path": ["hr", "candidates", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interviews",
+      "item": [
+        {
+          "name": "Create Panel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"expertise\": \"Java, Spring Boot\",\n  \"mobile\": \"+1234567890\",\n  \"organization\": \"Tech Corp\",\n  \"designation\": \"Senior Developer\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/interviews/panel",
+              "host": ["{{base_url}}"],
+              "path": ["interviews", "panel"]
+            }
+          }
+        },
+        {
+          "name": "Get All Panels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interviews/panel",
+              "host": ["{{base_url}}"],
+              "path": ["interviews", "panel"]
+            }
+          }
+        },
+        {
+          "name": "Schedule Interview",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidateId\": 1,\n  \"panelId\": 1,\n  \"interviewTime\": \"2024-05-10T10:00:00\",\n  \"status\": \"PENDING\",\n  \"focusArea\": \"Java, Spring Boot\",\n  \"round\": \"L1\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/interviews",
+              "host": ["{{base_url}}"],
+              "path": ["interviews"]
+            }
+          }
+        },
+        {
+          "name": "Get Interview by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interviews/1",
+              "host": ["{{base_url}}"],
+              "path": ["interviews", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get Interviews by Panel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/interviews?panelId=1",
+              "host": ["{{base_url}}"],
+              "path": ["interviews"],
+              "query": [
+                {
+                  "key": "panelId",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "item": [
+        {
+          "name": "Submit Feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interviewId\": 1,\n  \"rating\": 4,\n  \"comments\": \"Good technical knowledge, needs improvement in communication\",\n  \"recommendation\": \"PROCEED\",\n  \"panelEmail\": \"jane.smith@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/feedback",
+              "host": ["{{base_url}}"],
+              "path": ["feedback"]
+            }
+          }
+        },
+        {
+          "name": "Get Feedback by Interview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/feedback/interview/1",
+              "host": ["{{base_url}}"],
+              "path": ["feedback", "interview", "1"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

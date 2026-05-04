@@ -123,8 +123,7 @@ function loadJDs() {
         list.appendChild(card);
       });
     })
-    .catch(err => {
-      console.error("Error loading JDs", err);
+    .catch(() => {
       list.innerHTML = `<div class="alert alert-error">Error loading jobs. Please try again.</div>`;
     });
 }
