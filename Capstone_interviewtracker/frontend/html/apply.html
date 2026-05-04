@@ -1,76 +1,90 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apply for Job - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/apply.css">
 </head>
 <body class="page-dashboard page-candidate">
-
 <div class="dashboard-shell">
-  
-  <main class="content-area">
-    <div class="container">
-      <div class="header">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">U</div>
-          <div class="user-details">
-            <h3 id="userName">User</h3>
-            <p>Candidate</p>
-          </div>
-        </div>
-        <div class="header-actions">
-          <a class="btn apply-more-btn" href="dashboard.html">My Applications</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
-        </div>
-      </div>
-
-  <div class="jd-info" id="selectedJdInfo">
-    <h4>Selected Position</h4>
-    <p id="jdTitle">Select a job from the list below</p>
-  </div>
-
-  <div class="input-group">
-    <label for="jdSelect">Select Job <span class="required">*</span></label>
-    <select id="jdSelect" onchange="updateJdInfo()" required>
-      <option value="">-- Select a job --</option>
-    </select>
-    <small class="help-text">Choose the position you want to apply for</small>
-  </div>
-
-  <div class="input-group">
-    <label for="phone">Phone Number <span class="required">*</span></label>
-    <input id="phone" type="tel" placeholder="Enter your phone number" 
-           pattern="[0-9]{10}" maxlength="10" required
-           title="Please enter a valid 10-digit phone number">
-    <small class="help-text">Enter 10-digit mobile number without country code</small>
-  </div>
-
-  <div class="input-group">
-    <label for="experience">Years of Experience <span class="required">*</span></label>
-    <input id="experience" type="number" min="0" max="50" step="0.5" 
-           placeholder="Enter years of experience" required
-           title="Experience must be between 0 and 50 years">
-    <small class="help-text">Include decimal for months (e.g., 2.5 for 2 years 6 months)</small>
-  </div>
-
-  <div class="input-group">
-    <label>Resume (PDF) <span class="required">*</span></label>
-    <div class="file-input-wrapper">
-      <input type="file" id="resume" accept=".pdf,application/pdf" 
-             onchange="updateFileName()" required
-             title="Please upload your resume in PDF format (Max 5MB)">
-      <div class="file-display">
-        <div class="icon">📄 Resume File</div>
-        <p>Click to upload or drag and drop</p>
-        <p class="file-hint-text">PDF only (Max 5MB) - Required for application</p>
-        <div class="file-name" id="fileName"></div>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Candidate</div>
       </div>
     </div>
-    <small class="help-text">Upload your latest resume in PDF format</small>
-  </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">My Applications</a>
+        <a class="active" href="apply.html">Apply for Job</a>
+        <a href="jd.html?view=available">Available Jobs</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
 
-      <button onclick="applyJob()">Submit Application</button>
+  <main class="content-area">
+    <div class="container" style="max-width: 720px;">
+      <div class="header">
+        <div>
+          <h2>Apply for a Job</h2>
+          <p class="pipeline-note">Choose a role, confirm your details, and upload a PDF resume.</p>
+        </div>
+        <div class="header-actions">
+          <a class="btn btn-outline" href="dashboard.html">My Applications</a>
+        </div>
+      </div>
+
+      <div class="jd-info" id="selectedJdInfo">
+        <h4>Selected position</h4>
+        <p id="jdTitle">Select a job from the list below</p>
+      </div>
+
+      <div class="input-group">
+        <label for="jdSelect">Select Job <span class="required">*</span></label>
+        <select id="jdSelect" onchange="updateJdInfo()" required>
+          <option value="">-- Select a job --</option>
+        </select>
+        <small class="help-text">Choose the position you want to apply for.</small>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label for="phone">Phone Number <span class="required">*</span></label>
+          <input id="phone" type="tel" placeholder="9876543210" pattern="[0-9]{10}" maxlength="10" required>
+          <small class="help-text">Enter a 10-digit mobile number.</small>
+        </div>
+
+        <div class="input-group">
+          <label for="experience">Years of Experience <span class="required">*</span></label>
+          <input id="experience" type="number" min="0" max="50" step="0.5" placeholder="4.5" required>
+          <small class="help-text">Decimals are allowed for months.</small>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Resume (PDF) <span class="required">*</span></label>
+        <div class="file-input-wrapper">
+          <input type="file" id="resume" accept=".pdf,application/pdf" onchange="updateFileName()" required>
+          <div class="file-display" onclick="document.getElementById('resume').click()">
+            <div class="file-drop-text">Click to upload or drag and drop</div>
+            <div class="file-drop-hint">PDF only, max 5 MB</div>
+            <div class="file-name" id="fileName"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a class="btn btn-outline" href="dashboard.html">Cancel</a>
+        <button onclick="applyJob()">Submit Application</button>
+      </div>
     </div>
   </main>
 </div>

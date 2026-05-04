@@ -65,15 +65,20 @@ public class FeedbackService {
             if (!assigned) {
                 throw new IllegalArgumentException("You are not assigned to this interview");
             }
+            if (feedbackRepository.existsByInterview_IdAndPanel_Id(interviewId, panel.getId())) {
+                throw new IllegalArgumentException("Feedback already submitted for this interview");
+            }
 
             feedback.setPanel(panel);
         } else if (!ROLE_HR.equals(role)) {
             throw new IllegalArgumentException("Access denied");
         }
 
-        interview.setStatus("COMPLETED");
-        interviewRepository.save(interview);
         Feedback saved = feedbackRepository.save(feedback);
+        long submittedPanelCount = feedbackRepository.countDistinctPanelsByInterviewId(interviewId);
+        int assignedPanelCount = getAssignedPanelCount(interview);
+        interview.setStatus(submittedPanelCount >= assignedPanelCount ? "COMPLETED" : "FEEDBACK_PENDING");
+        interviewRepository.save(interview);
         log.info("Feedback submitted: feedbackId={}, interviewId={}, role={}", saved.getId(), interviewId, role);
         return saved;
     }
@@ -99,5 +104,12 @@ public class FeedbackService {
 
         Optional<Feedback> latest = feedbackRepository.findTopByInterview_IdOrderByIdDesc(interviewId);
         return latest.orElse(null);
+    }
+
+    private int getAssignedPanelCount(Interview interview) {
+        if (interview.getPanels() != null && !interview.getPanels().isEmpty()) {
+            return interview.getPanels().size();
+        }
+        return interview.getPanel() == null ? 0 : 1;
     }
 }

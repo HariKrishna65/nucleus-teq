@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HR Dashboard - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
@@ -8,14 +10,24 @@
 <body class="page-dashboard page-hr">
 <div class="dashboard-shell">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-title">HR Dashboard</div>
-    <nav class="sidebar-nav">
-      <a href="hr-main-dashboard.html" class="sidebar-link jd-link active">Dashboard</a>
-      <a href="candidates.html" class="sidebar-link candidates-link">Candidates</a>
-      <a href="onboard-candidate.html" class="sidebar-link onboard-link">Onboard Candidate</a>
-      <a href="hr-dashboard.html#panelMembersSection" class="sidebar-link panel-link">Panel Members</a>
-      <a href="hr-feedback.html" class="sidebar-link feedback-link">Feedback</a>
-    </nav>
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link active">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link">Feedback</a>
+        <a href="jd.html" class="sidebar-link">Job Descriptions</a>
+      </nav>
+    </div>
     <div class="sidebar-footer">
       <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
     </div>
@@ -26,58 +38,48 @@
       <div class="header">
         <div>
           <h2>HR Dashboard</h2>
-          <p class="pipeline-note">Welcome to the Interview Tracker HR Dashboard. Select an option below to get started.</p>
+          <p class="pipeline-note">Manage candidates, panel members, feedback, and job descriptions from one place.</p>
         </div>
         <div class="header-actions">
           <button onclick="window.location.href='jd.html'">Create JD</button>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <button class="secondary-btn" onclick="window.location.href='panel-management.html'">Add Panel</button>
         </div>
       </div>
 
       <div class="dashboard-grid">
         <div class="dashboard-card" onclick="window.location.href='candidates.html'">
-          <div class="card-icon">👥</div>
+          <div class="card-icon">C</div>
           <h3>Candidates</h3>
-          <p>View and manage all candidates, track interview progression, and assign panels.</p>
-          <div class="card-action">
-            <span class="action-text">Manage Candidates</span>
-          </div>
+          <p>View candidate progress, assign panels once per round, and move stages after complete feedback.</p>
+          <div class="card-action">Manage Candidates</div>
         </div>
 
         <div class="dashboard-card" onclick="window.location.href='onboard-candidate.html'">
-          <div class="card-icon">🎯</div>
+          <div class="card-icon">O</div>
           <h3>Onboard Candidate</h3>
-          <p>Review HR round candidates and make final selection decisions.</p>
-          <div class="card-action">
-            <span class="action-text">Onboard Candidates</span>
-          </div>
+          <p>Review final-stage candidates and handle onboarding decisions.</p>
+          <div class="card-action">Open Onboarding</div>
         </div>
 
         <div class="dashboard-card" onclick="window.location.href='panel-management.html'">
-          <div class="card-icon">👨‍💼</div>
+          <div class="card-icon">P</div>
           <h3>Panel Members</h3>
-          <p>Create panel member accounts, manage credentials, and assign interview panels.</p>
-          <div class="card-action">
-            <span class="action-text">Manage Panels</span>
-          </div>
+          <p>Create panel accounts, send password setup emails, and manage interview experts.</p>
+          <div class="card-action">Manage Panels</div>
         </div>
 
         <div class="dashboard-card" onclick="window.location.href='hr-feedback.html'">
-          <div class="card-icon">📊</div>
+          <div class="card-icon">F</div>
           <h3>Feedback</h3>
-          <p>View feedback submitted by panel members and track candidate performance.</p>
-          <div class="card-action">
-            <span class="action-text">View Feedback</span>
-          </div>
+          <p>View submitted feedback and compare outcomes across interview rounds.</p>
+          <div class="card-action">View Feedback</div>
         </div>
 
         <div class="dashboard-card" onclick="window.location.href='jd.html?view=available'">
-          <div class="card-icon">📋</div>
+          <div class="card-icon">J</div>
           <h3>Job Descriptions</h3>
-          <p>Create and manage job descriptions for open positions.</p>
-          <div class="card-action">
-            <span class="action-text">Manage JDs</span>
-          </div>
+          <p>Create and manage job descriptions that candidates can apply to.</p>
+          <div class="card-action">Manage JDs</div>
         </div>
       </div>
     </div>

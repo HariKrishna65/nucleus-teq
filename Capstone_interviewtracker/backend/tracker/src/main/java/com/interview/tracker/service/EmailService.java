@@ -200,6 +200,10 @@ public class EmailService {
         String round = interview != null ? (interview.getRound() == null ? "N/A" : interview.getRound()) : "N/A";
         String focus = interview != null ? (interview.getFocusArea() == null ? "General" : interview.getFocusArea()) : "General";
         String time = (interview != null && interview.getInterviewTime() != null) ? interview.getInterviewTime().format(EMAIL_DT) : "To be scheduled";
+        String duration = (interview != null && interview.getDuration() != null) ? interview.getDuration() + " minutes" : "N/A";
+        String type = (interview != null && interview.getInterviewType() != null && !interview.getInterviewType().isBlank()) ? interview.getInterviewType() : "N/A";
+        String meetingLink = (interview != null && interview.getMeetingLink() != null && !interview.getMeetingLink().isBlank()) ? interview.getMeetingLink() : "N/A";
+        String notes = (interview != null && interview.getNotes() != null && !interview.getNotes().isBlank()) ? interview.getNotes() : "N/A";
 
         String panelEmails = panels.stream()
                 .map(com.interview.tracker.entity.Panel::getEmail)
@@ -223,7 +227,11 @@ public class EmailService {
                     "Job: " + jobTitle + "\n" +
                     "Round: " + round + "\n" +
                     "Focus area: " + focus + "\n" +
-                    "Time: " + time + "\n\n" +
+                    "Time: " + time + "\n" +
+                    "Duration: " + duration + "\n" +
+                    "Type: " + type + "\n" +
+                    "Meeting link: " + meetingLink + "\n" +
+                    "Notes: " + notes + "\n\n" +
                     "Please login to Interview Tracker to view details.\n\n" +
                     "Best regards,\n" +
                     "Interview Tracker Team"
@@ -242,7 +250,10 @@ public class EmailService {
                 "Job: " + jobTitle + "\n" +
                 "Round: " + round + "\n" +
                 "Focus area: " + focus + "\n" +
-                "Time: " + time + "\n\n" +
+                "Time: " + time + "\n" +
+                "Duration: " + duration + "\n" +
+                "Type: " + type + "\n" +
+                "Meeting link: " + meetingLink + "\n\n" +
                 "You will be notified if the interview time changes.\n\n" +
                 "Best regards,\n" +
                 "Interview Tracker Team"

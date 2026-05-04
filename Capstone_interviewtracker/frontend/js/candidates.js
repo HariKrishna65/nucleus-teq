@@ -98,6 +98,17 @@ function feedbackHtml(feedback) {
   `;
 }
 
+function getMeetingLink(row) {
+  const link = row.interview?.meetingLink || row.meetingLink || row.meetingUrl || row.interview?.meetingUrl;
+  if (!link) return 'N/A';
+  const display = link.length > 40 ? `${link.slice(0, 40)}…` : link;
+  return `<a href="${link}" target="_blank" rel="noopener noreferrer">${display}</a>`;
+}
+
+function buildLocalDateTime(interviewDate, interviewTime) {
+  return `${interviewDate}T${interviewTime}:00`;
+}
+
 function renderCandidates(rows) {
   const list = document.getElementById("candidateList");
   const q = (searchQuery || "").trim().toLowerCase();
@@ -130,6 +141,7 @@ function renderCandidates(rows) {
             <th>Job Title</th>
             <th>Stage</th>
             <th>Status</th>
+            <th>Meeting</th>
             <th>Feedback</th>
             <th>Actions</th>
           </tr>
@@ -147,7 +159,15 @@ function renderCandidates(rows) {
               ? `${(latestFeedback.panel && latestFeedback.panel.name) || "Panel"} | ${latestFeedback.status || "N/A"} | ${latestFeedback.rating || "N/A"}`
               : "No feedback";
             const isFinal = stage === "SELECTED" || stage === "REJECTED";
-            const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
+            const isPanelRound = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
+            const canAssignPanel = row.canAssignPanel !== undefined ? row.canAssignPanel : isPanelRound;
+            const panelAssigned = !!row.panelAssignedForCurrentRound;
+            const assignedPanelCount = row.assignedPanelCount || 0;
+            const currentRoundFeedbackCount = row.currentRoundFeedbackCount || 0;
+            const canAdvanceStage = row.canAdvanceStage !== undefined ? row.canAdvanceStage : true;
+            const feedbackProgress = panelAssigned
+              ? `Feedback ${currentRoundFeedbackCount}/${assignedPanelCount}`
+              : feedbackText;
 
             return `
               <tr>
@@ -157,10 +177,11 @@ function renderCandidates(rows) {
                 <td>${job}</td>
                 <td>${renderStageTracker(stage)}</td>
                 <td><span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span></td>
-                <td>${feedbackText}</td>
+                <td>${getMeetingLink(row)}</td>
+                <td>${feedbackProgress}</td>
                 <td>
                   <div class="table-actions">
-                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Move to Next Stage</button>
+                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal || (isPanelRound && panelAssigned && !canAdvanceStage) ? "disabled" : ""}>Move to Next Stage</button>
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
                     <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
@@ -213,12 +234,17 @@ function askComments(actionLabel) {
 
 function advanceStage(candidateId) {
   // Find the candidate to check current stage
-  const candidate = allRows.find(row => (row.candidate || {}).id === candidateId);
-  const stage = candidate ? normalizeStage(candidate.candidate) : null;
+  const row = allRows.find(row => (row.candidate || {}).id === candidateId);
+  const stage = row ? normalizeStage(row.candidate) : null;
+  const isPanelRound = stage === 'L1_TECH' || stage === 'L2_TECH' || stage === 'HR_ROUND';
   
-  // If L1 or L2 stage, navigate to assign panel page
-  if (stage === 'L1_TECH' || stage === 'L2_TECH') {
+  if (isPanelRound && !row?.panelAssignedForCurrentRound) {
     window.location.href = `assign-panel.html?candidateId=${candidateId}`;
+    return;
+  }
+
+  if (isPanelRound && row?.canAdvanceStage === false) {
+    alert(`Waiting for feedback from all assigned panel members (${row.currentRoundFeedbackCount || 0}/${row.assignedPanelCount || 0}).`);
     return;
   }
   
@@ -352,6 +378,10 @@ function submitAssignPanel() {
     showAssignPanelError("Invalid date or time");
     return;
   }
+  if (interviewDateTime <= new Date()) {
+    showAssignPanelError("Interview date and time must be in the future");
+    return;
+  }
 
   const btn = document.getElementById("assignPanelSubmitBtn");
   if (btn) {
@@ -361,7 +391,7 @@ function submitAssignPanel() {
 
   const assignData = {
     panelEmails: emails,
-    interviewTime: interviewDateTime.toISOString(),
+    interviewTime: buildLocalDateTime(interviewDate, interviewTime),
     focusArea: focusArea || null,
     notes: interviewNotes || null
   };

@@ -31,11 +31,11 @@ function isValidEmail(email) {
 
 function showError(input, message) {
   input.classList.add("input-error");
-  let errorDiv = input.nextElementSibling;
-  if (!errorDiv || !errorDiv.classList.contains("error-message")) {
+  let errorDiv = input.parentElement.querySelector(".error-message");
+  if (!errorDiv) {
     errorDiv = document.createElement("div");
     errorDiv.className = "error-message";
-    input.parentNode.insertBefore(errorDiv, input.nextSibling);
+    input.parentElement.appendChild(errorDiv);
   }
   errorDiv.textContent = message;
   errorDiv.style.display = "block";
@@ -52,34 +52,34 @@ function login() {
   };
 
   authActions.login(data)
-  .then(data => {
-    showLoading(false);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
-    showAlert("Login successful! Redirecting...", "success");
+    .then(data => {
+      showLoading(false);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(data));
+      showAlert("Login successful. Redirecting...", "success");
 
-    setTimeout(() => {
-      if (data.role === "HR") {
-        window.location.href = "hr-main-dashboard.html";
-      } else if (data.role === "PANEL") {
-        window.location.href = "panel-dashboard.html";
+      setTimeout(() => {
+        if (data.role === "HR") {
+          window.location.href = "hr-main-dashboard.html";
+        } else if (data.role === "PANEL") {
+          window.location.href = "panel-dashboard.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      }, 700);
+    })
+    .catch(err => {
+      showLoading(false);
+      const errorMsg = err.message || "Login failed";
+
+      if (errorMsg.includes("verify") || errorMsg.includes("verified")) {
+        document.getElementById("verificationNotice").classList.remove("is-hidden");
+        showAlert(errorMsg, "error");
+      } else if (errorMsg.includes("Password not set") || errorMsg.includes("password")) {
+        showAlert(errorMsg + " Use Forgot password to reset.", "error");
       } else {
-        window.location.href = "dashboard.html";
+        showAlert(errorMsg, "error");
       }
-    }, 1000);
-  })
-  .catch(err => {
-    showLoading(false);
-    const errorMsg = err.message || "Login failed";
-
-    if (errorMsg.includes("verify") || errorMsg.includes("verified")) {
-      document.getElementById("verificationNotice").classList.remove("is-hidden");
-      showAlert(errorMsg, "error");
-    } else if (errorMsg.includes("Password not set") || errorMsg.includes("password")) {
-      showAlert(errorMsg + " Use Forgot password to reset.", "error");
-    } else {
-      showAlert(errorMsg, "error");
-    }
-  });
+    });
 }
 
 function showForgotPassword() {
@@ -99,14 +99,14 @@ function showForgotPassword() {
     showLoading(true);
 
     authActions.forgotPassword({ email })
-    .then(() => {
-      showLoading(false);
-      showAlert("Password reset link sent to your email!", "success");
-    })
-    .catch(err => {
-      showLoading(false);
-      showAlert("Failed to send reset email. Please try again.", "error");
-    });
+      .then(() => {
+        showLoading(false);
+        showAlert("Password reset link sent to your email.", "success");
+      })
+      .catch(() => {
+        showLoading(false);
+        showAlert("Failed to send reset email. Please try again.", "error");
+      });
   }
 }
 
@@ -115,23 +115,23 @@ function togglePassword(inputId, btn) {
   if (!input) return;
   const isHidden = input.type === "password";
   input.type = isHidden ? "text" : "password";
-  btn.textContent = isHidden ? "🙈" : "👁";
+  btn.textContent = isHidden ? "Hide" : "Show";
 }
 
 function showLoading(show) {
-  const btn = document.querySelector(".auth-card button");
+  const btn = document.getElementById("loginBtn");
   if (!btn) return;
   if (show) {
     btn.innerHTML = '<span class="spinner"></span> Loading...';
     btn.disabled = true;
   } else {
-    btn.textContent = "Login";
+    btn.textContent = "Sign in";
     btn.disabled = false;
   }
 }
 
 function showAlert(message, type) {
-  const existing = document.querySelector(".alert");
+  const existing = document.querySelector(".alert:not(#verificationNotice)");
   if (existing) existing.remove();
 
   const alert = document.createElement("div");
@@ -146,7 +146,6 @@ document.addEventListener("keypress", function(e) {
   if (e.key === "Enter") login();
 });
 
-// Redirect if already logged in
 const existingUser = getStoredUser();
 if (existingUser) {
   if (existingUser.role === "HR") window.location.href = "hr-main-dashboard.html";

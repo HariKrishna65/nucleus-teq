@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Management - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
@@ -8,14 +10,24 @@
 <body class="page-dashboard page-hr">
 <div class="dashboard-shell">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-title">HR Dashboard</div>
-    <nav class="sidebar-nav">
-      <a href="hr-main-dashboard.html" class="sidebar-link jd-link">Dashboard</a>
-      <a href="candidates.html" class="sidebar-link candidates-link">Candidates</a>
-      <a href="onboard-candidate.html" class="sidebar-link onboard-link">Onboard Candidate</a>
-      <a href="panel-management.html" class="sidebar-link panel-link active">Panel Members</a>
-      <a href="hr-feedback.html" class="sidebar-link feedback-link">Feedback</a>
-    </nav>
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link active">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link">Feedback</a>
+        <a href="jd.html" class="sidebar-link">Job Descriptions</a>
+      </nav>
+    </div>
     <div class="sidebar-footer">
       <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
     </div>
@@ -26,16 +38,16 @@
       <div class="header">
         <div>
           <h2>Panel Management</h2>
-          <p class="pipeline-note">Create panel logins and manage panel members.</p>
+          <p class="pipeline-note">Create panel accounts and manage interview experts.</p>
         </div>
         <div class="header-actions">
-          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">Dashboard</button>
         </div>
       </div>
 
       <section class="panel-section">
         <h3>Create Panel Member</h3>
-        <p class="pipeline-note">Create panel login and send password setup email.</p>
+        <p class="pipeline-note">Create a panel login and send the password setup email.</p>
         <div id="panelAlert" class="alert is-hidden"></div>
         <div class="panel-form-grid">
           <div class="input-group">

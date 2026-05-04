@@ -20,17 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   if (user && user.role === "HR") {
-    const hrDashboardBtn = document.getElementById("hrDashboardBtn");
     const availableJobsBtn = document.getElementById("availableJobsBtn");
     const createJobBtn = document.getElementById("createJobBtn");
 
-    if (hrDashboardBtn) hrDashboardBtn.classList.remove("is-hidden");
     if (availableJobsBtn) availableJobsBtn.classList.remove("is-hidden");
     if (createJobBtn) createJobBtn.classList.remove("is-hidden");
 
     initializeJDPage();
   } else {
-    ["createJobBtn", "hrDashboardBtn", "availableJobsBtn"].forEach(id => {
+    ["createJobBtn", "availableJobsBtn"].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = "none";
     });

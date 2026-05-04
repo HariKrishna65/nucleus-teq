@@ -3,6 +3,7 @@ package com.interview.tracker.controller;
 import com.interview.tracker.dto.LoginRequest;
 import com.interview.tracker.dto.RegisterRequest;
 import com.interview.tracker.dto.AuthResponse;
+import com.interview.tracker.dto.EmailRequest;
 import com.interview.tracker.dto.SetPasswordRequest;
 import com.interview.tracker.dto.CreateTestUserRequest;
 import com.interview.tracker.dto.VerifyEmailRequest;
@@ -56,7 +57,7 @@ public class AuthController {
     }
 
     @PostMapping(FORGOT_PASSWORD)
-    public AuthResponse forgotPassword(@Valid @RequestBody LoginRequest request) {
+    public AuthResponse forgotPassword(@Valid @RequestBody EmailRequest request) {
         return userService.requestPasswordReset(request.getEmail());
     }
 
@@ -68,7 +69,7 @@ public class AuthController {
     }
 
     @PostMapping(RESEND_VERIFICATION)
-    public AuthResponse resendVerificationEmail(@Valid @RequestBody LoginRequest request) {
+    public AuthResponse resendVerificationEmail(@Valid @RequestBody EmailRequest request) {
         return userService.resendVerificationEmail(request.getEmail());
     }
 }

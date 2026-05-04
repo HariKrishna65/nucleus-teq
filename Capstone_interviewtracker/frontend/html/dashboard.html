@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Applications - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/dashboard.css">
@@ -8,44 +10,59 @@
 <body class="page-dashboard page-candidate">
 <div class="dashboard-shell">
   <aside class="sidebar">
-    <nav class="sidebar-nav">
-      <a class="active" href="dashboard.html">My Applications</a>
-      <a href="apply.html">Apply Jobs</a>
-      <a href="jd.html?view=available">Available Jobs</a>
-      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
-    </nav>
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Candidate</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a class="active" href="dashboard.html">My Applications</a>
+        <a href="apply.html">Apply for Job</a>
+        <a href="jd.html?view=available">Available Jobs</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div>
+          <div class="user-name" id="userName">User</div>
+          <div class="user-role">Candidate</div>
+        </div>
+      </div>
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
   </aside>
 
   <main class="content-area">
     <div class="container">
       <div class="header">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">U</div>
-          <div class="user-details">
-            <h3 id="userName">User</h3>
-            <p>Candidate</p>
-          </div>
+        <div>
+          <h2>My Applications</h2>
+          <p class="pipeline-note">Track each application through screening, interview rounds, and final decisions.</p>
         </div>
         <div class="header-actions">
-          <a class="btn apply-more-btn" href="apply.html">Apply for more jobs</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a class="btn apply-more-btn" href="apply.html">Apply for Job</a>
         </div>
       </div>
 
       <div class="stats">
-        <div class="stat-card" data-filter="all" role="button" tabindex="0" aria-label="Show all applications">
+        <div class="stat-card" data-filter="all" role="button" tabindex="0">
           <div class="number" id="totalApps">0</div>
-          <div class="label">Total Applications</div>
+          <div class="label">Total Applied</div>
         </div>
-        <div class="stat-card" data-filter="pending" role="button" tabindex="0" aria-label="Show pending applications">
+        <div class="stat-card" data-filter="pending" role="button" tabindex="0">
           <div class="number" id="pendingApps">0</div>
-          <div class="label">Pending</div>
+          <div class="label">Pending Review</div>
         </div>
-        <div class="stat-card" data-filter="interview" role="button" tabindex="0" aria-label="Show in interview applications">
+        <div class="stat-card" data-filter="interview" role="button" tabindex="0">
           <div class="number" id="interviewApps">0</div>
           <div class="label">In Interview</div>
         </div>
-        <div class="stat-card" data-filter="selected" role="button" tabindex="0" aria-label="Show selected applications">
+        <div class="stat-card" data-filter="selected" role="button" tabindex="0">
           <div class="number" id="selectedApps">0</div>
           <div class="label">Selected</div>
         </div>

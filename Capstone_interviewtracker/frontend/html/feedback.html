@@ -1,99 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Submit Feedback - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/feedback.css">
 </head>
 <body class="page-dashboard page-panel">
-
 <div class="dashboard-shell">
   <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Panel Member</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a href="panel-dashboard.html">My Interviews</a>
+        <a class="active" href="feedback.html">Submit Feedback</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">P</div>
+        <div>
+          <div class="user-name" id="userName">Panel Member</div>
+          <div class="user-role">Panel Member</div>
+        </div>
+      </div>
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
   </aside>
 
   <main class="content-area">
-    <div class="container">
+    <div class="container" style="max-width: 760px;">
       <div class="header">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">P</div>
-          <div class="user-details">
-            <h3 id="userName">Panel Member</h3>
-            <p>Interview Panel</p>
-          </div>
+        <div>
+          <h2>Submit Interview Feedback</h2>
+          <p class="pipeline-note">Complete the rating, comments, and recommendation for this interview.</p>
         </div>
         <div class="header-actions">
-          <a class="btn apply-more-btn" href="panel-dashboard.html">My Interviews</a>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+          <a class="btn btn-outline" href="panel-dashboard.html">My Interviews</a>
         </div>
       </div>
 
-  <div class="interview-summary" id="interviewSummary">
-    <h4>Interview Details</h4>
-    <p><strong>Candidate:</strong> <span id="candidateName">Loading...</span></p>
-    <p><strong>Round:</strong> <span id="roundInfo">Loading...</span></p>
-    <p><strong>Focus Area:</strong> <span id="focusArea">Loading...</span></p>
-  </div>
+      <div class="interview-summary" id="interviewSummary">
+        <h4>Interview details</h4>
+        <p><strong>Candidate:</strong> <span id="candidateName">Loading...</span></p>
+        <p><strong>Round:</strong> <span id="roundInfo">Loading...</span></p>
+        <p><strong>Focus Area:</strong> <span id="focusArea">Loading...</span></p>
+      </div>
 
-  <div class="input-group">
-    <label>Rating</label>
-    <div class="rating-container" id="ratingContainer">
-      <div class="rating-option" data-value="1" onclick="selectRating(1)">
-        <div class="stars">1/5</div>
-        <div class="label">Poor</div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Performance Rating <span class="text-danger">*</span></div>
+        <div class="rating-container" id="ratingContainer">
+          <div class="rating-option" data-value="1" onclick="selectRating(1)"><div class="stars">1</div><div class="label">Poor</div></div>
+          <div class="rating-option" data-value="2" onclick="selectRating(2)"><div class="stars">2</div><div class="label">Below Avg</div></div>
+          <div class="rating-option" data-value="3" onclick="selectRating(3)"><div class="stars">3</div><div class="label">Average</div></div>
+          <div class="rating-option" data-value="4" onclick="selectRating(4)"><div class="stars">4</div><div class="label">Good</div></div>
+          <div class="rating-option" data-value="5" onclick="selectRating(5)"><div class="stars">5</div><div class="label">Excellent</div></div>
+        </div>
+        <input type="hidden" id="rating" value="">
       </div>
-      <div class="rating-option" data-value="2" onclick="selectRating(2)">
-        <div class="stars">2/5</div>
-        <div class="label">Average</div>
-      </div>
-      <div class="rating-option" data-value="3" onclick="selectRating(3)">
-        <div class="stars">3/5</div>
-        <div class="label">Good</div>
-      </div>
-      <div class="rating-option" data-value="4" onclick="selectRating(4)">
-        <div class="stars">4/5</div>
-        <div class="label">Very Good</div>
-      </div>
-      <div class="rating-option" data-value="5" onclick="selectRating(5)">
-        <div class="stars">5/5</div>
-        <div class="label">Excellent</div>
-      </div>
-    </div>
-    <input type="hidden" id="rating" value="">
-  </div>
 
-  <div class="input-group">
-    <label for="comments">Comments / Feedback</label>
-    <textarea id="comments" placeholder="Provide detailed feedback about the candidate's performance..."></textarea>
-  </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Detailed Comments <span class="text-danger">*</span></div>
+        <div class="input-group" style="margin:0;">
+          <textarea id="comments" rows="5" placeholder="Describe technical depth, communication, problem-solving, strengths, and improvement areas."></textarea>
+        </div>
+      </div>
 
-  <div class="input-group">
-    <label>Interview Decision</label>
-    <div class="status-options" id="statusOptions">
-      <div class="status-option" data-value="L1" onclick="selectStatus('L1')">
-        <div class="icon">Stage 1</div>
-        <div class="label">Move to L1</div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Interview Decision <span class="text-danger">*</span></div>
+        <div class="status-options" id="statusOptions">
+          <div class="status-option" data-value="L1" onclick="selectStatus('L1')"><div class="label">Move to L1</div></div>
+          <div class="status-option" data-value="L2" onclick="selectStatus('L2')"><div class="label">Move to L2</div></div>
+          <div class="status-option" data-value="HR" onclick="selectStatus('HR')"><div class="label">HR Round</div></div>
+          <div class="status-option" data-value="SELECTED" onclick="selectStatus('SELECTED')"><div class="label">Select</div></div>
+          <div class="status-option rejected" data-value="REJECTED" onclick="selectStatus('REJECTED')"><div class="label">Reject</div></div>
+        </div>
+        <input type="hidden" id="status" value="">
       </div>
-      <div class="status-option" data-value="L2" onclick="selectStatus('L2')">
-        <div class="icon">Stage 2</div>
-        <div class="label">Move to L2</div>
-      </div>
-      <div class="status-option" data-value="HR" onclick="selectStatus('HR')">
-        <div class="icon">HR</div>
-        <div class="label">HR Round</div>
-      </div>
-      <div class="status-option" data-value="SELECTED" onclick="selectStatus('SELECTED')">
-        <div class="icon">Select</div>
-        <div class="label">Selected</div>
-      </div>
-      <div class="status-option rejected" data-value="REJECTED" onclick="selectStatus('REJECTED')">
-        <div class="icon">Reject</div>
-        <div class="label">Reject</div>
-      </div>
-    </div>
-    <input type="hidden" id="status" value="">
-  </div>
 
-      <button id="submitFeedbackBtn" onclick="submitFeedback()">Submit Feedback</button>
+      <div class="form-actions" style="margin-top:16px;">
+        <a class="btn btn-outline" href="panel-dashboard.html">Cancel</a>
+        <button id="submitFeedbackBtn" onclick="submitFeedback()">Submit Feedback</button>
+      </div>
     </div>
   </main>
 </div>

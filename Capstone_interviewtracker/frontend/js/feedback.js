@@ -28,26 +28,19 @@ function showInterviewSelection() {
 
   container.innerHTML = `
     <div class="header">
-      <div class="user-info">
-        <div class="user-avatar">${(user.name || "P").charAt(0).toUpperCase()}</div>
-        <div class="user-details">
-          <h3>${user.name || "Panel Member"}</h3>
-          <p>Interview Panel</p>
-        </div>
+      <div>
+        <h2>Select an Interview</h2>
+        <p class="pipeline-note">Choose one of your assigned interviews to submit or review feedback.</p>
       </div>
       <div class="header-actions">
-        <a class="btn apply-more-btn" href="panel-dashboard.html">My Interviews</a>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <a class="btn btn-outline" href="panel-dashboard.html">My Interviews</a>
       </div>
     </div>
 
-    <div class="interview-selection">
-      <h2>Select an Interview for Feedback</h2>
-      <div id="interviewList">
-        <div class="loading">
-          <div class="spinner"></div>
-          <p>Loading interviews...</p>
-        </div>
+    <div id="interviewList">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading interviews...</p>
       </div>
     </div>
   `;
@@ -75,7 +68,7 @@ function loadInterviewsForSelection() {
       if (interviews.length === 0) {
         list.innerHTML = `
           <div class="empty-state">
-            <div class="icon">📋</div>
+            <div class="icon">Interviews</div>
             <h3>No interviews available</h3>
             <p>You don't have any assigned interviews.</p>
             <a href="panel-dashboard.html" class="btn">Back to Dashboard</a>
@@ -93,17 +86,17 @@ function loadInterviewsForSelection() {
           ${pending.map(interview => `
             <div class="interview-card selectable" onclick="selectInterview(${interview.id})">
               <div class="interview-info">
-                <b>${interview.candidate?.user?.name || 'Unknown Candidate'}</b>
-                <span>Round: ${interview.round || 'N/A'}</span>
-                <span>Focus: ${interview.focusArea || 'General'}</span>
+                <b>${interview.candidate?.user?.name || "Unknown Candidate"}</b>
+                <span>Round: ${interview.round || "N/A"}</span>
+                <span>Focus: ${interview.focusArea || "General"}</span>
                 <span>Time: ${formatDateTime(interview.interviewTime)}</span>
                 <div class="interview-meta">
-                  <span class="meta-item">⏳ Pending</span>
+                  <span class="meta-item">Pending</span>
                 </div>
               </div>
               <button class="btn btn-small">Submit Feedback</button>
             </div>
-          `).join('')}
+          `).join("")}
         ` : '<p style="color:#6b7280;">No pending interviews.</p>'}
 
         ${completed.length > 0 ? `
@@ -111,18 +104,17 @@ function loadInterviewsForSelection() {
           ${completed.map(interview => `
             <div class="interview-card" style="opacity:0.7;">
               <div class="interview-info">
-                <b>${interview.candidate?.user?.name || 'Unknown Candidate'}</b>
-                <span>Round: ${interview.round || 'N/A'}</span>
+                <b>${interview.candidate?.user?.name || "Unknown Candidate"}</b>
+                <span>Round: ${interview.round || "N/A"}</span>
                 <span>Time: ${formatDateTime(interview.interviewTime)}</span>
                 <div class="interview-meta">
-                  <span class="meta-item">✅ Completed</span>
+                  <span class="meta-item">Completed</span>
                 </div>
               </div>
-              <button class="btn btn-small btn-secondary" 
-                onclick="selectInterview(${interview.id})">View Feedback</button>
+              <button class="btn btn-small btn-secondary" onclick="selectInterview(${interview.id})">View Feedback</button>
             </div>
-          `).join('')}
-        ` : ''}
+          `).join("")}
+        ` : ""}
       `;
     })
     .catch(err => {
@@ -142,9 +134,25 @@ function selectInterview(id) {
   loadInterviewDetails();
 }
 
-// ==========================================
-// FEEDBACK FORM
-// ==========================================
+function isInterviewAssignedToCurrentUser(interview) {
+  if (!interview || !user) return false;
+  const currentUserEmail = (user.email || user.username || "").toLowerCase();
+  const currentUserId = user.panelId || user.userId;
+
+  if (currentUserId && (interview.panelId === currentUserId || interview.panel?.id === currentUserId)) {
+    return true;
+  }
+
+  if (Array.isArray(interview.panelEmails) && currentUserEmail) {
+    return interview.panelEmails.some(email => String(email || "").toLowerCase() === currentUserEmail);
+  }
+
+  if (interview.panel?.email && currentUserEmail) {
+    return String(interview.panel.email).toLowerCase() === currentUserEmail;
+  }
+
+  return false;
+}
 
 function loadInterviewDetails() {
   if (!user || !user.userId) {
@@ -154,6 +162,15 @@ function loadInterviewDetails() {
 
   interviewActions.getById(interviewId)
     .then(data => {
+      if (!isInterviewAssignedToCurrentUser(data)) {
+        showAlert("You are not assigned to this interview. Only assigned panel members may view or submit feedback.", "error");
+        localStorage.removeItem(STORAGE_KEYS.INTERVIEW_ID);
+        setTimeout(() => {
+          window.location.href = "panel-dashboard.html";
+        }, 2200);
+        return;
+      }
+
       interviewStatus = data.status || "PENDING";
 
       const candidateNameEl = document.getElementById("candidateName");
@@ -161,8 +178,7 @@ function loadInterviewDetails() {
       const focusAreaEl = document.getElementById("focusArea");
 
       if (candidateNameEl) {
-        candidateNameEl.textContent =
-          data.candidate?.user?.name || "Unknown";
+        candidateNameEl.textContent = data.candidate?.user?.name || "Unknown";
       }
       if (roundInfoEl) {
         roundInfoEl.textContent = data.round || "N/A";
@@ -170,9 +186,6 @@ function loadInterviewDetails() {
       if (focusAreaEl) {
         focusAreaEl.textContent = data.focusArea || "General";
       }
-
-      const form = document.getElementById("feedbackForm");
-      if (form) form.classList.remove("is-hidden");
 
       if (interviewStatus === "COMPLETED") {
         loadExistingFeedback();
@@ -213,7 +226,7 @@ function loadExistingFeedback() {
         submitBtn.textContent = "Feedback Already Submitted";
       }
 
-      showAlert("Feedback already submitted — view only.", "success");
+      showAlert("Feedback already submitted. View only.", "success");
     })
     .catch(() => {});
 }
@@ -270,18 +283,18 @@ function submitFeedback() {
   showLoading(true);
 
   const feedback = {
-    rating: parseInt(document.getElementById("rating").value),
+    rating: parseInt(document.getElementById("rating").value, 10),
     comments: document.getElementById("comments").value.trim(),
     result: document.getElementById("status").value,
     interview: {
-      id: parseInt(interviewId)
+      id: parseInt(interviewId, 10)
     }
   };
 
   feedbackActions.submit(feedback)
     .then(() => {
       showLoading(false);
-      showAlert("Feedback submitted successfully! ✅", "success");
+      showAlert("Feedback submitted successfully.", "success");
       localStorage.removeItem(STORAGE_KEYS.INTERVIEW_ID);
       setTimeout(() => {
         window.location.href = "panel-dashboard.html";
@@ -333,16 +346,6 @@ function formatDateTime(dateTime) {
   });
 }
 
-function formatStatus(status) {
-  const map = {
-    PENDING: "Pending",
-    IN_PROGRESS: "In Progress",
-    COMPLETED: "Completed",
-    CANCELLED: "Cancelled"
-  };
-  return map[status] || status || "Pending";
-}
-
 function logout() {
   if (confirm("Are you sure you want to logout?")) {
     localStorage.removeItem(STORAGE_KEYS.USER);
@@ -350,15 +353,8 @@ function logout() {
   }
 }
 
-function toggleSidebar() {
-  const shell = document.querySelector(".dashboard-shell");
-  if (!shell) return;
-  shell.classList.toggle("sidebar-collapsed");
-}
-
 window.selectRating = selectRating;
 window.selectStatus = selectStatus;
 window.submitFeedback = submitFeedback;
 window.logout = logout;
-window.toggleSidebar = toggleSidebar;
 window.selectInterview = selectInterview;

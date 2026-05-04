@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Dashboard - Interview Tracker</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/panel-dashboard.css">
@@ -8,45 +10,59 @@
 <body class="page-dashboard page-panel">
 <div class="dashboard-shell">
   <aside class="sidebar">
-    <nav class="sidebar-nav">
-      <a class="active" href="panel-dashboard.html">My Interviews</a>
-      <a href="feedback.html">Feedback</a>
-      <a href="login.html" onclick="logout()" class="logout-link">Logout</a>
-    </nav>
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Panel Member</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a class="active" href="panel-dashboard.html">My Interviews</a>
+        <a href="feedback.html">Submit Feedback</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">P</div>
+        <div>
+          <div class="user-name" id="userName">Panel Member</div>
+          <div class="user-role">Panel Member</div>
+        </div>
+      </div>
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
   </aside>
 
   <main class="content-area">
     <div class="container">
       <div class="header">
-        <div class="user-info">
-          <div class="user-avatar" id="userAvatar">P</div>
-          <div class="user-details">
-            <h3 id="userName">Panel Member</h3>
-            <p>Interview Panel</p>
-          </div>
-        </div>
-        <div class="header-actions">
-          <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">☰</button>
-          <button class="logout-btn" onclick="logout()">Logout</button>
+        <div>
+          <h2>My Interviews</h2>
+          <p class="pipeline-note">Review assigned interviews and submit structured feedback.</p>
         </div>
       </div>
 
       <div class="stats">
-        <div class="stat-card" data-filter="all" role="button" tabindex="0" aria-label="Show all interviews">
+        <div class="stat-card" data-filter="all" role="button" tabindex="0">
           <div class="number" id="totalInterviews">0</div>
-          <div class="label">Assigned</div>
+          <div class="label">Total Assigned</div>
         </div>
-        <div class="stat-card" data-filter="pending" role="button" tabindex="0" aria-label="Show pending interviews">
+        <div class="stat-card" data-filter="pending" role="button" tabindex="0">
           <div class="number" id="pendingInterviews">0</div>
           <div class="label">Pending</div>
         </div>
-        <div class="stat-card" data-filter="completed" role="button" tabindex="0" aria-label="Show completed interviews">
+        <div class="stat-card" data-filter="completed" role="button" tabindex="0">
           <div class="number" id="completedInterviews">0</div>
           <div class="label">Completed</div>
         </div>
       </div>
 
-      <h2>My Interviews</h2>
+      <div class="section-header">
+        <h2>Assigned Interviews</h2>
+      </div>
       <ul id="interviewList">
         <div class="loading">
           <div class="spinner"></div>

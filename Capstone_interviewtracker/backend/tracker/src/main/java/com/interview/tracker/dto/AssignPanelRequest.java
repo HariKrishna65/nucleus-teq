@@ -15,6 +15,8 @@ public class AssignPanelRequest {
 
     private String interviewType;
 
+    private String meetingLink;
+
     private String focusArea;
 
     private String notes;
@@ -30,6 +32,9 @@ public class AssignPanelRequest {
 
     public String getInterviewType() { return interviewType; }
     public void setInterviewType(String interviewType) { this.interviewType = interviewType; }
+
+    public String getMeetingLink() { return meetingLink; }
+    public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
 
     public String getFocusArea() { return focusArea; }
     public void setFocusArea(String focusArea) { this.focusArea = focusArea; }

@@ -32,6 +32,15 @@ public class Interview {
 
     private String status;
 
+    private Integer duration;
+
+    private String interviewType;
+
+    private String meetingLink;
+
+    @Column(length = 1000)
+    private String notes;
+
     
     @ManyToOne
     @JoinColumn(name = "candidate_id")
@@ -69,6 +78,18 @@ public class Interview {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Integer getDuration() { return duration; }
+    public void setDuration(Integer duration) { this.duration = duration; }
+
+    public String getInterviewType() { return interviewType; }
+    public void setInterviewType(String interviewType) { this.interviewType = interviewType; }
+
+    public String getMeetingLink() { return meetingLink; }
+    public void setMeetingLink(String meetingLink) { this.meetingLink = meetingLink; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 
     public Candidate getCandidate() { return candidate; }
     public void setCandidate(Candidate candidate) { this.candidate = candidate; }

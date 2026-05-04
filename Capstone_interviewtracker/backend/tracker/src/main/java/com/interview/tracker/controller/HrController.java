@@ -63,11 +63,13 @@ public class HrController {
         List<Candidate> candidates = candidateRepository.findAllByOrderByApplicationDateDesc();
         List<Map<String, Object>> payload = candidates.stream().map(candidate -> {
             List<Feedback> feedbackList = feedbackRepository.findByInterview_Candidate_IdOrderByIdDesc(candidate.getId());
+            Interview currentRoundInterview = findCurrentRoundInterview(candidate);
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("candidate", candidate);
             item.put("feedback", feedbackList);
             item.put("feedbackCount", feedbackList.size());
             item.put("latestFeedback", feedbackList.isEmpty() ? null : feedbackList.get(0));
+            addRoundProgress(item, candidate, currentRoundInterview);
             return item;
         }).toList();
         return ResponseEntity.ok(payload);
@@ -92,6 +94,7 @@ public class HrController {
         payload.put("interviewHistory", interviewList);
         payload.put("feedbackCount", feedbackList.size());
         payload.put("latestFeedback", feedbackList.isEmpty() ? null : feedbackList.get(0));
+        addRoundProgress(payload, candidate, findCurrentRoundInterview(candidate));
 
         return ResponseEntity.ok(payload);
     }
@@ -139,6 +142,19 @@ public class HrController {
         if (stage != Stage.L1_TECH && stage != Stage.L2_TECH && stage != Stage.HR_ROUND) {
             return ResponseEntity.badRequest().body("Panel can be assigned only for L1, L2, or HR round candidates");
         }
+        String currentRound = mapStageToInterviewRound(stage);
+        if (interviewRepository.existsByCandidate_IdAndRound(id, currentRound)) {
+            return ResponseEntity.badRequest().body("Panel already assigned for this round");
+        }
+
+        if (request.getInterviewTime() == null) {
+            return ResponseEntity.badRequest().body("Interview date and time are required");
+        }
+
+        LocalDateTime interviewTime = request.getInterviewTime();
+        if (!interviewTime.isAfter(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("Interview date and time must be in the future");
+        }
 
         List<String> emails = request.getPanelEmails();
         if (emails == null || emails.isEmpty()) {
@@ -176,13 +192,12 @@ public class HrController {
             (request.getFocusArea() != null && !request.getFocusArea().isBlank()) ? request.getFocusArea() :
             (c.getJd() != null && c.getJd().getSkills() != null && !c.getJd().getSkills().isBlank()) ? c.getJd().getSkills() : "General"
         );
-        interview.setRound(mapStageToInterviewRound(c.getStage()));
-
-        // Use provided interview time or default to tomorrow
-        LocalDateTime interviewTime = request.getInterviewTime() != null
-            ? request.getInterviewTime()
-            : LocalDateTime.now().plusDays(1);
+        interview.setRound(currentRound);
         interview.setInterviewTime(interviewTime);
+        interview.setDuration(request.getDuration());
+        interview.setInterviewType(request.getInterviewType());
+        interview.setMeetingLink(blankToNull(request.getMeetingLink()));
+        interview.setNotes(blankToNull(request.getNotes()));
 
         interview.setInterviewerName(panelEntities.stream()
                 .map(p -> (p.getName() != null && !p.getName().isBlank()) ? p.getName() : p.getEmail())
@@ -211,6 +226,10 @@ public class HrController {
         };
     }
 
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
     @PostMapping("/candidates/{id}/advance")
     public ResponseEntity<?> advance(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
         Candidate c = candidateRepository.findById(id).orElse(null);
@@ -223,6 +242,11 @@ public class HrController {
 
         if (c.getStage() == Stage.REJECTED || c.getStage() == Stage.SELECTED) {
             return ResponseEntity.badRequest().body("Candidate is already in a final stage");
+        }
+
+        ResponseEntity<?> panelRoundGate = validatePanelRoundCanAdvance(c);
+        if (panelRoundGate != null) {
+            return panelRoundGate;
         }
 
         Stage next = nextStage(c.getStage());
@@ -301,5 +325,63 @@ public class HrController {
             case HR_ROUND -> Stage.SELECTED;
             default -> null;
         };
+    }
+
+    private Interview findCurrentRoundInterview(Candidate candidate) {
+        if (candidate == null || candidate.getId() == null || !requiresPanelFeedback(candidate.getStage())) {
+            return null;
+        }
+        return interviewRepository
+                .findTopByCandidate_IdAndRoundOrderByInterviewTimeDesc(candidate.getId(), mapStageToInterviewRound(candidate.getStage()))
+                .orElse(null);
+    }
+
+    private void addRoundProgress(Map<String, Object> item, Candidate candidate, Interview interview) {
+        boolean panelRound = candidate != null && requiresPanelFeedback(candidate.getStage());
+        int assignedPanelCount = getAssignedPanelCount(interview);
+        long receivedFeedbackCount = interview != null && interview.getId() != null
+                ? feedbackRepository.countDistinctPanelsByInterviewId(interview.getId())
+                : 0L;
+
+        item.put("currentRoundInterview", interview);
+        item.put("panelAssignedForCurrentRound", interview != null);
+        item.put("canAssignPanel", panelRound && interview == null);
+        item.put("assignedPanelCount", assignedPanelCount);
+        item.put("currentRoundFeedbackCount", receivedFeedbackCount);
+        item.put("canAdvanceStage", !panelRound || (interview != null && assignedPanelCount > 0 && receivedFeedbackCount >= assignedPanelCount));
+    }
+
+    private ResponseEntity<?> validatePanelRoundCanAdvance(Candidate candidate) {
+        if (!requiresPanelFeedback(candidate.getStage())) {
+            return null;
+        }
+
+        Interview interview = findCurrentRoundInterview(candidate);
+        if (interview == null) {
+            return ResponseEntity.badRequest().body("Assign panel for this round before moving to the next stage");
+        }
+
+        int assignedPanelCount = getAssignedPanelCount(interview);
+        long receivedFeedbackCount = feedbackRepository.countDistinctPanelsByInterviewId(interview.getId());
+        if (assignedPanelCount == 0) {
+            return ResponseEntity.badRequest().body("Assign panel for this round before moving to the next stage");
+        }
+        if (receivedFeedbackCount < assignedPanelCount) {
+            return ResponseEntity.badRequest().body("All assigned panel members must submit feedback before moving to the next stage");
+        }
+
+        return null;
+    }
+
+    private boolean requiresPanelFeedback(Stage stage) {
+        return stage == Stage.L1_TECH || stage == Stage.L2_TECH || stage == Stage.HR_ROUND;
+    }
+
+    private int getAssignedPanelCount(Interview interview) {
+        if (interview == null) return 0;
+        if (interview.getPanels() != null && !interview.getPanels().isEmpty()) {
+            return interview.getPanels().size();
+        }
+        return interview.getPanel() == null ? 0 : 1;
     }
 }

@@ -96,8 +96,7 @@ function register() {
     // Check if registration was successful
     if (msg.includes("success") || msg.includes("verification") || msg.includes("email")) {
       showAlert("Registration successful! Please check your email to verify your account.", "success");
-      // Redirect to login after delay
-      setTimeout(() => window.location.href = "login.html", 3000);
+      setTimeout(() => window.location.href = "login.html", 800);
     } else if (msg.includes("exists") || msg.includes("already")) {
       showAlert("Email already registered. Please login or use forgot password.", "error");
     } else {
@@ -120,12 +119,12 @@ function register() {
 }
 
 function showLoading(show) {
-  const btn = document.querySelector("button");
+  const btn = document.getElementById("registerBtn");
   if (show) {
     btn.innerHTML = '<span class="spinner"></span> Creating Account...';
     btn.disabled = true;
   } else {
-    btn.textContent = "Register";
+    btn.textContent = "Create account";
     btn.disabled = false;
   }
 }
@@ -138,7 +137,7 @@ function showAlert(message, type) {
   alert.className = `alert alert-${type}`;
   alert.textContent = message;
 
-  const container = document.querySelector(".container");
+  const container = document.querySelector(".auth-card");
   container.insertBefore(alert, container.firstChild);
 }
 

@@ -196,6 +196,7 @@ public class UserService {
         validatePasswordPolicy(request.getNewPassword());
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setEmailVerified(true);
         user.setVerificationToken(null);
         user.setTokenExpiry(null);
 

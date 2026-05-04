@@ -47,6 +47,9 @@ function displayCandidateInfo() {
   const phone = candidate.phone || candidate.mobileNumber || "N/A";
   const job = candidate.jd && candidate.jd.title ? candidate.jd.title : "Not mapped";
   const stage = normalizeStage(candidate);
+  const panelAssigned = candidateData.panelAssignedForCurrentRound;
+  const feedbackCount = candidateData.currentRoundFeedbackCount || 0;
+  const assignedCount = candidateData.assignedPanelCount || 0;
 
   candidateName.textContent = `Assign Panel - ${name}`;
 
@@ -72,8 +75,18 @@ function displayCandidateInfo() {
         <label>Current Stage:</label>
         <span class="badge">${stage.replace('_', ' ')}</span>
       </div>
+      <div class="info-item">
+        <label>Round Assignment:</label>
+        <span>${panelAssigned ? `Already assigned (Feedback ${feedbackCount}/${assignedCount})` : 'Not assigned yet'}</span>
+      </div>
     </div>
   `;
+
+  if (panelAssigned) {
+    showError("Panel already assigned for this round. You cannot assign another panel until the candidate moves to the next stage.");
+    const submitBtn = document.getElementById('assignPanelSubmitBtn');
+    if (submitBtn) submitBtn.disabled = true;
+  }
 }
 
 // Load available panel members
@@ -167,8 +180,17 @@ function validateForm() {
   return true;
 }
 
+function buildLocalDateTime(interviewDate, interviewTime) {
+  return `${interviewDate}T${interviewTime}:00`;
+}
+
 // Submit panel assignment
 function submitAssignPanel() {
+  if (candidateData && candidateData.canAssignPanel === false) {
+    showError("Panel already assigned for this round");
+    return;
+  }
+
   if (!validateForm()) {
     return;
   }
@@ -180,10 +202,8 @@ function submitAssignPanel() {
   const duration = document.getElementById('interviewDuration').value;
   const interviewType = document.getElementById('interviewType').value;
   const focusArea = document.getElementById('focusArea').value.trim();
+  const meetingLink = document.getElementById('meetingLink')?.value.trim();
   const interviewNotes = document.getElementById('interviewNotes').value.trim();
-
-  // Combine date and time
-  const interviewDateTime = new Date(`${interviewDate}T${interviewTime}`);
 
   const panelEmails = [panelEmail1, panelEmail2].filter(Boolean);
 
@@ -193,10 +213,11 @@ function submitAssignPanel() {
 
   const assignData = {
     panelEmails: panelEmails,
-    interviewTime: interviewDateTime.toISOString(),
+    interviewTime: buildLocalDateTime(interviewDate, interviewTime),
     duration: parseInt(duration),
     interviewType: interviewType,
     focusArea: focusArea || null,
+    meetingLink: meetingLink || null,
     notes: interviewNotes || null,
     round: round  // ✅ Round auto-set from stage
   };
