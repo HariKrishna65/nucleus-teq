@@ -10,6 +10,8 @@ import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,8 @@ import static com.interview.tracker.constants.AppConstants.ROLE_PANEL;
 
 @Service
 public class UserService {
+
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -54,14 +58,17 @@ public class UserService {
 
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            log.warn("Registration rejected because email already exists: {}", request.getEmail());
             throw new IllegalArgumentException("Email already exists");
         }
 
         if (userRepository.findByPhone(request.getPhone()).isPresent()) {
+            log.warn("Registration rejected because phone already exists for email={}", request.getEmail());
             throw new IllegalArgumentException("Phone already exists");
         }
 
         if (request.getRole() == null || !roles.contains(request.getRole())) {
+            log.warn("Registration rejected because role is invalid: {}", request.getRole());
             throw new IllegalArgumentException("Invalid role");
         }
 
@@ -84,6 +91,7 @@ public class UserService {
         user.setEmailVerified(false);
         
         User saved = userRepository.save(user);
+        log.info("Registered user id={} email={} role={}", saved.getId(), saved.getEmail(), saved.getRole());
         
         emailService.sendVerificationAndPasswordEmail(saved);
 
@@ -100,17 +108,23 @@ public class UserService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> {
+                    log.warn("Login failed because user was not found: {}", request.getEmail());
+                    return new IllegalArgumentException("User not found");
+                });
 
         if (!user.isEmailVerified()) {
+            log.warn("Login blocked because email is not verified for user id={}", user.getId());
             throw new IllegalArgumentException("Please verify your email first. Check your inbox for the verification link.");
         }
 
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            log.warn("Login blocked because password is not set for user id={}", user.getId());
             throw new IllegalArgumentException("Password not set. Please set your password using the link sent to your email.");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("Login failed because password did not match for user id={}", user.getId());
             throw new IllegalArgumentException("Invalid password");
         }
 
@@ -127,6 +141,7 @@ public class UserService {
         }
 
         String token = jwtService.generateToken(user);
+        log.info("Login successful for user id={} role={}", user.getId(), user.getRole());
         return new AuthResponse("Login successful", user.getRole(), user.getId(), user.getName(), panelId, token);
     }
 

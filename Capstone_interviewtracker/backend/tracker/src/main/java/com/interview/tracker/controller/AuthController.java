@@ -9,6 +9,8 @@ import com.interview.tracker.dto.CreateTestUserRequest;
 import com.interview.tracker.dto.VerifyEmailRequest;
 import com.interview.tracker.service.UserService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import static com.interview.tracker.constants.AppConstants.AUTH;
 import static com.interview.tracker.constants.AppConstants.CREATE_TEST_USER;
@@ -25,6 +27,8 @@ import static com.interview.tracker.constants.AppConstants.VERIFY_AND_SET_PASSWO
 
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final UserService userService;
 
     public AuthController(UserService userService) {
@@ -33,11 +37,13 @@ public class AuthController {
 
     @PostMapping(REGISTER)
     public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Registration request received for email={} role={}", request.getEmail(), request.getRole());
         return userService.register(request);
     }
 
     @PostMapping(LOGIN)
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+        log.info("Login request received for email={}", request.getEmail());
         return userService.login(request);
     }
 
@@ -58,6 +64,7 @@ public class AuthController {
 
     @PostMapping(FORGOT_PASSWORD)
     public AuthResponse forgotPassword(@Valid @RequestBody EmailRequest request) {
+        log.info("Password reset request received for email={}", request.getEmail());
         return userService.requestPasswordReset(request.getEmail());
     }
 
