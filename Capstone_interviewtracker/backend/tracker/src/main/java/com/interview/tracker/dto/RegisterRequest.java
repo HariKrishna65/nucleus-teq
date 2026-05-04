@@ -19,6 +19,12 @@ public class RegisterRequest {
 
     @NotBlank(message = "Role is required")
     private String role;
+
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$",
+            message = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
+    )
+    private String password;
     
     private LocalDate dateOfBirth;
     private String gender;
@@ -40,6 +46,9 @@ public class RegisterRequest {
 
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
     public LocalDate getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(LocalDate dateOfBirth) { this.dateOfBirth = dateOfBirth; }

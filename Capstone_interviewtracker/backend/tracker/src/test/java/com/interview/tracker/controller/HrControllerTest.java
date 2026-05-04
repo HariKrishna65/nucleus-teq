@@ -7,6 +7,7 @@ import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.repository.CandidateRepository;
 import com.interview.tracker.repository.FeedbackRepository;
 import com.interview.tracker.repository.InterviewRepository;
+import com.interview.tracker.repository.JobDescriptionRepository;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.repository.UserRepository;
 import com.interview.tracker.service.EmailService;
@@ -31,6 +32,7 @@ class HrControllerTest {
         PanelRepository panelRepository = mock(PanelRepository.class);
         EmailService emailService = mock(EmailService.class);
         InterviewRepository interviewRepository = mock(InterviewRepository.class);
+        JobDescriptionRepository jobDescriptionRepository = mock(JobDescriptionRepository.class);
 
         HrController controller = new HrController(
                 candidateRepository,
@@ -38,7 +40,8 @@ class HrControllerTest {
                 userRepository,
                 panelRepository,
                 emailService,
-                interviewRepository
+                interviewRepository,
+                jobDescriptionRepository
         );
 
         Candidate c = new Candidate();
@@ -73,6 +76,7 @@ class HrControllerTest {
         PanelRepository panelRepository = mock(PanelRepository.class);
         EmailService emailService = mock(EmailService.class);
         InterviewRepository interviewRepository = mock(InterviewRepository.class);
+        JobDescriptionRepository jobDescriptionRepository = mock(JobDescriptionRepository.class);
 
         HrController controller = new HrController(
                 candidateRepository,
@@ -80,7 +84,8 @@ class HrControllerTest {
                 userRepository,
                 panelRepository,
                 emailService,
-                interviewRepository
+                interviewRepository,
+                jobDescriptionRepository
         );
 
         Candidate c = new Candidate();
@@ -100,6 +105,7 @@ class HrControllerTest {
         PanelRepository panelRepository = mock(PanelRepository.class);
         EmailService emailService = mock(EmailService.class);
         InterviewRepository interviewRepository = mock(InterviewRepository.class);
+        JobDescriptionRepository jobDescriptionRepository = mock(JobDescriptionRepository.class);
 
         HrController controller = new HrController(
                 candidateRepository,
@@ -107,7 +113,8 @@ class HrControllerTest {
                 userRepository,
                 panelRepository,
                 emailService,
-                interviewRepository
+                interviewRepository,
+                jobDescriptionRepository
         );
 
         Candidate c = new Candidate();

@@ -34,6 +34,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleServerError(RuntimeException ex) {
+        Map<String, Object> body = baseError(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                ex.getMessage() == null ? "Something went wrong" : ex.getMessage()
+        );
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private Map<String, Object> baseError(HttpStatus status, String message) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", Instant.now().toString());

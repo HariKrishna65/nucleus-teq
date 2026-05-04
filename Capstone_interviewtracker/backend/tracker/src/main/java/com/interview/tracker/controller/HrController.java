@@ -4,14 +4,17 @@ import com.interview.tracker.constants.Stage;
 import com.interview.tracker.constants.StageStatus;
 import com.interview.tracker.dto.AssignPanelRequest;
 import com.interview.tracker.dto.CreatePanelRequest;
+import com.interview.tracker.dto.ReferralCandidateRequest;
 import com.interview.tracker.entity.Candidate;
 import com.interview.tracker.entity.Feedback;
 import com.interview.tracker.entity.Interview;
+import com.interview.tracker.entity.JobDescription;
 import com.interview.tracker.entity.Panel;
 import com.interview.tracker.entity.User;
 import com.interview.tracker.repository.CandidateRepository;
 import com.interview.tracker.repository.FeedbackRepository;
 import com.interview.tracker.repository.InterviewRepository;
+import com.interview.tracker.repository.JobDescriptionRepository;
 import com.interview.tracker.repository.PanelRepository;
 import com.interview.tracker.repository.UserRepository;
 import com.interview.tracker.service.EmailService;
@@ -20,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -38,6 +42,7 @@ public class HrController {
     private final PanelRepository panelRepository;
     private final EmailService emailService;
     private final InterviewRepository interviewRepository;
+    private final JobDescriptionRepository jobDescriptionRepository;
 
     @Value("${app.invite.skip-verification:true}")
     private boolean skipInviteVerification;
@@ -48,7 +53,8 @@ public class HrController {
             UserRepository userRepository,
             PanelRepository panelRepository,
             EmailService emailService,
-            InterviewRepository interviewRepository
+            InterviewRepository interviewRepository,
+            JobDescriptionRepository jobDescriptionRepository
     ) {
         this.candidateRepository = candidateRepository;
         this.feedbackRepository = feedbackRepository;
@@ -56,6 +62,7 @@ public class HrController {
         this.panelRepository = panelRepository;
         this.emailService = emailService;
         this.interviewRepository = interviewRepository;
+        this.jobDescriptionRepository = jobDescriptionRepository;
     }
 
     @GetMapping("/candidates")
@@ -130,14 +137,58 @@ public class HrController {
         return ResponseEntity.ok(savedPanel);
     }
 
+    @Transactional
+    @PostMapping("/referrals")
+    public ResponseEntity<?> createReferralCandidate(@Valid @RequestBody ReferralCandidateRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("User with this email already exists");
+        }
+        if (userRepository.findByPhone(request.getPhone()).isPresent()) {
+            return ResponseEntity.badRequest().body("Phone number already exists");
+        }
+
+        JobDescription jd = jobDescriptionRepository.findById(request.getJdId())
+                .orElseThrow(() -> new IllegalArgumentException("Job description not found"));
+
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setRole(com.interview.tracker.constants.AppConstants.ROLE_CANDIDATE);
+        user.setEmailVerified(true);
+        user.setActive(true);
+        user.setInvitedAt(LocalDateTime.now());
+        User savedUser = userRepository.save(user);
+
+        Candidate candidate = new Candidate();
+        candidate.setUser(savedUser);
+        candidate.setFullName(request.getName());
+        candidate.setPhone(request.getPhone());
+        candidate.setMobileNumber(request.getPhone());
+        candidate.setExperience(request.getExperience() == null ? 0 : request.getExperience());
+        candidate.setTotalExperience(request.getExperience());
+        candidate.setSource(request.getSource() == null || request.getSource().isBlank() ? "Referral" : request.getSource());
+        candidate.setJd(jd);
+        candidate.setStatus("REFERRED");
+        candidate.setStage(Stage.PROFILING);
+        candidate.setStageStatus(StageStatus.COMPLETED);
+        candidate.setApplicationDate(LocalDateTime.now());
+        Candidate savedCandidate = candidateRepository.save(candidate);
+
+        emailService.sendPasswordSetEmail(savedUser);
+        log.info("HR referral candidate created: candidateId={} email={}", savedCandidate.getId(), savedUser.getEmail());
+
+        return ResponseEntity.ok(savedCandidate);
+    }
+
     @PostMapping("/candidates/{id}/assign-panel")
     public ResponseEntity<?> assignPanelMembers(@PathVariable Long id, @Valid @RequestBody AssignPanelRequest request) {
         Candidate c = candidateRepository.findById(id).orElse(null);
         if (c == null) return ResponseEntity.status(404).body("Candidate not found");
 
         Stage stage = c.getStage();
-        if (stage != Stage.L1_TECH && stage != Stage.L2_TECH && stage != Stage.HR_ROUND) {
-            return ResponseEntity.badRequest().body("Panel can be assigned only for L1, L2, or HR round candidates");
+        if (stage != Stage.L1_TECH && stage != Stage.L2_TECH) {
+            return ResponseEntity.badRequest().body("Panel can be assigned only for L1 or L2 candidates");
         }
         String currentRound = mapStageToInterviewRound(stage);
         if (interviewRepository.existsByCandidate_IdAndRound(id, currentRound)) {
@@ -371,7 +422,7 @@ public class HrController {
     }
 
     private boolean requiresPanelFeedback(Stage stage) {
-        return stage == Stage.L1_TECH || stage == Stage.L2_TECH || stage == Stage.HR_ROUND;
+        return stage == Stage.L1_TECH || stage == Stage.L2_TECH;
     }
 
     private int getAssignedPanelCount(Interview interview) {

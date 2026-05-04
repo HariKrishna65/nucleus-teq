@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -54,6 +55,7 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
 
 
@@ -76,7 +78,12 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         
-        user.setPassword(null);
+        if (hasText(request.getPassword())) {
+            validatePasswordPolicy(request.getPassword());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        } else {
+            user.setPassword(null);
+        }
         
         user.setRole(request.getRole());
         
@@ -105,6 +112,7 @@ public class UserService {
         );
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -123,7 +131,7 @@ public class UserService {
             throw new IllegalArgumentException("Password not set. Please set your password using the link sent to your email.");
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!isPasswordValid(request.getPassword(), user)) {
             log.warn("Login failed because password did not match for user id={}", user.getId());
             throw new IllegalArgumentException("Invalid password");
         }
@@ -278,6 +286,27 @@ public class UserService {
                     "Password must be at least 8 characters and include uppercase, lowercase, number, and special character."
             );
         }
+    }
+
+    private boolean isPasswordValid(String rawPassword, User user) {
+        String storedPassword = user.getPassword();
+        if (passwordEncoder.matches(rawPassword, storedPassword)) {
+            return true;
+        }
+
+        if (storedPassword != null && storedPassword.equals(rawPassword)) {
+            validatePasswordPolicy(rawPassword);
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            userRepository.save(user);
+            log.info("Upgraded plaintext password to BCrypt for user id={}", user.getId());
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     public AuthResponse createTestUser(CreateTestUserRequest request) {
