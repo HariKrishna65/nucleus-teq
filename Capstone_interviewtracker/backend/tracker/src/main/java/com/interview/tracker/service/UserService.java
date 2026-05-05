@@ -16,7 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +60,27 @@ public class UserService {
         this.jwtService = jwtService;
     }
 
+    private String decryptPassword(String password) {
+        if (!hasText(password)) {
+            return password;
+        }
+
+        try {
+            String key = "mySecretKey12345"; // 16 bytes
+            String iv = "1234567890123456"; // 16 bytes
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
+            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(password));
+            return new String(decryptedBytes);
+        } catch (IllegalArgumentException e) {
+            return password;
+        } catch (Exception e) {
+            throw new RuntimeException("Error decrypting password", e);
+        }
+    }
+
     @Transactional
     public AuthResponse register(RegisterRequest request) {
 
@@ -79,8 +105,13 @@ public class UserService {
         user.setEmail(request.getEmail());
         
         if (hasText(request.getPassword())) {
-            validatePasswordPolicy(request.getPassword());
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            String decryptedPassword = decryptPassword(request.getPassword());
+            if (hasText(decryptedPassword)) {
+                validatePasswordPolicy(decryptedPassword);
+                user.setPassword(passwordEncoder.encode(decryptedPassword));
+            } else {
+                user.setPassword(null);
+            }
         } else {
             user.setPassword(null);
         }
@@ -131,7 +162,7 @@ public class UserService {
             throw new IllegalArgumentException("Password not set. Please set your password using the link sent to your email.");
         }
 
-        if (!isPasswordValid(request.getPassword(), user)) {
+        if (!isPasswordValid(decryptPassword(request.getPassword()), user)) {
             log.warn("Login failed because password did not match for user id={}", user.getId());
             throw new IllegalArgumentException("Invalid password");
         }
@@ -210,9 +241,10 @@ public class UserService {
             throw new IllegalArgumentException("Token has expired. Please request a new password reset.");
         }
 
-        validatePasswordPolicy(request.getNewPassword());
+        String decryptedPassword = decryptPassword(request.getNewPassword());
+        validatePasswordPolicy(decryptedPassword);
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(decryptedPassword));
         user.setEmailVerified(true);
         user.setVerificationToken(null);
         user.setTokenExpiry(null);
@@ -321,7 +353,7 @@ public class UserService {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(decryptPassword(request.getPassword())));
         user.setRole(request.getRole());
         user.setPhone(request.getPhone());
         user.setCity(request.getCity());

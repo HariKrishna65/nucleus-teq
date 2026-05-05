@@ -13,7 +13,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +34,21 @@ class UserServiceTest {
     private JwtService jwtService;
     private UserService service;
 
+    private String encryptPassword(String password) {
+        try {
+            String key = "mySecretKey12345"; // 16 bytes
+            String iv = "1234567890123456"; // 16 bytes
+            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
+            byte[] encryptedBytes = cipher.doFinal(password.getBytes());
+            return Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            throw new RuntimeException("Error encrypting password", e);
+        }
+    }
+
     @BeforeEach
     void setUp() {
         userRepository = mock(UserRepository.class);
@@ -45,7 +64,7 @@ class UserServiceTest {
         RegisterRequest request = new RegisterRequest();
         request.setName("Hari");
         request.setEmail("hari@example.com");
-        request.setPassword("Secret@123");
+        request.setPassword(encryptPassword("Secret@123"));
         request.setRole("CANDIDATE");
         request.setPhone("9876543210");
 
@@ -69,7 +88,7 @@ class UserServiceTest {
     void register_withWeakPassword_rejects() {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("hari@example.com");
-        request.setPassword("weak");
+        request.setPassword(encryptPassword("weak"));
         request.setRole("CANDIDATE");
         request.setPhone("9876543210");
         when(userRepository.findByEmail("hari@example.com")).thenReturn(Optional.empty());
@@ -105,7 +124,7 @@ class UserServiceTest {
     @Test
     void register_withoutPassword_savesPendingPasswordUser() {
         RegisterRequest request = registerRequest("nopass@example.com", "9876543211", "CANDIDATE");
-        request.setPassword(" ");
+        request.setPassword(encryptPassword(""));
         when(userRepository.findByEmail("nopass@example.com")).thenReturn(Optional.empty());
         when(userRepository.findByPhone("9876543211")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
@@ -129,7 +148,7 @@ class UserServiceTest {
 
         LoginRequest request = new LoginRequest();
         request.setEmail("panel@example.com");
-        request.setPassword("Secret@123");
+        request.setPassword(encryptPassword("Secret@123"));
 
         when(userRepository.findByEmail("panel@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Secret@123", "encoded")).thenReturn(true);
@@ -148,7 +167,7 @@ class UserServiceTest {
     void login_rejectsMissingUnverifiedUnsetAndInvalidPasswords() {
         LoginRequest request = new LoginRequest();
         request.setEmail("user@example.com");
-        request.setPassword("Secret@123");
+        request.setPassword(encryptPassword("Secret@123"));
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
         assertEquals("User not found", assertThrows(IllegalArgumentException.class,
                 () -> service.login(request)).getMessage());
@@ -181,7 +200,7 @@ class UserServiceTest {
         user.setPassword("Secret@123");
         LoginRequest request = new LoginRequest();
         request.setEmail("user@example.com");
-        request.setPassword("Secret@123");
+        request.setPassword(encryptPassword("Secret@123"));
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Secret@123", "Secret@123")).thenReturn(false);
         when(passwordEncoder.encode("Secret@123")).thenReturn("encoded");
@@ -235,7 +254,7 @@ class UserServiceTest {
         panel.setTokenExpiry(LocalDate.now().plusDays(1));
         SetPasswordRequest request = new SetPasswordRequest();
         request.setToken("set");
-        request.setNewPassword("Secret@123");
+        request.setNewPassword(encryptPassword("Secret@123"));
         when(userRepository.findAll()).thenReturn(List.of(panel));
         when(passwordEncoder.encode("Secret@123")).thenReturn("encoded");
         AuthResponse response = service.setPassword(request);
@@ -300,7 +319,7 @@ class UserServiceTest {
         CreateTestUserRequest request = new CreateTestUserRequest();
         request.setName("Panel User");
         request.setEmail("panel@example.com");
-        request.setPassword("Secret@123");
+        request.setPassword(encryptPassword("Secret@123"));
         request.setRole("PANEL");
         when(userRepository.findByEmail("panel@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("Secret@123")).thenReturn("encoded");
@@ -317,7 +336,7 @@ class UserServiceTest {
         CreateTestUserRequest request = new CreateTestUserRequest();
         request.setName("Candidate");
         request.setEmail("candidate@example.com");
-        request.setPassword("Secret@123");
+        request.setPassword(encryptPassword("Secret@123"));
         request.setRole("CANDIDATE");
         when(userRepository.findByEmail("candidate@example.com")).thenReturn(Optional.of(new User()));
         assertEquals("Email already exists", assertThrows(IllegalArgumentException.class,

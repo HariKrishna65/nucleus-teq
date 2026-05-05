@@ -1,9 +1,17 @@
 const authActions = {
-  register: (data) =>
-    fetchHandler("/auth/register", { method: "POST", body: data }),
+  register: (data) => {
+    if (data.password) {
+      data.password = encryptPassword(data.password);
+    }
+    return fetchHandler("/auth/register", { method: "POST", body: data });
+  },
 
-  login: (data) =>
-    fetchHandler("/auth/login", { method: "POST", body: data }),
+  login: (data) => {
+    if (data.password) {
+      data.password = encryptPassword(data.password);
+    }
+    return fetchHandler("/auth/login", { method: "POST", body: data });
+  },
 
   forgotPassword: (data) =>
     fetchHandler("/auth/forgot-password", { method: "POST", body: data })
@@ -95,6 +103,12 @@ const hrActions = {
       requireAuth: true
     })
 };
+
+function encryptPassword(password) {
+  const key = CryptoJS.enc.Utf8.parse('mySecretKey12345'); // 16 bytes
+  const iv = CryptoJS.enc.Utf8.parse('1234567890123456'); // 16 bytes
+  return CryptoJS.AES.encrypt(password, key, { iv: iv }).toString();
+}
 
 function logout() {
   localStorage.removeItem(STORAGE_KEYS.USER);

@@ -58,10 +58,11 @@ function handleSetPassword() {
 }
 
 function setPassword(password) {
+  const encryptedPassword = encryptPassword(password);
   const payload = {
     token: currentToken,
-    newPassword: password,
-    confirmPassword: password
+    newPassword: encryptedPassword,
+    confirmPassword: encryptedPassword
   };
 
   fetchHandler("/auth/set-password", { method: "POST", body: payload })
