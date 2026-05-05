@@ -1,3 +1,23 @@
+#submitFeedbackBtn {
+  width: auto;
+}
+
+.form-page-shell {
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
+.form-page-shell .form-actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+.form-page-shell .form-actions .btn,
+.form-page-shell .form-actions button {
+  width: auto;
+  min-width: 150px;
+}
+
 .interview-summary h4 {
   margin: 0 0 10px;
   color: var(--panel-primary);
@@ -9,8 +29,4 @@
 
 .interview-summary p {
   margin: 4px 0;
-}
-
-#submitFeedbackBtn {
-  width: 100%;
 }

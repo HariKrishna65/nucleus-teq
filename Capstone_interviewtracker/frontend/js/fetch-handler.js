@@ -52,7 +52,11 @@ async function fetchHandler(path, options = {}) {
     : await res.text();
 
   if (!res.ok) {
-    const message = typeof data === "string" ? data : data.message || `Error ${res.status}`;
+    const message = typeof data === "string"
+      ? data
+      : data.fields
+        ? Object.values(data.fields).join(" ")
+        : data.message || `Error ${res.status}`;
     throw new Error(message);
   }
 

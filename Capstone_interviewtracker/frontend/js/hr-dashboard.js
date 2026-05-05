@@ -27,47 +27,17 @@ function stageLabel(stage) {
   const labels = {
     PROFILING: "Profiling",
     SCREENING: "Screening",
-    L1_TECH: "L1 Technical",
-    L2_TECH: "L2 Technical",
-    HR_ROUND: "HR Round",
+    L1_TECH: "L1",
+    L2_TECH: "L2",
+    HR_ROUND: "HR",
     SELECTED: "Selected",
     REJECTED: "Rejected"
   };
   return labels[stage] || stage;
 }
 
-function stageIndex(stage) {
-  const order = ["PROFILING", "SCREENING", "L1_TECH", "L2_TECH", "HR_ROUND", "SELECTED"];
-  const idx = order.indexOf(stage);
-  return idx === -1 ? 0 : idx;
-}
-
 function renderStageTracker(stage) {
-  const steps = ["PROFILING", "SCREENING", "L1_TECH", "L2_TECH", "HR_ROUND", "SELECTED"];
-  const current = stageIndex(stage);
-  const isRejected = stage === "REJECTED";
-
-  if (isRejected) {
-    return `<span class="badge">Rejected</span>`;
-  }
-
-  return `
-    <div class="stage-tracker" title="${stageLabel(stage)}">
-      ${steps.map((s, i) => {
-        const done = i < current;
-        const active = i === current;
-        const circleClass = done ? "done" : (active ? "active" : "");
-        const lineClass = i < current ? "done" : "";
-        const line = i < steps.length - 1 ? `<span class="stage-line ${lineClass}"></span>` : "";
-        return `
-          <span class="stage-step">
-            <span class="stage-circle ${circleClass}"></span>
-            ${line}
-          </span>
-        `;
-      }).join("")}
-    </div>
-  `;
+  return `<span class="badge">${stageLabel(stage)}</span>`;
 }
 
 function feedbackHtml(feedback) {
@@ -133,7 +103,8 @@ function renderCandidates(rows) {
               ? `${(latestFeedback.panel && latestFeedback.panel.name) || "Panel"} | ${latestFeedback.status || "N/A"} | ${latestFeedback.rating || "N/A"}`
               : "No feedback";
             const isFinal = stage === "SELECTED" || stage === "REJECTED";
-            const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
+            const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH";
+            const canSelect = stage === "HR_ROUND" && !isFinal;
 
             return `
               <tr>
@@ -148,7 +119,7 @@ function renderCandidates(rows) {
                   <div class="table-actions">
                     <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Advance</button>
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
-                    <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
+                    ${canSelect ? `<button class="btn-success btn-small" onclick="selectCandidate(${c.id})">Select</button>` : ``}
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
                     <button class="btn-danger btn-small" onclick="deleteCandidate(${c.id})">Delete</button>
                   </div>

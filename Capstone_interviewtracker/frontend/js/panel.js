@@ -33,7 +33,6 @@ function renderInterviews() {
       <div class="empty-state">
         <div class="icon">Interviews</div>
         <h3>No interviews</h3>
-        <p>Try another filter or check back later.</p>
       </div>
     `;
     return;
@@ -110,8 +109,7 @@ function loadInterviews() {
 
       renderInterviews();
     })
-    .catch(err => {
-      console.error(err);
+    .catch(() => {
       list.innerHTML = `
         <div class="alert alert-error">
           Error loading interviews. Please try again.

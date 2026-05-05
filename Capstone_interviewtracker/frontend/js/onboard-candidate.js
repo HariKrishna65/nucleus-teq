@@ -9,6 +9,7 @@ if (user.role !== "HR") {
 
 let allRows = [];
 let searchQuery = "";
+let allJobs = [];
 
 function normalizeStage(candidate) {
   if (candidate.stage) return candidate.stage;
@@ -24,7 +25,7 @@ function renderOnboard(rows) {
   const wrap = document.getElementById("onboardList");
   const q = (searchQuery || "").trim().toLowerCase();
   const filtered = (rows || [])
-    .filter(r => normalizeStage((r && r.candidate) || {}) === "HR_ROUND")
+    .filter(r => (((r && r.candidate) || {}).source || "").toLowerCase() === "referral")
     .filter(r => {
       const c = (r && r.candidate) || {};
       const name = ((c.user && c.user.name) || c.fullName || "Candidate").toLowerCase();
@@ -35,7 +36,7 @@ function renderOnboard(rows) {
     });
 
   if (!filtered.length) {
-    wrap.innerHTML = '<div class="empty-state"><h3>No HR round candidates</h3><p>Candidates in the HR round will appear here for final decision.</p></div>';
+    wrap.innerHTML = '<div class="empty-state"><h3>No referral candidates</h3></div>';
     return;
   }
 
@@ -48,8 +49,8 @@ function renderOnboard(rows) {
             <th>Email</th>
             <th>Phone</th>
             <th>Job Title</th>
+            <th>Stage</th>
             <th>Status</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -59,6 +60,7 @@ function renderOnboard(rows) {
             const email = (c.user && c.user.email) || "N/A";
             const phone = c.phone || c.mobileNumber || "N/A";
             const job = c.jd && c.jd.title ? c.jd.title : "Not mapped";
+            const stage = normalizeStage(c).replace("_", " ");
             const status = (c.stageStatus || "PENDING").replace("_", " ");
             return `
               <tr>
@@ -66,13 +68,8 @@ function renderOnboard(rows) {
                 <td>${email}</td>
                 <td>${phone}</td>
                 <td>${job}</td>
+                <td><span class="badge">${stage}</span></td>
                 <td><span class="badge">${status}</span></td>
-                <td>
-                  <div class="table-actions">
-                    <button class="btn-success btn-small" onclick="selectCandidate(${c.id})">Select</button>
-                    <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})">Reject</button>
-                  </div>
-                </td>
               </tr>
             `;
           }).join("")}
@@ -82,29 +79,69 @@ function renderOnboard(rows) {
   `;
 }
 
-function askComments(actionLabel) {
-  const comments = prompt(`${actionLabel} comments (required):`);
-  if (!comments || !comments.trim()) {
-    alert("Comments are required.");
-    return null;
+function showReferralAlert(message, type) {
+  const alert = document.getElementById("referralAlert");
+  if (!alert) return;
+  alert.className = `alert alert-${type}`;
+  alert.textContent = message;
+  alert.classList.remove("is-hidden");
+}
+
+function clearReferralForm() {
+  ["refName", "refEmail", "refPhone", "refExperience", "refSource"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  const jd = document.getElementById("refJd");
+  if (jd) jd.value = "";
+}
+
+function loadJobs() {
+  const select = document.getElementById("refJd");
+  jdActions.list()
+    .then((jobs) => {
+      allJobs = Array.isArray(jobs) ? jobs : [];
+      if (!select) return;
+      select.innerHTML = '<option value="">Select job description</option>' +
+        allJobs.map(job => `<option value="${job.id}">${job.title || "Untitled Job"}</option>`).join("");
+    })
+    .catch(() => {
+      if (select) select.innerHTML = '<option value="">Failed to load jobs</option>';
+    });
+}
+
+function createReferralCandidate() {
+  const payload = {
+    name: document.getElementById("refName").value.trim(),
+    email: document.getElementById("refEmail").value.trim(),
+    phone: document.getElementById("refPhone").value.trim(),
+    jdId: Number(document.getElementById("refJd").value),
+    experience: Number(document.getElementById("refExperience").value || 0),
+    source: document.getElementById("refSource").value.trim() || "Referral"
+  };
+
+  if (!payload.name || !payload.email || !payload.phone || !payload.jdId) {
+    showReferralAlert("Please fill name, email, phone, and job description.", "error");
+    return;
   }
-  return comments.trim();
-}
 
-function selectCandidate(candidateId) {
-  const comments = askComments("Selection");
-  if (!comments) return;
-  hrActions.selectCandidate(candidateId, comments)
-    .then(() => load())
-    .catch((err) => alert(err.message || "Failed to select candidate"));
-}
+  const btn = document.getElementById("createReferralBtn");
+  btn.disabled = true;
+  btn.textContent = "Adding...";
 
-function rejectCandidate(candidateId) {
-  const comments = askComments("Rejection");
-  if (!comments) return;
-  hrActions.rejectCandidate(candidateId, comments)
-    .then(() => load())
-    .catch((err) => alert(err.message || "Failed to reject candidate"));
+  hrActions.createReferralCandidate(payload)
+    .then(() => {
+      showReferralAlert("Candidate added. Password setup email sent successfully.", "success");
+      clearReferralForm();
+      load();
+    })
+    .catch((err) => {
+      showReferralAlert(err.message || "Failed to add referral candidate.", "error");
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.textContent = "Add Candidate & Send Email";
+    });
 }
 
 function wire() {
@@ -146,11 +183,11 @@ function load() {
     });
 }
 
-window.selectCandidate = selectCandidate;
-window.rejectCandidate = rejectCandidate;
+window.createReferralCandidate = createReferralCandidate;
 window.clearOnboardFilters = clearOnboardFilters;
 window.toggleSidebar = toggleSidebar;
 window.logout = logout;
 
 wire();
+loadJobs();
 load();

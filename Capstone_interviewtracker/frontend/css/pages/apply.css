@@ -1,3 +1,8 @@
+.form-page-shell {
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
 .jd-info,
 .jd-info-bar {
   margin-bottom: 20px;

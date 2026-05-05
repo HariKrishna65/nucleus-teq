@@ -37,12 +37,51 @@
     <div class="container">
       <div class="header">
         <div>
-          <h2>Onboard Candidates</h2>
-          <p class="pipeline-note">Review candidates in the final stages and take onboarding decisions.</p>
+          <h2>Onboard Candidate</h2>
+          <p class="pipeline-note">Add referral candidates and send password setup emails.</p>
         </div>
         <div class="header-actions">
           <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">Dashboard</button>
         </div>
+      </div>
+
+      <section class="panel-section">
+        <h3>Add Referral Candidate</h3>
+        <p class="pipeline-note">The candidate receives an email to set a password and login.</p>
+        <div id="referralAlert" class="alert is-hidden"></div>
+        <div class="panel-form-grid">
+          <div class="input-group">
+            <label for="refName">Full Name</label>
+            <input id="refName" type="text" placeholder="Enter candidate name">
+          </div>
+          <div class="input-group">
+            <label for="refEmail">Email</label>
+            <input id="refEmail" type="email" placeholder="candidate@example.com">
+          </div>
+          <div class="input-group">
+            <label for="refPhone">Phone</label>
+            <input id="refPhone" type="tel" placeholder="9876543210">
+          </div>
+          <div class="input-group">
+            <label for="refJd">Job Description</label>
+            <select id="refJd">
+              <option value="">Loading jobs...</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="refExperience">Experience</label>
+            <input id="refExperience" type="number" min="0" step="0.5" placeholder="0">
+          </div>
+          <div class="input-group">
+            <label for="refSource">Source</label>
+            <input id="refSource" type="text" placeholder="Referral">
+          </div>
+        </div>
+        <button id="createReferralBtn" class="create-panel-btn" type="button" onclick="createReferralCandidate()">Add Candidate & Send Email</button>
+      </section>
+
+      <div class="section-header" style="margin-top:24px;">
+        <h2>Referral Candidates</h2>
       </div>
 
       <div class="toolbar">

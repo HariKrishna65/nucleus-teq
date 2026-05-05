@@ -1,15 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
   const user = getStoredUser();
 
-  console.log("User data:", user);
-
   if (!user) {
-    console.log("No user found, redirecting to login");
     window.location.href = "login.html";
     return;
   }
   if (user.role !== "HR") {
-    console.log("User role is not HR, role is:", user.role);
     window.location.href = "index.html";
     return;
   }
@@ -39,47 +35,17 @@ function stageLabel(stage) {
   const labels = {
     PROFILING: "Profiling",
     SCREENING: "Screening",
-    L1_TECH: "L1 Technical",
-    L2_TECH: "L2 Technical",
-    HR_ROUND: "HR Round",
+    L1_TECH: "L1",
+    L2_TECH: "L2",
+    HR_ROUND: "HR",
     SELECTED: "Selected",
     REJECTED: "Rejected"
   };
   return labels[stage] || stage;
 }
 
-function stageIndex(stage) {
-  const order = ["PROFILING", "SCREENING", "L1_TECH", "L2_TECH", "HR_ROUND", "SELECTED"];
-  const idx = order.indexOf(stage);
-  return idx === -1 ? 0 : idx;
-}
-
 function renderStageTracker(stage) {
-  const steps = ["PROFILING", "SCREENING", "L1_TECH", "L2_TECH", "HR_ROUND", "SELECTED"];
-  const current = stageIndex(stage);
-  const isRejected = stage === "REJECTED";
-
-  if (isRejected) {
-    return `<span class="badge">Rejected</span>`;
-  }
-
-  return `
-    <div class="stage-tracker" title="${stageLabel(stage)}">
-      ${steps.map((s, i) => {
-        const done = i < current;
-        const active = i === current;
-        const circleClass = done ? "done" : (active ? "active" : "");
-        const lineClass = i < current ? "done" : "";
-        const line = i < steps.length - 1 ? `<span class="stage-line ${lineClass}"></span>` : "";
-        return `
-          <span class="stage-step">
-            <span class="stage-circle ${circleClass}"></span>
-            ${line}
-          </span>
-        `;
-      }).join("")}
-    </div>
-  `;
+  return `<span class="badge">${stageLabel(stage)}</span>`;
 }
 
 function feedbackHtml(feedback) {
@@ -157,7 +123,7 @@ function renderCandidates(rows) {
               ? `${(latestFeedback.panel && latestFeedback.panel.name) || "Panel"} | ${latestFeedback.status || "N/A"} | ${latestFeedback.rating || "N/A"}`
               : "No feedback";
             const isFinal = stage === "SELECTED" || stage === "REJECTED";
-            const isPanelRound = stage === "L1_TECH" || stage === "L2_TECH" || stage === "HR_ROUND";
+            const isPanelRound = stage === "L1_TECH" || stage === "L2_TECH";
             const canAssignPanel = row.canAssignPanel !== undefined ? row.canAssignPanel : isPanelRound;
             const panelAssigned = !!row.panelAssignedForCurrentRound;
             const assignedPanelCount = row.assignedPanelCount || 0;
@@ -166,6 +132,11 @@ function renderCandidates(rows) {
             const feedbackProgress = panelAssigned
               ? `Feedback ${currentRoundFeedbackCount}/${assignedPanelCount}`
               : feedbackText;
+            const feedbackList = Array.isArray(row.feedback) ? row.feedback : [];
+            const feedbackCell = feedbackList.length
+              ? `<button class="secondary-btn btn-small" onclick="openFeedbackModal(${c.id})">${feedbackProgress}</button>`
+              : feedbackProgress;
+            const canSelect = stage === "HR_ROUND" && !isFinal;
 
             return `
               <tr>
@@ -176,12 +147,12 @@ function renderCandidates(rows) {
                 <td>${renderStageTracker(stage)}</td>
                 <td><span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span></td>
                 <td>${getMeetingLink(row)}</td>
-                <td>${feedbackProgress}</td>
+                <td>${feedbackCell}</td>
                 <td>
                   <div class="table-actions">
                     <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal || (isPanelRound && panelAssigned && !canAdvanceStage) ? "disabled" : ""}>Move to Next Stage</button>
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
-                    <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Select</button>
+                    ${canSelect ? `<button class="btn-success btn-small" onclick="selectCandidate(${c.id})">Select</button>` : ``}
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>
                     <button class="btn-danger btn-small" onclick="deleteCandidate(${c.id})">Delete</button>
                   </div>
@@ -233,7 +204,7 @@ function askComments(actionLabel) {
 function advanceStage(candidateId) {
   const row = allRows.find(row => (row.candidate || {}).id === candidateId);
   const stage = row ? normalizeStage(row.candidate) : null;
-  const isPanelRound = stage === 'L1_TECH' || stage === 'L2_TECH' || stage === 'HR_ROUND';
+  const isPanelRound = stage === 'L1_TECH' || stage === 'L2_TECH';
   
   if (isPanelRound && !row?.panelAssignedForCurrentRound) {
     window.location.href = `assign-panel.html?candidateId=${candidateId}`;
@@ -328,6 +299,34 @@ function closeAssignPanel() {
   assignCandidateId = null;
 }
 
+function openFeedbackModal(candidateId) {
+  const row = allRows.find(row => (row.candidate || {}).id === candidateId);
+  const feedback = row && Array.isArray(row.feedback) ? row.feedback : [];
+  const body = document.getElementById("feedbackModalBody");
+  const modal = document.getElementById("feedbackModal");
+  if (!body || !modal) return;
+
+  body.innerHTML = feedback.length ? feedback.map((fb, index) => `
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-title">${(fb.panel && fb.panel.name) || `Panel ${index + 1}`}</div>
+      <p><strong>Round:</strong> ${fb.interview && fb.interview.round ? fb.interview.round : "N/A"}</p>
+      <p><strong>Rating:</strong> ${fb.rating || "N/A"}</p>
+      <p><strong>Decision:</strong> ${fb.status || fb.result || "N/A"}</p>
+      <p style="white-space:normal;"><strong>Comments:</strong> ${fb.comments || "-"}</p>
+    </div>
+  `).join("") : '<div class="empty-state">No feedback submitted yet.</div>';
+
+  modal.classList.remove("is-hidden");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeFeedbackModal() {
+  const modal = document.getElementById("feedbackModal");
+  if (!modal) return;
+  modal.classList.add("is-hidden");
+  modal.setAttribute("aria-hidden", "true");
+}
+
 function showAssignPanelError(message) {
   const err = document.getElementById("assignPanelError");
   if (!err) return;
@@ -415,6 +414,8 @@ function logout() {
 window.closeAssignPanel = closeAssignPanel;
 window.submitAssignPanel = submitAssignPanel;
 window.openAssignPanel = openAssignPanel;
+window.openFeedbackModal = openFeedbackModal;
+window.closeFeedbackModal = closeFeedbackModal;
 window.deleteCandidate = deleteCandidate;
 window.clearCandidateFilters = clearCandidateFilters;
 window.toggleSidebar = toggleSidebar;
@@ -428,17 +429,26 @@ loadPanels();
 loadCandidates();
 
 (() => {
-  const modal = document.getElementById("assignPanelModal");
-  if (!modal) return;
-  modal.classList.add("is-hidden");
-  modal.setAttribute("aria-hidden", "true");
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeAssignPanel();
-  });
+  const assignModal = document.getElementById("assignPanelModal");
+  const feedbackModal = document.getElementById("feedbackModal");
+  if (assignModal) {
+    assignModal.classList.add("is-hidden");
+    assignModal.setAttribute("aria-hidden", "true");
+    assignModal.addEventListener("click", (e) => {
+      if (e.target === assignModal) closeAssignPanel();
+    });
+  }
+  if (feedbackModal) {
+    feedbackModal.classList.add("is-hidden");
+    feedbackModal.setAttribute("aria-hidden", "true");
+    feedbackModal.addEventListener("click", (e) => {
+      if (e.target === feedbackModal) closeFeedbackModal();
+    });
+  }
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("is-hidden")) {
-      closeAssignPanel();
+    if (e.key === "Escape") {
+      if (assignModal && !assignModal.classList.contains("is-hidden")) closeAssignPanel();
+      if (feedbackModal && !feedbackModal.classList.contains("is-hidden")) closeFeedbackModal();
     }
   });
 })();

@@ -22,6 +22,7 @@
       <nav class="sidebar-nav">
         <a href="panel-dashboard.html">My Interviews</a>
         <a class="active" href="feedback.html">Submit Feedback</a>
+        <a href="jd.html?view=available">Job Descriptions</a>
       </nav>
     </div>
     <div class="sidebar-footer">
@@ -37,7 +38,7 @@
   </aside>
 
   <main class="content-area">
-    <div class="container" style="max-width: 760px;">
+    <div class="container form-page-shell">
       <div class="header">
         <div>
           <h2>Submit Interview Feedback</h2>
@@ -72,18 +73,6 @@
         <div class="input-group" style="margin:0;">
           <textarea id="comments" rows="5" placeholder="Describe technical depth, communication, problem-solving, strengths, and improvement areas."></textarea>
         </div>
-      </div>
-
-      <div class="card" style="margin-top:14px;">
-        <div class="card-title">Interview Decision <span class="text-danger">*</span></div>
-        <div class="status-options" id="statusOptions">
-          <div class="status-option" data-value="L1" onclick="selectStatus('L1')"><div class="label">Move to L1</div></div>
-          <div class="status-option" data-value="L2" onclick="selectStatus('L2')"><div class="label">Move to L2</div></div>
-          <div class="status-option" data-value="HR" onclick="selectStatus('HR')"><div class="label">HR Round</div></div>
-          <div class="status-option" data-value="SELECTED" onclick="selectStatus('SELECTED')"><div class="label">Select</div></div>
-          <div class="status-option rejected" data-value="REJECTED" onclick="selectStatus('REJECTED')"><div class="label">Reject</div></div>
-        </div>
-        <input type="hidden" id="status" value="">
       </div>
 
       <div class="form-actions" style="margin-top:16px;">

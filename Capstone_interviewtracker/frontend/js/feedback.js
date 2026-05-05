@@ -117,8 +117,7 @@ function loadInterviewsForSelection() {
         ` : ""}
       `;
     })
-    .catch(err => {
-      console.error(err);
+    .catch(() => {
       const list = document.getElementById("interviewList");
       if (list) {
         list.innerHTML = `
@@ -191,8 +190,7 @@ function loadInterviewDetails() {
         loadExistingFeedback();
       }
     })
-    .catch(err => {
-      console.error(err);
+    .catch(() => {
       showAlert("Error loading interview details.", "error");
     });
 }
@@ -216,10 +214,6 @@ function loadExistingFeedback() {
       document.querySelectorAll(".rating-option").forEach(el => {
         el.style.pointerEvents = "none";
       });
-      document.querySelectorAll(".status-option").forEach(el => {
-        el.style.pointerEvents = "none";
-      });
-
       const submitBtn = document.getElementById("submitFeedbackBtn");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -241,25 +235,23 @@ function selectRating(value) {
 }
 
 function selectStatus(value) {
+  const statusInput = document.getElementById("status");
+  if (!statusInput) return;
   document.querySelectorAll(".status-option").forEach(el => {
     el.classList.remove("selected");
   });
   const selected = document.querySelector(`.status-option[data-value="${value}"]`);
   if (selected) selected.classList.add("selected");
-  document.getElementById("status").value = value;
+  statusInput.value = value;
 }
 
 function validateFeedback() {
   const rating = document.getElementById("rating").value;
-  const status = document.getElementById("status").value;
   const comments = document.getElementById("comments").value.trim();
   let isValid = true;
 
   if (!rating) {
     showAlert("Please select a rating", "error");
-    isValid = false;
-  } else if (!status) {
-    showAlert("Please select a decision", "error");
     isValid = false;
   } else if (!comments) {
     showAlert("Please provide comments", "error");
@@ -285,7 +277,7 @@ function submitFeedback() {
   const feedback = {
     rating: parseInt(document.getElementById("rating").value, 10),
     comments: document.getElementById("comments").value.trim(),
-    result: document.getElementById("status").value,
+    result: "SUBMITTED",
     interview: {
       id: parseInt(interviewId, 10)
     }
@@ -302,7 +294,6 @@ function submitFeedback() {
     })
     .catch(err => {
       showLoading(false);
-      console.error("Feedback error:", err);
       showAlert(err.message || "Error submitting feedback.", "error");
     });
 }

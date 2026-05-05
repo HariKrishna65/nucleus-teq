@@ -7,69 +7,152 @@
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/pages/jd.css">
 </head>
-<body class="page-workflow">
+<body class="page-dashboard page-candidate page-jd">
+<div class="dashboard-shell">
+  <aside class="sidebar role-sidebar is-hidden" id="candidateSidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Candidate</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html">My Applications</a>
+        <a href="apply.html">Apply for Job</a>
+        <a class="active" href="jd.html?view=available">Available Jobs</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" data-user-avatar>U</div>
+        <div>
+          <div class="user-name" data-user-name>User</div>
+          <div class="user-role">Candidate</div>
+        </div>
+      </div>
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
 
-<div class="container">
-  <div class="header">
-    <h2>Job Opportunities</h2>
-    <div class="header-actions">
-      <button id="availableJobsBtn" class="back-btn is-hidden" onclick="setView('available')">Available Jobs</button>
-      <button id="createJobBtn" class="back-btn is-hidden" onclick="setView('create')">+ Create Job</button>
-      <button id="homeBtn" class="back-btn" onclick="window.location.href='dashboard.html'">Home</button>
+  <aside class="sidebar role-sidebar is-hidden" id="panelSidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Panel Member</div>
+      </div>
     </div>
-  </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a href="panel-dashboard.html">My Interviews</a>
+        <a href="feedback.html">Submit Feedback</a>
+        <a class="active" href="jd.html?view=available">Job Descriptions</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" data-user-avatar>P</div>
+        <div>
+          <div class="user-name" data-user-name>Panel Member</div>
+          <div class="user-role">Panel Member</div>
+        </div>
+      </div>
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
 
-  <div id="jdForm" class="create-jd-form is-hidden">
-    <h3>Post New Job</h3>
-    <div class="form-row">
-      <div class="input-group">
-        <label for="title">Job Title <span class="required">*</span></label>
-        <input id="title" type="text" required minlength="3" maxlength="100"
-               placeholder="e.g., Software Engineer">
-      </div>
-      <div class="input-group">
-        <label for="experienceMin">Min Experience (years) <span class="required">*</span></label>
-        <input id="experienceMin" type="number" min="0" max="50" step="0.5" required placeholder="e.g., 2">
-      </div>
-      <div class="input-group">
-        <label for="experienceMax">Max Experience (years) <span class="required">*</span></label>
-        <input id="experienceMax" type="number" min="0" max="50" step="0.5" required placeholder="e.g., 5">
+  <aside class="sidebar role-sidebar is-hidden" id="hrSidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
       </div>
     </div>
-    <div class="input-group">
-      <label for="description">Job Description <span class="required">*</span></label>
-      <textarea id="description" rows="4" minlength="50" maxlength="500" required
-                placeholder="Describe the role, responsibilities, and requirements (50-500 characters)"></textarea>
-      <small class="help-text">Minimum 10 words, maximum 50 words</small>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link">Feedback</a>
+        <a href="jd.html" class="sidebar-link active">Job Descriptions</a>
+      </nav>
     </div>
-    <div class="input-group">
-      <label for="skills">Required Skills <span class="required">*</span></label>
-      <input id="skills" type="text" required placeholder="e.g., Java Spring React">
-      <small class="help-text">Enter skills separated by spaces or commas</small>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
     </div>
-    <div class="form-row">
-      <div class="input-group">
-        <label for="salaryMin">Min Salary (Annual ₹) <span class="required">*</span></label>
-        <input id="salaryMin" type="number" min="100000" max="5000000" step="10000" required placeholder="e.g., 400000">
-      </div>
-      <div class="input-group">
-        <label for="salaryMax">Max Salary (Annual ₹) <span class="required">*</span></label>
-        <input id="salaryMax" type="number" min="100000" max="5000000" step="10000" required placeholder="e.g., 900000">
-      </div>
-    </div>
-    <button onclick="createJD()">Post Job</button>
-  </div>
+  </aside>
 
-  <div class="jobs-header">
-    <h3 id="jobsTitle">Available Positions</h3>
-    <div class="jobs-subtitle" id="jobsSubtitle">Browse open roles and apply.</div>
-  </div>
-  <div class="jobs-grid" id="jdList">
-    <div class="loading">
-      <div class="spinner"></div>
-      <p>Loading jobs...</p>
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h2 id="pageTitle">Job Descriptions</h2>
+          <p class="pipeline-note" id="pageSubtitle">Browse open roles.</p>
+        </div>
+        <div class="header-actions">
+          <button id="availableJobsBtn" class="secondary-btn is-hidden" onclick="setView('available')">Available Jobs</button>
+          <button id="createJobBtn" class="secondary-btn is-hidden" onclick="setView('create')">Create Job</button>
+        </div>
+      </div>
+
+      <div id="jdForm" class="create-jd-form is-hidden">
+        <h3>Post New Job</h3>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="title">Job Title <span class="required">*</span></label>
+            <input id="title" type="text" required minlength="3" maxlength="100" placeholder="e.g., Software Engineer">
+          </div>
+          <div class="input-group">
+            <label for="experienceMin">Min Experience (years) <span class="required">*</span></label>
+            <input id="experienceMin" type="number" min="0" max="50" step="0.5" required placeholder="e.g., 2">
+          </div>
+          <div class="input-group">
+            <label for="experienceMax">Max Experience (years) <span class="required">*</span></label>
+            <input id="experienceMax" type="number" min="0" max="50" step="0.5" required placeholder="e.g., 5">
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="description">Job Description <span class="required">*</span></label>
+          <textarea id="description" rows="4" minlength="50" maxlength="500" required placeholder="Describe the role, responsibilities, and requirements"></textarea>
+        </div>
+        <div class="input-group">
+          <label for="skillEntry">Required Skills <span class="required">*</span></label>
+          <div class="skill-input-wrap" id="skillInputWrap">
+            <div class="skill-tags" id="skillTags"></div>
+            <input id="skillEntry" type="text" placeholder="Type a skill and press Enter">
+          </div>
+          <input id="skills" type="hidden" required>
+          <small class="help-text">Press Enter after each skill.</small>
+        </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="salaryMin">Min Salary (Annual INR) <span class="required">*</span></label>
+            <input id="salaryMin" type="number" min="100000" max="5000000" step="10000" required placeholder="e.g., 400000">
+          </div>
+          <div class="input-group">
+            <label for="salaryMax">Max Salary (Annual INR) <span class="required">*</span></label>
+            <input id="salaryMax" type="number" min="100000" max="5000000" step="10000" required placeholder="e.g., 900000">
+          </div>
+        </div>
+        <button onclick="createJD()">Post Job</button>
+      </div>
+
+      <h2 id="jobsTitle">Available Jobs</h2>
+      <ul class="jobs-list" id="jdList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading jobs...</p>
+        </div>
+      </ul>
     </div>
-  </div>
+  </main>
 </div>
 
 <script src="../js/fetch-handler.js"></script>

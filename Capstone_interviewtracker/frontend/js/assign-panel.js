@@ -133,7 +133,6 @@ function getRoundFromStage(candidate) {
   switch (stage) {
     case "L1_TECH": return "L1";
     case "L2_TECH": return "L2";
-    case "HR_ROUND": return "HR";
     default: return "L1";
   }
 }

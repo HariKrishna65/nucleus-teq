@@ -85,6 +85,9 @@ const hrActions = {
   createPanel: (panel) =>
     fetchHandler("/hr/panels", { method: "POST", body: panel, requireAuth: true }),
 
+  createReferralCandidate: (candidate) =>
+    fetchHandler("/hr/referrals", { method: "POST", body: candidate, requireAuth: true }),
+
   assignPanel: (id, data) =>
     fetchHandler(`/hr/candidates/${id}/assign-panel`, {
       method: "POST",
