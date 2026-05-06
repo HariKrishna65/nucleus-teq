@@ -105,9 +105,7 @@ const hrActions = {
 };
 
 function encryptPassword(password) {
-  const key = CryptoJS.enc.Utf8.parse('mySecretKey12345'); // 16 bytes
-  const iv = CryptoJS.enc.Utf8.parse('1234567890123456'); // 16 bytes
-  return CryptoJS.AES.encrypt(password, key, { iv: iv }).toString();
+  return btoa(unescape(encodeURIComponent(password)));
 }
 
 function logout() {
