@@ -105,7 +105,12 @@ const hrActions = {
 };
 
 function encryptPassword(password) {
-  return btoa(unescape(encodeURIComponent(password)));
+  const utf8Bytes = new TextEncoder().encode(password);
+  let binary = "";
+  utf8Bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
 }
 
 function logout() {
