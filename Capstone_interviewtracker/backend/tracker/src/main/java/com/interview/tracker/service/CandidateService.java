@@ -60,8 +60,10 @@ public class CandidateService {
             throw new IllegalArgumentException("Candidates can only apply for themselves");
         }
 
-        if (!candidateRepository.findByUser_Id(userId).isEmpty()) {
-            throw new IllegalArgumentException("Only one job application is allowed per candidate");
+        List<Candidate> existingApplications = candidateRepository.findByUser_Id(userId);
+        boolean hasActiveApplication = existingApplications.stream().anyMatch(existing -> !isRejected(existing));
+        if (hasActiveApplication) {
+            throw new IllegalArgumentException("Only one active job application is allowed per candidate");
         }
 
         if (candidateRepository.findByUser_IdAndJd_Id(userId, jdId).isPresent()) {
@@ -78,6 +80,7 @@ public class CandidateService {
 
         if (candidate.getPhone() != null && !candidate.getPhone().isBlank()) {
             candidateRepository.findByPhone(candidate.getPhone())
+                    .filter(existing -> !isRejectedApplicationForUser(existing, userId))
                     .ifPresent(existing -> {
                         throw new IllegalArgumentException("Mobile number already exists");
                     });
@@ -128,5 +131,20 @@ public class CandidateService {
     public Candidate getCandidateById(Long id) {
         return candidateRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
+    }
+
+    private boolean isRejectedApplicationForUser(Candidate candidate, Long userId) {
+        return candidate != null
+                && candidate.getUser() != null
+                && userId != null
+                && userId.equals(candidate.getUser().getId())
+                && isRejected(candidate);
+    }
+
+    private boolean isRejected(Candidate candidate) {
+        if (candidate == null) {
+            return false;
+        }
+        return candidate.getStage() == Stage.REJECTED || "REJECTED".equalsIgnoreCase(candidate.getStatus());
     }
 }

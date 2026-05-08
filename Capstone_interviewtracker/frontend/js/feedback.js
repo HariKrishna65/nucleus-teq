@@ -1,5 +1,6 @@
 const user = getStoredUser();
 let interviewStatus = "PENDING";
+let currentInterviewTime = null;
 let interviewId = localStorage.getItem(STORAGE_KEYS.INTERVIEW_ID);
 
 if (!user) {
@@ -83,7 +84,9 @@ function loadInterviewsForSelection() {
       list.innerHTML = `
         ${pending.length > 0 ? `
           <h3 style="margin-bottom:12px; color:#1f2937;">Pending Feedback</h3>
-          ${pending.map(interview => `
+          ${pending.map(interview => {
+            const canSubmit = isInterviewTimePassed(interview.interviewTime);
+            return `
             <div class="interview-card selectable" onclick="selectInterview(${interview.id})">
               <div class="interview-info">
                 <b>${interview.candidate?.user?.name || "Unknown Candidate"}</b>
@@ -91,12 +94,12 @@ function loadInterviewsForSelection() {
                 <span>Focus: ${interview.focusArea || "General"}</span>
                 <span>Time: ${formatDateTime(interview.interviewTime)}</span>
                 <div class="interview-meta">
-                  <span class="meta-item">Pending</span>
+                  <span class="meta-item">${canSubmit ? "Pending" : "Scheduled"}</span>
                 </div>
               </div>
-              <button class="btn btn-small">Submit Feedback</button>
+              <button class="btn btn-small">${canSubmit ? "Submit Feedback" : "Available After Interview"}</button>
             </div>
-          `).join("")}
+          `}).join("")}
         ` : '<p style="color:#6b7280;">No pending interviews.</p>'}
 
         ${completed.length > 0 ? `
@@ -171,6 +174,7 @@ function loadInterviewDetails() {
       }
 
       interviewStatus = data.status || "PENDING";
+      currentInterviewTime = data.interviewTime || null;
 
       const candidateNameEl = document.getElementById("candidateName");
       const roundInfoEl = document.getElementById("roundInfo");
@@ -188,6 +192,8 @@ function loadInterviewDetails() {
 
       if (interviewStatus === "COMPLETED") {
         loadExistingFeedback();
+      } else if (!isInterviewTimePassed(currentInterviewTime)) {
+        lockFeedbackUntilInterview(currentInterviewTime);
       }
     })
     .catch(() => {
@@ -270,6 +276,11 @@ function submitFeedback() {
     return;
   }
 
+  if (!isInterviewTimePassed(currentInterviewTime)) {
+    showAlert("Feedback can be submitted only after the interview time.", "error");
+    return;
+  }
+
   if (!validateFeedback()) return;
 
   showLoading(true);
@@ -296,6 +307,20 @@ function submitFeedback() {
       showLoading(false);
       showAlert(err.message || "Error submitting feedback.", "error");
     });
+}
+
+function isInterviewTimePassed(dateTime) {
+  if (!dateTime) return false;
+  return new Date() >= new Date(dateTime);
+}
+
+function lockFeedbackUntilInterview(dateTime) {
+  const submitBtn = document.getElementById("submitFeedbackBtn");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Available After Interview";
+  }
+  showAlert(`Feedback opens after ${formatDateTime(dateTime)}.`, "error");
 }
 
 function showLoading(show) {

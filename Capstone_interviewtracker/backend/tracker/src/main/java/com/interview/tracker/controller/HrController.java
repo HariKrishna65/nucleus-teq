@@ -69,6 +69,7 @@ public class HrController {
     public ResponseEntity<?> getCandidatesWithProgress() {
         List<Candidate> candidates = candidateRepository.findAllByOrderByApplicationDateDesc();
         List<Map<String, Object>> payload = candidates.stream().map(candidate -> {
+            ensureFinalStageIsCompleted(candidate);
             List<Feedback> feedbackList = feedbackRepository.findByInterview_Candidate_IdOrderByIdDesc(candidate.getId());
             Interview currentRoundInterview = findCurrentRoundInterview(candidate);
             Map<String, Object> item = new LinkedHashMap<>();
@@ -88,6 +89,7 @@ public class HrController {
         if (candidate == null) {
             return ResponseEntity.status(404).body("Candidate not found");
         }
+        ensureFinalStageIsCompleted(candidate);
 
         List<Feedback> feedbackList = feedbackRepository.findByInterview_Candidate_IdOrderByIdDesc(id);
         List<Interview> interviewList = interviewRepository.findByCandidate_Id(id);
@@ -291,6 +293,9 @@ public class HrController {
         if (c.getStage() == Stage.REJECTED || c.getStage() == Stage.SELECTED) {
             return ResponseEntity.badRequest().body("Candidate is already in a final stage");
         }
+        if (c.getStage() == Stage.HR_ROUND) {
+            return ResponseEntity.badRequest().body("Use Select or Reject after the HR round");
+        }
 
         ResponseEntity<?> panelRoundGate = validatePanelRoundCanAdvance(c);
         if (panelRoundGate != null) {
@@ -323,6 +328,7 @@ public class HrController {
 
         c.setStage(Stage.REJECTED);
         c.setStageStatus(StageStatus.COMPLETED);
+        c.setStatus("REJECTED");
         c.setHrComments(comments);
         log.info("Candidate rejected by HR: id={}", c.getId());
         Candidate saved = candidateRepository.save(c);
@@ -342,9 +348,13 @@ public class HrController {
         if (comments == null || comments.isBlank()) {
             return ResponseEntity.badRequest().body("HR comments are mandatory for final selection");
         }
+        if (c.getStage() != Stage.HR_ROUND) {
+            return ResponseEntity.badRequest().body("Candidate can be selected only after the HR round");
+        }
 
         c.setStage(Stage.SELECTED);
         c.setStageStatus(StageStatus.COMPLETED);
+        c.setStatus("SELECTED");
         c.setHrComments(comments);
         log.info("Candidate selected by HR: id={}", c.getId());
         Candidate saved = candidateRepository.save(c);
@@ -370,7 +380,6 @@ public class HrController {
             case SCREENING -> Stage.L1_TECH;
             case L1_TECH -> Stage.L2_TECH;
             case L2_TECH -> Stage.HR_ROUND;
-            case HR_ROUND -> Stage.SELECTED;
             default -> null;
         };
     }
@@ -382,6 +391,32 @@ public class HrController {
         return interviewRepository
                 .findTopByCandidate_IdAndRoundOrderByInterviewTimeDesc(candidate.getId(), mapStageToInterviewRound(candidate.getStage()))
                 .orElse(null);
+    }
+
+    private void ensureFinalStageIsCompleted(Candidate candidate) {
+        if (candidate == null) {
+            return;
+        }
+        boolean finalStage = candidate.getStage() == Stage.SELECTED || candidate.getStage() == Stage.REJECTED;
+        if (!finalStage) {
+            return;
+        }
+
+        boolean changed = false;
+        if (candidate.getStageStatus() != StageStatus.COMPLETED) {
+            candidate.setStageStatus(StageStatus.COMPLETED);
+            changed = true;
+        }
+
+        String expectedStatus = candidate.getStage().name();
+        if (!expectedStatus.equals(candidate.getStatus())) {
+            candidate.setStatus(expectedStatus);
+            changed = true;
+        }
+
+        if (changed) {
+            candidateRepository.save(candidate);
+        }
     }
 
     private void addRoundProgress(Map<String, Object> item, Candidate candidate, Interview interview) {

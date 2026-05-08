@@ -40,6 +40,11 @@ function renderStageTracker(stage) {
   return `<span class="badge">${stageLabel(stage)}</span>`;
 }
 
+function displayStageStatus(candidate, stage) {
+  if (stage === "SELECTED" || stage === "REJECTED") return "COMPLETED";
+  return (candidate.stageStatus || "PENDING").replace("_", " ");
+}
+
 function feedbackHtml(feedback) {
   if (!feedback) {
     return '<div class="feedback-block"><div class="feedback-title">Latest Feedback</div><div class="meta">No feedback submitted yet</div></div>';
@@ -105,6 +110,7 @@ function renderCandidates(rows) {
             const isFinal = stage === "SELECTED" || stage === "REJECTED";
             const canAssignPanel = stage === "L1_TECH" || stage === "L2_TECH";
             const canSelect = stage === "HR_ROUND" && !isFinal;
+            const disableAdvance = isFinal || stage === "HR_ROUND";
 
             return `
               <tr>
@@ -113,11 +119,11 @@ function renderCandidates(rows) {
                 <td>${phone}</td>
                 <td>${job}</td>
                 <td>${renderStageTracker(stage)}</td>
-                <td><span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span></td>
+                <td><span class="badge">${displayStageStatus(c, stage)}</span></td>
                 <td>${feedbackText}</td>
                 <td>
                   <div class="table-actions">
-                    <button class="btn-small" onclick="advanceStage(${c.id})" ${isFinal ? "disabled" : ""}>Advance</button>
+                    <button class="btn-small" onclick="advanceStage(${c.id})" ${disableAdvance ? "disabled" : ""}>Advance</button>
                     ${canAssignPanel ? `<button class="secondary-btn btn-small" onclick="openAssignPanel(${c.id})" ${isFinal ? "disabled" : ""}>Assign</button>` : ``}
                     ${canSelect ? `<button class="btn-success btn-small" onclick="selectCandidate(${c.id})">Select</button>` : ``}
                     <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject</button>

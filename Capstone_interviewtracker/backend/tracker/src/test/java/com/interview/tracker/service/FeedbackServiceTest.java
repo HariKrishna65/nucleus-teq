@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,6 +53,7 @@ class FeedbackServiceTest {
         Panel panel = panel(8L, "panel@example.com");
         Interview interview = new Interview();
         interview.setId(3L);
+        interview.setInterviewTime(LocalDateTime.now().minusMinutes(5));
         interview.setPanels(List.of(panel));
         Feedback feedback = validFeedback(3L);
 
@@ -166,6 +168,7 @@ class FeedbackServiceTest {
         Panel panel2 = panel(2L, "two@example.com");
         Interview interview = new Interview();
         interview.setId(3L);
+        interview.setInterviewTime(LocalDateTime.now().minusMinutes(5));
         interview.setPanels(List.of(panel1, panel2));
         Feedback feedback = validFeedback(3L);
 
@@ -186,6 +189,7 @@ class FeedbackServiceTest {
         Panel panel = panel(1L, "one@example.com");
         Interview interview = new Interview();
         interview.setId(3L);
+        interview.setInterviewTime(LocalDateTime.now().minusMinutes(5));
         interview.setPanel(panel);
         Feedback feedback = validFeedback(3L);
 
@@ -220,6 +224,22 @@ class FeedbackServiceTest {
 
         assertEquals("Feedback already submitted for this interview", assertThrows(IllegalArgumentException.class,
                 () -> service.save(validFeedback(3L))).getMessage());
+    }
+
+    @Test
+    void save_beforeInterviewTime_rejectsFeedback() {
+        setJwt("hr@example.com", "HR");
+        Interview interview = new Interview();
+        interview.setId(3L);
+        interview.setInterviewTime(LocalDateTime.now().plusMinutes(30));
+        Feedback feedback = validFeedback(3L);
+
+        when(interviewRepository.findById(3L)).thenReturn(Optional.of(interview));
+
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> service.save(feedback));
+
+        assertEquals("Feedback can be submitted only after the interview time", ex.getMessage());
+        verify(feedbackRepository, never()).save(any());
     }
 
     @Test

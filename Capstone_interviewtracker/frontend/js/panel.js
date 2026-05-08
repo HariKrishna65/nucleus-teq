@@ -42,6 +42,7 @@ function renderInterviews() {
     const li = document.createElement("li");
     li.className = "interview-card";
     const hasFeedback = i.status === "COMPLETED";
+    const canSubmitFeedback = hasFeedback || isInterviewTimePassed(i.interviewTime);
     
     li.innerHTML = `
       <div class="interview-info">
@@ -53,8 +54,8 @@ function renderInterviews() {
           <span class="meta-item status ${i.status || 'PENDING'}">${formatStatus(i.status)}</span>
         </div>
       </div>
-      <button class="btn btn-small" onclick="giveFeedback(${i.id})">
-        ${hasFeedback ? 'View Feedback' : 'Submit Feedback'}
+      <button class="btn btn-small" onclick="giveFeedback(${i.id})" ${canSubmitFeedback ? "" : "disabled"}>
+        ${hasFeedback ? 'View Feedback' : canSubmitFeedback ? 'Submit Feedback' : 'Available After Interview'}
       </button>
     `;
 
@@ -127,6 +128,11 @@ function formatDateTime(dateTime) {
     hour: "2-digit", 
     minute: "2-digit" 
   });
+}
+
+function isInterviewTimePassed(dateTime) {
+  if (!dateTime) return false;
+  return new Date() >= new Date(dateTime);
 }
 
 function formatStatus(status) {

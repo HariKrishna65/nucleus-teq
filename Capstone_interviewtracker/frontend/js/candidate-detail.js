@@ -67,6 +67,11 @@ function renderStageTracker(stage) {
   `;
 }
 
+function displayStageStatus(candidate, stage) {
+  if (stage === "SELECTED" || stage === "REJECTED") return "COMPLETED";
+  return (candidate.stageStatus || "PENDING").replace("_", " ");
+}
+
 function formatDate(dateString) {
   if (!dateString) return "N/A";
   const date = new Date(dateString);
@@ -93,6 +98,9 @@ function renderCandidateDetails() {
   const resume = c.resumePath ? `<a href="#" onclick="viewResume('${c.resumePath}')" class="btn-small">View Resume</a>` : "N/A";
   const createdDate = formatDate(c.createdAt);
   const updatedDate = formatDate(c.updatedAt);
+  const isFinal = stage === "SELECTED" || stage === "REJECTED";
+  const canSelect = stage === "HR_ROUND" && !isFinal;
+  const disableAdvance = isFinal || stage === "HR_ROUND";
 
   document.getElementById("candidateName").textContent = name;
 
@@ -146,7 +154,7 @@ function renderCandidateDetails() {
         </div>
         <div class="detail-row">
           <span class="detail-label">Stage Status</span>
-          <span class="detail-value"><span class="badge">${(c.stageStatus || "PENDING").replace("_", " ")}</span></span>
+          <span class="detail-value"><span class="badge">${displayStageStatus(c, stage)}</span></span>
         </div>
         <div class="detail-row">
           <span class="detail-label">Applied On</span>
@@ -168,9 +176,9 @@ function renderCandidateDetails() {
     </div>
 
     <div class="detail-actions">
-      <button class="btn-small" onclick="advanceStage(${c.id})" ${stage === "SELECTED" || stage === "REJECTED" ? "disabled" : ""}>Advance Stage</button>
-      <button class="btn-success btn-small" onclick="selectCandidate(${c.id})" ${stage === "SELECTED" || stage === "REJECTED" ? "disabled" : ""}>Select Candidate</button>
-      <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${stage === "SELECTED" || stage === "REJECTED" ? "disabled" : ""}>Reject Candidate</button>
+      <button class="btn-small" onclick="advanceStage(${c.id})" ${disableAdvance ? "disabled" : ""}>Advance Stage</button>
+      ${canSelect ? `<button class="btn-success btn-small" onclick="selectCandidate(${c.id})">Select Candidate</button>` : ""}
+      <button class="btn-danger btn-small" onclick="rejectCandidate(${c.id})" ${isFinal ? "disabled" : ""}>Reject Candidate</button>
       <button class="secondary-btn btn-small" onclick="window.location.href='candidates.html'">Back to Candidates</button>
     </div>
 
@@ -245,7 +253,7 @@ function loadCandidateDetails() {
 
 function advanceStage(candidateId) {
   const comments = prompt("Optional HR comments for stage movement:") || "";
-  hrActions.(candidateId, comments)
+  hrActions.advanceCandidate(candidateId, comments)
     .then(() => loadCandidateDetails())
     .catch((err) => alert(err.message || "Failed to advance stage"));
 }

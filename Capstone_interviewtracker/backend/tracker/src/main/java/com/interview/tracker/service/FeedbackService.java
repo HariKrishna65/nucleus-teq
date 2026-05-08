@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.interview.tracker.constants.AppConstants.ROLE_HR;
@@ -72,6 +73,13 @@ public class FeedbackService {
             feedback.setPanel(panel);
         } else if (!ROLE_HR.equals(role)) {
             throw new IllegalArgumentException("Access denied");
+        }
+
+        if (interview.getInterviewTime() == null) {
+            throw new IllegalArgumentException("Interview time is not scheduled");
+        }
+        if (LocalDateTime.now().isBefore(interview.getInterviewTime())) {
+            throw new IllegalArgumentException("Feedback can be submitted only after the interview time");
         }
 
         Feedback saved = feedbackRepository.save(feedback);

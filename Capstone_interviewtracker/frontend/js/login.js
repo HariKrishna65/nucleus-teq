@@ -147,8 +147,10 @@ document.addEventListener("keypress", function(e) {
 });
 
 const existingUser = getStoredUser();
-if (existingUser) {
+if (existingUser && existingUser.token) {
   if (existingUser.role === "HR") window.location.href = "hr-main-dashboard.html";
   else if (existingUser.role === "PANEL") window.location.href = "panel-dashboard.html";
   else window.location.href = "dashboard.html";
+} else if (existingUser) {
+  localStorage.removeItem(STORAGE_KEYS.USER);
 }

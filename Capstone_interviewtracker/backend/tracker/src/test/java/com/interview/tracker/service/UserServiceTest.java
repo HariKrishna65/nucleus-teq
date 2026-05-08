@@ -13,9 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
@@ -35,18 +33,8 @@ class UserServiceTest {
     private UserService service;
 
     private String encryptPassword(String password) {
-        try {
-            String key = "mySecretKey12345"; // 16 bytes
-            String iv = "1234567890123456"; // 16 bytes
-            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
-            IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
-            byte[] encryptedBytes = cipher.doFinal(password.getBytes());
-            return Base64.getEncoder().encodeToString(encryptedBytes);
-        } catch (Exception e) {
-            throw new RuntimeException("Error encrypting password", e);
-        }
+        byte[] utf8Bytes = password.getBytes(StandardCharsets.UTF_8);
+        return Base64.getEncoder().encodeToString(utf8Bytes);
     }
 
     @BeforeEach

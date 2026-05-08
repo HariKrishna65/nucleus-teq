@@ -86,15 +86,41 @@ class CandidateServiceTest {
     }
 
     @Test
-    void createCandidate_withDuplicateUserApplication_rejects() {
+    void createCandidate_withActiveUserApplication_rejects() {
         Candidate candidate = candidateWithUserAndJd(1L, 2L);
         when(candidateRepository.findByUser_Id(1L)).thenReturn(List.of(new Candidate()));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> service.createCandidate(candidate, null));
 
-        assertEquals("Only one job application is allowed per candidate", ex.getMessage());
+        assertEquals("Only one active job application is allowed per candidate", ex.getMessage());
         verify(candidateRepository, never()).save(any());
+    }
+
+    @Test
+    void createCandidate_withOnlyRejectedPreviousApplication_allowsDifferentJob() throws Exception {
+        Candidate candidate = candidateWithUserAndJd(1L, 3L);
+        candidate.setPhone("9876543210");
+        User existingUser = new User();
+        existingUser.setId(1L);
+        JobDescription newJd = new JobDescription();
+        newJd.setId(3L);
+        Candidate rejected = candidateWithUserAndJd(1L, 2L);
+        rejected.setStage(Stage.REJECTED);
+
+        when(candidateRepository.findByUser_Id(1L)).thenReturn(List.of(rejected));
+        when(candidateRepository.findByUser_IdAndJd_Id(1L, 3L)).thenReturn(Optional.empty());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(jobDescriptionRepository.findById(3L)).thenReturn(Optional.of(newJd));
+        when(candidateRepository.findByPhone("9876543210")).thenReturn(Optional.of(rejected));
+        when(candidateRepository.save(any(Candidate.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Candidate saved = service.createCandidate(candidate, null);
+
+        assertEquals(existingUser, saved.getUser());
+        assertEquals(newJd, saved.getJd());
+        assertEquals("APPLIED", saved.getStatus());
+        assertEquals(Stage.PROFILING, saved.getStage());
     }
 
     @Test

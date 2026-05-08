@@ -77,6 +77,23 @@ class HrControllerTest {
     }
 
     @Test
+    void getCandidatesWithProgress_normalizesFinalStageStatus() {
+        TestContext ctx = context();
+        Candidate selected = candidate(12L, Stage.SELECTED);
+        selected.setStageStatus(StageStatus.PENDING);
+        selected.setStatus("REFERRED");
+        when(ctx.candidateRepository.findAllByOrderByApplicationDateDesc()).thenReturn(List.of(selected));
+        when(ctx.feedbackRepository.findByInterview_Candidate_IdOrderByIdDesc(12L)).thenReturn(List.of());
+
+        ResponseEntity<?> response = ctx.controller.getCandidatesWithProgress();
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(StageStatus.COMPLETED, selected.getStageStatus());
+        assertEquals("SELECTED", selected.getStatus());
+        verify(ctx.candidateRepository).save(selected);
+    }
+
+    @Test
     void reject_withoutComments_returnsBadRequest() {
         CandidateRepository candidateRepository = mock(CandidateRepository.class);
         FeedbackRepository feedbackRepository = mock(FeedbackRepository.class);
@@ -366,6 +383,12 @@ class HrControllerTest {
         when(finalStage.candidateRepository.findById(2L)).thenReturn(Optional.of(candidate(2L, Stage.SELECTED)));
         assertEquals(400, finalStage.controller.advance(2L, null).getStatusCode().value());
 
+        TestContext hrRoundAdvance = context();
+        when(hrRoundAdvance.candidateRepository.findById(9L)).thenReturn(Optional.of(candidate(9L, Stage.HR_ROUND)));
+        ResponseEntity<?> hrRoundAdvanceResponse = hrRoundAdvance.controller.advance(9L, null);
+        assertEquals(400, hrRoundAdvanceResponse.getStatusCode().value());
+        assertEquals("Use Select or Reject after the HR round", hrRoundAdvanceResponse.getBody());
+
         TestContext panelNotAssigned = context();
         when(panelNotAssigned.candidateRepository.findById(3L)).thenReturn(Optional.of(candidate(3L, Stage.L1_TECH)));
         when(panelNotAssigned.interviewRepository.findTopByCandidate_IdAndRoundOrderByInterviewTimeDesc(3L, "L1"))
@@ -408,6 +431,12 @@ class HrControllerTest {
         assertEquals(400, select.controller.select(6L, Map.of()).getStatusCode().value());
         assertEquals(200, select.controller.select(6L, Map.of("comments", "yes")).getStatusCode().value());
         verify(select.emailService).sendCandidateSelectedEmail(selectedUser, null);
+
+        TestContext selectTooEarly = context();
+        when(selectTooEarly.candidateRepository.findById(10L)).thenReturn(Optional.of(candidate(10L, Stage.L2_TECH)));
+        ResponseEntity<?> selectTooEarlyResponse = selectTooEarly.controller.select(10L, Map.of("comments", "yes"));
+        assertEquals(400, selectTooEarlyResponse.getStatusCode().value());
+        assertEquals("Candidate can be selected only after the HR round", selectTooEarlyResponse.getBody());
 
         TestContext moreFeedbackNeeded = context();
         Candidate l2Candidate = candidate(8L, Stage.L2_TECH);

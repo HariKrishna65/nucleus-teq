@@ -2,6 +2,7 @@ const authActions = {
   register: (data) => {
     if (data.password) {
       data.password = encryptPassword(data.password);
+      console.debug("Auth register payload prepared", { email: data.email, passwordLength: data.password.length });
     }
     return fetchHandler("/auth/register", { method: "POST", body: data });
   },
@@ -9,6 +10,7 @@ const authActions = {
   login: (data) => {
     if (data.password) {
       data.password = encryptPassword(data.password);
+      console.debug("Auth login payload prepared", { email: data.email, passwordLength: data.password.length });
     }
     return fetchHandler("/auth/login", { method: "POST", body: data });
   },

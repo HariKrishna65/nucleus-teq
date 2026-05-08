@@ -16,9 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -66,18 +64,10 @@ public class UserService {
         }
 
         try {
-            String key = "mySecretKey12345"; // 16 bytes
-            String iv = "1234567890123456"; // 16 bytes
-            SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
-            IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
-            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(password));
-            return new String(decryptedBytes);
-        } catch (IllegalArgumentException e) {
+            byte[] decoded = Base64.getDecoder().decode(password);
+            return new String(decoded, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException ex) {
             return password;
-        } catch (Exception e) {
-            throw new RuntimeException("Error decrypting password", e);
         }
     }
 
@@ -145,6 +135,7 @@ public class UserService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
+        log.debug("Login request for email={} payloadLooksLikeBase64={}", request.getEmail(), isLikelyBase64(request.getPassword()));
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
@@ -322,15 +313,28 @@ public class UserService {
 
     private boolean isPasswordValid(String rawPassword, User user) {
         String storedPassword = user.getPassword();
+        if (storedPassword == null) {
+            return false;
+        }
+
         if (passwordEncoder.matches(rawPassword, storedPassword)) {
             return true;
         }
 
-        if (storedPassword != null && storedPassword.equals(rawPassword)) {
+        if (storedPassword.equals(rawPassword)) {
             validatePasswordPolicy(rawPassword);
             user.setPassword(passwordEncoder.encode(rawPassword));
             userRepository.save(user);
             log.info("Upgraded plaintext password to BCrypt for user id={}", user.getId());
+            return true;
+        }
+
+        String base64Stored = Base64.getEncoder().encodeToString(rawPassword.getBytes(StandardCharsets.UTF_8));
+        if (storedPassword.equals(base64Stored)) {
+            validatePasswordPolicy(rawPassword);
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            userRepository.save(user);
+            log.info("Upgraded Base64-stored password to BCrypt for user id={}", user.getId());
             return true;
         }
 
@@ -339,6 +343,18 @@ public class UserService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private boolean isLikelyBase64(String value) {
+        if (!hasText(value)) {
+            return false;
+        }
+        try {
+            byte[] decoded = Base64.getDecoder().decode(value);
+            return decoded.length > 0 && new String(decoded, StandardCharsets.UTF_8).chars().allMatch(ch -> ch >= 32);
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
     }
 
     public AuthResponse createTestUser(CreateTestUserRequest request) {
