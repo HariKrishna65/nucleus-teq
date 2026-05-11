@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Feedback - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
+</head>
+<body class="page-dashboard page-hr">
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link active">Feedback</a>
+        <a href="jd.html" class="sidebar-link">Job Descriptions</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h2>Feedback</h2>
+          <p class="pipeline-note">Review panel feedback across candidates and interview rounds.</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">Dashboard</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="toolbar-field">
+            <input id="feedbackSearch" type="text" placeholder="Search by candidate name, email, job title, panel name...">
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <select id="feedbackStageFilter" aria-label="Filter by stage">
+            <option value="ALL">All stages</option>
+            <option value="PROFILING">Profiling</option>
+            <option value="SCREENING">Screening</option>
+            <option value="L1_TECH">L1</option>
+            <option value="L2_TECH">L2</option>
+            <option value="HR_ROUND">HR</option>
+            <option value="SELECTED">Selected</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+          <button class="secondary-btn" type="button" onclick="clearFeedbackFilters()">Clear</button>
+        </div>
+      </div>
+
+      <div id="feedbackList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading feedback...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/fetch-handler.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/hr-feedback.js"></script>
+</body>
+</html>

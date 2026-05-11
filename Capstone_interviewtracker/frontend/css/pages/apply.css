@@ -1,0 +1,29 @@
+.form-page-shell {
+  width: min(960px, 100%);
+  margin: 0 auto;
+}
+
+.jd-info,
+.jd-info-bar {
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  border: 1px solid rgba(37,99,235,.2);
+  border-radius: var(--radius-lg);
+  background: var(--candidate-muted);
+}
+
+.jd-info h4 {
+  margin: 0 0 4px;
+  color: var(--candidate-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+
+.jd-info p {
+  margin: 0;
+  color: var(--c-text);
+  font-size: 16px;
+  font-weight: 800;
+}

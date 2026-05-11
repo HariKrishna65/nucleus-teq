@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Candidate Details - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/candidate-detail.css">
+</head>
+<body class="page-dashboard page-hr">
+
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-title">HR Dashboard</div>
+    <nav class="sidebar-nav">
+      <a href="hr-main-dashboard.html" class="sidebar-link jd-link">Dashboard</a>
+      <a href="candidates.html" class="sidebar-link candidates-link">Candidates</a>
+      <a href="onboard-candidate.html" class="sidebar-link onboard-link">Onboard Candidate</a>
+      <a href="panel-management.html" class="sidebar-link panel-link">Panel Members</a>
+      <a href="hr-feedback.html" class="sidebar-link feedback-link">Feedback</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <button class="back-btn" onclick="window.location.href='candidates.html'">Back to Candidates</button>
+          <h2 id="candidateName">Candidate Details</h2>
+          <p class="pipeline-note">View and manage candidate information.</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
+        </div>
+      </div>
+
+      <div id="candidateDetail" class="candidate-detail">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading candidate details...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/fetch-handler.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/candidate-detail.js"></script>
+</body>
+</html>

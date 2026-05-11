@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Feedback - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/feedback.css">
+</head>
+<body class="page-dashboard page-panel">
+<div class="dashboard-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">Panel Member</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <nav class="sidebar-nav">
+        <a href="panel-dashboard.html">My Interviews</a>
+        <a class="active" href="feedback.html">Submit Feedback</a>
+        <a href="jd.html?view=available">Job Descriptions</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="userAvatar">P</div>
+        <div>
+          <div class="user-name" id="userName">Panel Member</div>
+          <div class="user-role">Panel Member</div>
+        </div>
+      </div>
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container form-page-shell">
+      <div class="header">
+        <div>
+          <h2>Submit Interview Feedback</h2>
+          <p class="pipeline-note">Complete the rating, comments, and recommendation for this interview.</p>
+        </div>
+        <div class="header-actions">
+          <a class="btn btn-outline" href="panel-dashboard.html">My Interviews</a>
+        </div>
+      </div>
+
+      <div class="interview-summary" id="interviewSummary">
+        <h4>Interview details</h4>
+        <p><strong>Candidate:</strong> <span id="candidateName">Loading...</span></p>
+        <p><strong>Round:</strong> <span id="roundInfo">Loading...</span></p>
+        <p><strong>Focus Area:</strong> <span id="focusArea">Loading...</span></p>
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Performance Rating <span class="text-danger">*</span></div>
+        <div class="rating-container" id="ratingContainer">
+          <div class="rating-option" data-value="1" onclick="selectRating(1)"><div class="stars">1</div><div class="label">Poor</div></div>
+          <div class="rating-option" data-value="2" onclick="selectRating(2)"><div class="stars">2</div><div class="label">Below Avg</div></div>
+          <div class="rating-option" data-value="3" onclick="selectRating(3)"><div class="stars">3</div><div class="label">Average</div></div>
+          <div class="rating-option" data-value="4" onclick="selectRating(4)"><div class="stars">4</div><div class="label">Good</div></div>
+          <div class="rating-option" data-value="5" onclick="selectRating(5)"><div class="stars">5</div><div class="label">Excellent</div></div>
+        </div>
+        <input type="hidden" id="rating" value="">
+      </div>
+
+      <div class="card" style="margin-top:14px;">
+        <div class="card-title">Detailed Comments <span class="text-danger">*</span></div>
+        <div class="input-group" style="margin:0;">
+          <textarea id="comments" rows="5" placeholder="Describe technical depth, communication, problem-solving, strengths, and improvement areas."></textarea>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:16px;">
+        <a class="btn btn-outline" href="panel-dashboard.html">Cancel</a>
+        <button id="submitFeedbackBtn" onclick="submitFeedback()">Submit Feedback</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/fetch-handler.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/feedback.js"></script>
+</body>
+</html>

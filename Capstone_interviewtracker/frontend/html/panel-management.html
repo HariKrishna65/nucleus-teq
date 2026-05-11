@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Management - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
+</head>
+<body class="page-dashboard page-hr">
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link active">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link">Feedback</a>
+        <a href="jd.html" class="sidebar-link">Job Descriptions</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h2>Panel Management</h2>
+          <p class="pipeline-note">Create panel accounts and manage interview experts.</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">Dashboard</button>
+        </div>
+      </div>
+
+      <section class="panel-section">
+        <h3>Create Panel Member</h3>
+        <p class="pipeline-note">Create a panel login and send the password setup email.</p>
+        <div id="panelAlert" class="alert is-hidden"></div>
+        <div class="panel-form-grid">
+          <div class="input-group">
+            <label for="panelName">Full Name</label>
+            <input id="panelName" type="text" placeholder="Enter full name" required>
+          </div>
+          <div class="input-group">
+            <label for="panelEmail">Email</label>
+            <input id="panelEmail" type="email" placeholder="Enter email" required>
+          </div>
+          <div class="input-group">
+            <label for="panelPhone">Mobile</label>
+            <input id="panelPhone" type="tel" placeholder="Enter mobile number" required>
+          </div>
+          <div class="input-group">
+            <label for="panelOrganization">Organization</label>
+            <input id="panelOrganization" type="text" placeholder="Enter organization" required>
+          </div>
+          <div class="input-group">
+            <label for="panelDesignation">Designation</label>
+            <input id="panelDesignation" type="text" placeholder="Enter designation" required>
+          </div>
+          <div class="input-group">
+            <label for="panelExpertise">Expertise</label>
+            <input id="panelExpertise" type="text" placeholder="Enter expertise" required>
+          </div>
+        </div>
+        <button id="createPanelBtn" class="create-panel-btn" type="button" onclick="createPanelMember()">Create Panel</button>
+      </section>
+
+      <section class="panel-list-section">
+        <h3>Panel Members</h3>
+        <div class="panel-table-wrap">
+          <table class="panel-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Organization</th>
+                <th>Designation</th>
+                <th>Expertise</th>
+              </tr>
+            </thead>
+            <tbody id="panelMembersBody">
+              <tr>
+                <td colspan="6" class="empty-state">Loading panel members...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="../js/fetch-handler.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/panel-management.js"></script>
+</body>
+</html>

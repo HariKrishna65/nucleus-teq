@@ -1,0 +1,9 @@
+.page-panel #interviewList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.page-panel .interview-card {
+  margin-bottom: 0;
+}

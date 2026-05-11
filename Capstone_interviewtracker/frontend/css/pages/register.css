@@ -1,0 +1,8 @@
+.page-auth .auth-card {
+  width: min(480px, 100%);
+}
+
+.page-auth .auth-card > button {
+  width: 100%;
+  margin-top: 8px;
+}

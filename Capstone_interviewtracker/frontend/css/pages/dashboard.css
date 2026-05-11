@@ -1,0 +1,9 @@
+.page-candidate .apply-more-btn,
+.page-candidate .apply-btn {
+  background: var(--candidate-primary);
+  color: #fff;
+}
+
+.page-candidate #applicationsTitle {
+  margin: 0 0 16px;
+}

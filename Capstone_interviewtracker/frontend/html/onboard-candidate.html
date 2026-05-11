@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onboard Candidate - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
+</head>
+<body class="page-dashboard page-hr">
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link active">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link">Feedback</a>
+        <a href="jd.html" class="sidebar-link">Job Descriptions</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h2>Onboard Candidate</h2>
+          <p class="pipeline-note">Add referral candidates and send password setup emails.</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">Dashboard</button>
+        </div>
+      </div>
+
+      <section class="panel-section">
+        <h3>Add Referral Candidate</h3>
+        <p class="pipeline-note">The candidate receives an email to set a password and login.</p>
+        <div id="referralAlert" class="alert is-hidden"></div>
+        <div class="panel-form-grid">
+          <div class="input-group">
+            <label for="refName">Full Name</label>
+            <input id="refName" type="text" placeholder="Enter candidate name">
+          </div>
+          <div class="input-group">
+            <label for="refEmail">Email</label>
+            <input id="refEmail" type="email" placeholder="candidate@example.com">
+          </div>
+          <div class="input-group">
+            <label for="refPhone">Phone</label>
+            <input id="refPhone" type="tel" placeholder="9876543210">
+          </div>
+          <div class="input-group">
+            <label for="refJd">Job Description</label>
+            <select id="refJd">
+              <option value="">Loading jobs...</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="refExperience">Experience</label>
+            <input id="refExperience" type="number" min="0" step="0.5" placeholder="0">
+          </div>
+          <div class="input-group">
+            <label for="refSource">Source</label>
+            <input id="refSource" type="text" placeholder="Referral">
+          </div>
+        </div>
+        <button id="createReferralBtn" class="create-panel-btn" type="button" onclick="createReferralCandidate()">Add Candidate & Send Email</button>
+      </section>
+
+      <div class="section-header" style="margin-top:24px;">
+        <h2>Referral Candidates</h2>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="toolbar-field">
+            <input id="onboardSearch" type="text" placeholder="Search by name, email, phone, job title...">
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button class="secondary-btn" type="button" onclick="clearOnboardFilters()">Clear</button>
+        </div>
+      </div>
+
+      <div id="onboardList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading candidates...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../js/fetch-handler.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/onboard-candidate.js"></script>
+</body>
+</html>

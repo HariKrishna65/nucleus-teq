@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidates - Interview Tracker</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/hr-dashboard.css">
+</head>
+<body class="page-dashboard page-hr">
+<div class="dashboard-shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">IT</div>
+      <div>
+        <div class="sidebar-brand-name">Interview Tracker</div>
+        <div class="sidebar-brand-role">HR</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <nav class="sidebar-nav">
+        <a href="hr-main-dashboard.html" class="sidebar-link">Dashboard</a>
+        <a href="candidates.html" class="sidebar-link active">Candidates</a>
+        <a href="onboard-candidate.html" class="sidebar-link">Onboard Candidate</a>
+        <a href="panel-management.html" class="sidebar-link">Panel Members</a>
+        <a href="hr-feedback.html" class="sidebar-link">Feedback</a>
+        <a href="jd.html" class="sidebar-link">Job Descriptions</a>
+      </nav>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" onclick="logout()" class="logout-link sidebar-link">Logout</a>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="container">
+      <div class="header">
+        <div>
+          <h2>All Candidates</h2>
+          <p class="pipeline-note">Manage all candidates and track interview progression.</p>
+        </div>
+        <div class="header-actions">
+          <button class="secondary-btn" onclick="window.location.href='hr-main-dashboard.html'">HR Dashboard</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="toolbar-field">
+            <input id="candidateSearch" type="text" placeholder="Search by name, email, phone, job title...">
+          </div>
+        </div>
+      </div>
+
+      <div id="candidateList">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Loading candidates...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="feedbackModal" class="modal-backdrop is-hidden" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle">
+    <div class="modal-header">
+      <h3 id="feedbackModalTitle">Panel Feedback</h3>
+      <button class="secondary-btn" type="button" onclick="closeFeedbackModal()">Close</button>
+    </div>
+    <div id="feedbackModalBody" class="modal-body"></div>
+  </div>
+</div>
+
+<div id="assignPanelModal" class="modal-backdrop is-hidden" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="assignPanelTitle">
+    <div class="modal-header">
+      <h3 id="assignPanelTitle">Assign Panel Members</h3>
+      <button class="secondary-btn" type="button" onclick="closeAssignPanel()">Close</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="pipeline-note">Select 1 or 2 panel members and schedule interview details.</p>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label for="panelEmail1">Panel member 1 (required)</label>
+          <select id="panelEmail1"></select>
+        </div>
+        <div class="input-group">
+          <label for="panelEmail2">Panel member 2 (optional)</label>
+          <select id="panelEmail2"></select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group">
+          <label for="interviewDate">Interview Date (required)</label>
+          <input type="date" id="interviewDate" required>
+        </div>
+        <div class="input-group">
+          <label for="interviewTime">Interview Time (required)</label>
+          <input type="time" id="interviewTime" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group full-width">
+          <label for="focusArea">Focus Area (optional)</label>
+          <input type="text" id="focusArea" placeholder="e.g., JavaScript, System Design, Database">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="input-group full-width">
+          <label for="interviewNotes">Interview Notes (optional)</label>
+          <textarea id="interviewNotes" rows="3" placeholder="Additional notes for panel members..."></textarea>
+        </div>
+      </div>
+
+      <div id="assignPanelError" class="alert alert-error is-hidden"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="assignPanelSubmitBtn" type="button" onclick="submitAssignPanel()">Assign & Send Emails</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/fetch-handler.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/candidates.js"></script>
+<script>
+function toggleSidebar() {
+  const shell = document.querySelector('.dashboard-shell');
+  shell.classList.toggle('sidebar-collapsed');
+}
+</script>
+</body>
+</html>

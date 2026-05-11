@@ -1,0 +1,164 @@
+.page-jd .jobs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.page-jd .jd-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  padding: 16px 20px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.page-jd .jd-card:hover {
+  box-shadow: var(--shadow);
+}
+
+.page-jd .jd-info {
+  min-width: 0;
+}
+
+.page-jd .jd-info b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--c-text);
+  font-size: 15px;
+}
+
+.page-jd .jd-info p {
+  margin: 0 0 10px;
+  color: var(--c-text-2);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: normal;
+}
+
+.page-jd .jd-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.page-jd .jd-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.page-jd .create-jd-form {
+  padding: 20px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  background: var(--c-surface);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.page-jd .create-jd-form h3 {
+  margin-top: 0;
+}
+
+.page-jd .form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.page-jd .input-group {
+  margin-bottom: 14px;
+}
+
+.page-jd .input-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--c-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.page-jd .input-group input,
+.page-jd .input-group textarea {
+  width: 100%;
+}
+
+.page-jd .skill-input-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 46px;
+  padding: 8px 10px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+  background: var(--c-surface);
+}
+
+.page-jd .skill-input-wrap:focus-within {
+  border-color: var(--hr-primary);
+  box-shadow: 0 0 0 3px rgba(5,150,105,.12);
+}
+
+.page-jd .skill-tags {
+  display: contents;
+}
+
+.page-jd .skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.page-jd .skill-tag button {
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--c-text-3);
+  font-size: 14px;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.page-jd #skillEntry {
+  flex: 1 1 180px;
+  min-width: 160px;
+  padding: 4px;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.page-jd .required {
+  color: var(--red);
+}
+
+@media (max-width: 760px) {
+  .page-jd .jd-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-jd .jd-actions {
+    justify-content: flex-start;
+  }
+}

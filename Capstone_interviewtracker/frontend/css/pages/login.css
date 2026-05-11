@@ -1,0 +1,7 @@
+body.page-auth .auth-card button#loginBtn {
+  width: 100%;
+}
+
+.verification-notice p {
+  margin: 0;
+}

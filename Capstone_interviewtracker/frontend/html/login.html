@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Interview Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/pages/login.css">
+</head>
+<body class="page-auth page-candidate">
+<div class="auth-layout">
+  <section class="auth-visual candidate-bg">
+    <a href="index.html" class="auth-side-back">Back</a>
+    <div class="brand">
+      <span class="brand-icon">IT</span>
+      <span>Interview Tracker</span>
+    </div>
+    <h1>Land your next opportunity, faster.</h1>
+    <p>Track every application, interview, and decision in one focused workspace built for candidates, panels, and HR teams.</p>
+    <div class="visual-cards">
+      <div class="visual-card">
+        <h3>Live Pipeline</h3>
+        <p>See exactly where each application stands.</p>
+      </div>
+      <div class="visual-card">
+        <h3>Interview Updates</h3>
+        <p>Get email notifications for schedules and decisions.</p>
+      </div>
+      <div class="visual-card">
+        <h3>Role Dashboards</h3>
+        <p>Candidate, panel, and HR views stay cleanly separated.</p>
+      </div>
+      <div class="visual-card">
+        <h3>Secure Access</h3>
+        <p>Verification and password setup protect every account.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="auth-panel">
+    <div class="auth-card">
+      <h2>Welcome back</h2>
+      <p class="subtitle">Sign in to continue to your dashboard</p>
+
+      <div class="verification-notice alert alert-info is-hidden" id="verificationNotice">
+        <p>Please verify your email first. Check your inbox for the verification link.</p>
+      </div>
+
+      <div class="input-group">
+        <label for="email">Email address</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password">
+          <button type="button" class="toggle-password" onclick="togglePassword('password', this)" aria-label="Show password">Show</button>
+        </div>
+      </div>
+
+      <div class="forgot-password">
+        <a onclick="showForgotPassword()">Forgot password?</a>
+      </div>
+
+      <button id="loginBtn" class="btn-full" onclick="login()">Sign in</button>
+
+      <div class="signup-link">
+        Need an account? <a href="register.html">Create one</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="../js/fetch-handler.js?v=3"></script>
+<script src="../js/api.js?v=3"></script>
+<script src="../js/login.js?v=3"></script>
+</body>
+</html>
