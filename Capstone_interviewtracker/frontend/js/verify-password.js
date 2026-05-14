@@ -58,11 +58,10 @@ function handleSetPassword() {
 }
 
 function setPassword(password) {
-  const encryptedPassword = encryptPassword(password);
   const payload = {
     token: currentToken,
-    newPassword: encryptedPassword,
-    confirmPassword: encryptedPassword
+    newPassword: password,
+    confirmPassword: password
   };
 
   fetchHandler("/auth/set-password", { method: "POST", body: payload })
@@ -95,7 +94,7 @@ document.getElementById("newPassword")?.addEventListener("input", function() {
     upper: /[A-Z]/.test(password),
     lower: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[!@#$%^&*]/.test(password)
+    special: /[^A-Za-z0-9]/.test(password)
   };
 
   updateRequirement("req-length", requirements.length);
@@ -137,7 +136,7 @@ function updateRequirement(elementId, met) {
 }
 
 function isValidPassword(password) {
-  const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/;
+  const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
   return pattern.test(password);
 }
 
