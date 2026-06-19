@@ -1,3 +1,6 @@
+"""
+Write pytest test cases for a function that checks whether a number is prime.
+"""
 def is_prime(number: int):
 
     if number <= 1:

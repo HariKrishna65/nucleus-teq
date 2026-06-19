@@ -1,11 +1,18 @@
 import re
 
 
+"""
+Write a program to extract all numbers from a given string using regular
+expressions.
+"""
 def extract_numbers(text: str):
 
     return re.findall(r"\d+", text)
 
 
+"""
+Write a regular expression to validate an email address.
+"""
 def validate_email(email: str):
 
     pattern = (
@@ -19,6 +26,9 @@ def validate_email(email: str):
     )
 
 
+"""
+Write a regular expression to validate a 10-digit mobile number.
+"""
 def validate_mobile(number: str):
 
     return bool(
@@ -29,6 +39,9 @@ def validate_mobile(number: str):
     )
 
 
+"""
+Use re.search() to check whether a word exists in a sentence.
+"""
 def search_word(
     sentence: str,
     word: str
@@ -39,6 +52,9 @@ def search_word(
     )
 
 
+"""
+Use re.findall() to extract all words starting with a capital letter.
+"""
 def capital_words(text: str):
 
     return re.findall(
@@ -47,6 +63,9 @@ def capital_words(text: str):
     )
 
 
+"""
+Replace multiple spaces in a string with a single space using re.sub().
+"""
 def remove_extra_spaces(text: str):
 
     return re.sub(
@@ -56,11 +75,34 @@ def remove_extra_spaces(text: str):
     )
 
 
+"""
+Write a pattern to check if a string contains only alphabets.
+"""
 def alphabet_only(text: str):
 
     return bool(
         re.match(
             r"^[A-Za-z]+$",
             text
+        )
+    )
+
+
+"""
+Create a password validation program using regex (minimum length, one digit,
+one special character).
+"""
+def validate_password(password: str):
+
+    pattern = (
+        r"^(?=.*\d)"
+        r"(?=.*[^A-Za-z0-9])"
+        r".{8,}$"
+    )
+
+    return bool(
+        re.match(
+            pattern,
+            password
         )
     )
