@@ -1,5 +1,3 @@
-"""Student performance project."""
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -7,6 +5,12 @@ import seaborn as sns
 from python_advance.data_science.constants import PASS_MARKS
 
 
+"""
+Assignment 7: Mini Project
+Create a dataset of Students with Name, Marks, and Hours Studied.
+Load into Pandas.
+Add Performance = Pass if Marks > 65 else Fail.
+"""
 def create_student_dataframe() -> pd.DataFrame:
     dataframe = pd.DataFrame(
         {
@@ -27,6 +31,10 @@ def create_student_dataframe() -> pd.DataFrame:
     return dataframe
 
 
+"""
+Assignment 7: Mini Project
+Visualize Line Chart -> Hours vs Marks.
+"""
 def line_chart() -> None:
     dataframe = create_student_dataframe()
 
@@ -38,6 +46,10 @@ def line_chart() -> None:
     plt.show()
 
 
+"""
+Assignment 7: Mini Project
+Visualize Scatter Plot -> Study vs Marks.
+"""
 def scatter_plot() -> None:
     dataframe = create_student_dataframe()
 
@@ -49,6 +61,10 @@ def scatter_plot() -> None:
     plt.show()
 
 
+"""
+Assignment 7: Mini Project
+Use Seaborn Barplot -> Performance vs Marks.
+"""
 def performance_barplot() -> None:
     dataframe = create_student_dataframe()
 

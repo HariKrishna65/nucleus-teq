@@ -1,10 +1,12 @@
-"""Seaborn visualizations."""
-
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 
+"""
+Assignment 6: Seaborn Visualizations
+Create employee dataset for advanced charts.
+"""
 def employee_dataframe() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -15,6 +17,10 @@ def employee_dataframe() -> pd.DataFrame:
     )
 
 
+"""
+Assignment 6: Seaborn Visualizations
+Create Barplot -> Department vs Salary.
+"""
 def bar_plot() -> None:
     dataframe = employee_dataframe()
 
@@ -27,6 +33,10 @@ def bar_plot() -> None:
     plt.show()
 
 
+"""
+Assignment 6: Seaborn Visualizations
+Create Boxplot -> Salary distribution.
+"""
 def box_plot() -> None:
     dataframe = employee_dataframe()
 
@@ -38,6 +48,10 @@ def box_plot() -> None:
     plt.show()
 
 
+"""
+Assignment 6: Seaborn Visualizations
+Create Heatmap using correlation between Age and Salary.
+"""
 def heat_map() -> None:
     dataframe = employee_dataframe()
 

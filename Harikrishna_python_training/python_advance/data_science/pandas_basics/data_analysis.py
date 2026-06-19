@@ -1,8 +1,13 @@
-"""GroupBy analysis."""
-
 import pandas as pd
 
 
+"""
+Assignment 4: Data Analysis
+Using employee dataset:
+Find average salary by department.
+Find max salary by department.
+Count employees per department.
+"""
 def department_analysis() -> dict:
     dataframe = pd.DataFrame(
         {

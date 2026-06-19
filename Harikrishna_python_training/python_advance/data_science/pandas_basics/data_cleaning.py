@@ -1,8 +1,13 @@
-"""Data cleaning examples."""
-
 import pandas as pd
 
 
+"""
+Assignment 3: Data Cleaning
+Create dataset with Name, Age, and Salary.
+Detect missing values.
+Replace missing Age with mean.
+Replace missing Salary with 0.
+"""
 def clean_data() -> pd.DataFrame:
     dataframe = pd.DataFrame(
         {

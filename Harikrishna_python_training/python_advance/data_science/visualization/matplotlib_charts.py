@@ -1,8 +1,11 @@
-"""Matplotlib charts."""
-
 import matplotlib.pyplot as plt
 
 
+"""
+Assignment 5: Matplotlib Charts
+Using Departments = HR, IT, Finance and Employees = 5, 12, 7.
+Create Bar Chart.
+"""
 def bar_chart() -> None:
     departments = ["HR", "IT", "Finance"]
     employees = [5, 12, 7]
@@ -12,6 +15,11 @@ def bar_chart() -> None:
     plt.show()
 
 
+"""
+Assignment 5: Matplotlib Charts
+Using Departments = HR, IT, Finance and Employees = 5, 12, 7.
+Create Line Chart.
+"""
 def line_chart() -> None:
     departments = ["HR", "IT", "Finance"]
     employees = [5, 12, 7]
@@ -20,6 +28,10 @@ def line_chart() -> None:
     plt.show()
 
 
+"""
+Assignment 5: Matplotlib Charts
+Create Histogram using salaries: [30000, 40000, 50000, 60000, 45000].
+"""
 def histogram() -> None:
     salaries = [30000, 40000, 50000, 60000, 45000]
 
@@ -27,6 +39,10 @@ def histogram() -> None:
     plt.show()
 
 
+"""
+Assignment 5: Matplotlib Charts
+Create Scatter Plot: Age vs Salary.
+"""
 def scatter_plot() -> None:
     ages = [25, 30, 28, 35]
     salaries = [30000, 50000, 45000, 60000]
