@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JobDescription.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Interview Tracker</a> &gt; <a href="index.source.html" class="el_package">com.interview.tracker.entity</a> &gt; <span class="el_source">JobDescription.java</span></div><h1>JobDescription.java</h1><pre class="source lang-java linenums">package com.interview.tracker.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
+@Entity
+@Table(name = &quot;job_description&quot;)
+public class JobDescription {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank(message = &quot;Title is required&quot;)
+    private String title;
+
+    @NotBlank(message = &quot;Description is required&quot;)
+    private String description;
+
+    @NotBlank(message = &quot;Skills are required&quot;)
+    private String skills;
+
+    @NotNull(message = &quot;Minimum experience is required&quot;)
+    @Min(value = 0, message = &quot;Minimum experience cannot be negative&quot;)
+    private Integer experienceMin;
+
+    @NotNull(message = &quot;Maximum experience is required&quot;)
+    @Min(value = 0, message = &quot;Maximum experience cannot be negative&quot;)
+    private Integer experienceMax;
+
+    @NotNull(message = &quot;Minimum salary is required&quot;)
+    @Min(value = 0, message = &quot;Minimum salary cannot be negative&quot;)
+    private Integer salaryMin;
+
+    @NotNull(message = &quot;Maximum salary is required&quot;)
+    @Min(value = 0, message = &quot;Maximum salary cannot be negative&quot;)
+    private Integer salaryMax;
+
+    private Integer experience;
+    private String salary;
+    private String location;
+    private String jobType;
+
+<span class="fc" id="L44">    public JobDescription() {}</span>
+
+<span class="fc" id="L46">    public Long getId() { return id; }</span>
+<span class="fc" id="L47">    public void setId(Long id) { this.id = id; }</span>
+
+<span class="fc" id="L49">    public String getTitle() { return title; }</span>
+<span class="fc" id="L50">    public void setTitle(String title) { this.title = title; }</span>
+
+<span class="fc" id="L52">    public String getDescription() { return description; }</span>
+<span class="fc" id="L53">    public void setDescription(String description) { this.description = description; }</span>
+
+<span class="fc" id="L55">    public String getSkills() { return skills; }</span>
+<span class="fc" id="L56">    public void setSkills(String skills) { this.skills = skills; }</span>
+
+<span class="fc" id="L58">    public Integer getExperienceMin() { return experienceMin; }</span>
+<span class="fc" id="L59">    public void setExperienceMin(Integer experienceMin) { this.experienceMin = experienceMin; }</span>
+
+<span class="fc" id="L61">    public Integer getExperienceMax() { return experienceMax; }</span>
+<span class="fc" id="L62">    public void setExperienceMax(Integer experienceMax) { this.experienceMax = experienceMax; }</span>
+
+<span class="fc" id="L64">    public Integer getSalaryMin() { return salaryMin; }</span>
+<span class="fc" id="L65">    public void setSalaryMin(Integer salaryMin) { this.salaryMin = salaryMin; }</span>
+
+<span class="fc" id="L67">    public Integer getSalaryMax() { return salaryMax; }</span>
+<span class="fc" id="L68">    public void setSalaryMax(Integer salaryMax) { this.salaryMax = salaryMax; }</span>
+
+<span class="fc" id="L70">    public Integer getExperience() { return experience; }</span>
+<span class="fc" id="L71">    public void setExperience(Integer experience) { this.experience = experience; }</span>
+
+<span class="fc" id="L73">    public String getSalary() { return salary; }</span>
+<span class="fc" id="L74">    public void setSalary(String salary) { this.salary = salary; }</span>
+
+<span class="fc" id="L76">    public String getLocation() { return location; }</span>
+<span class="fc" id="L77">    public void setLocation(String location) { this.location = location; }</span>
+
+<span class="fc" id="L79">    public String getJobType() { return jobType; }</span>
+<span class="fc" id="L80">    public void setJobType(String jobType) { this.jobType = jobType; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

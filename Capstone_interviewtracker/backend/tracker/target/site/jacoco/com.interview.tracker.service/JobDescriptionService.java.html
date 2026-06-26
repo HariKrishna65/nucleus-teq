@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JobDescriptionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Interview Tracker</a> &gt; <a href="index.source.html" class="el_package">com.interview.tracker.service</a> &gt; <span class="el_source">JobDescriptionService.java</span></div><h1>JobDescriptionService.java</h1><pre class="source lang-java linenums">package com.interview.tracker.service;
+
+import com.interview.tracker.entity.JobDescription;
+import com.interview.tracker.repository.JobDescriptionRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class JobDescriptionService {
+
+    private final JobDescriptionRepository repo;
+
+<span class="fc" id="L14">    public JobDescriptionService(JobDescriptionRepository repo) {</span>
+<span class="fc" id="L15">        this.repo = repo;</span>
+<span class="fc" id="L16">    }</span>
+
+    public JobDescription save(JobDescription jd) {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">        if (jd == null) {</span>
+<span class="fc" id="L20">            throw new IllegalArgumentException(&quot;Job is required&quot;);</span>
+        }
+
+<span class="fc" id="L23">        validateDescriptionWords(jd.getDescription());</span>
+<span class="fc" id="L24">        validateRange(&quot;Experience&quot;, jd.getExperienceMin(), jd.getExperienceMax());</span>
+<span class="fc" id="L25">        validateRange(&quot;Salary&quot;, jd.getSalaryMin(), jd.getSalaryMax());</span>
+
+<span class="pc bpc" id="L27" title="1 of 4 branches missed.">        if (jd.getExperience() == null &amp;&amp; jd.getExperienceMin() != null) {</span>
+<span class="fc" id="L28">            jd.setExperience(jd.getExperienceMin());</span>
+        }
+<span class="pc bpc" id="L30" title="3 of 8 branches missed.">        if ((jd.getSalary() == null || jd.getSalary().isBlank()) &amp;&amp; jd.getSalaryMin() != null &amp;&amp; jd.getSalaryMax() != null) {</span>
+<span class="fc" id="L31">            jd.setSalary(jd.getSalaryMin() + &quot; - &quot; + jd.getSalaryMax());</span>
+        }
+<span class="fc" id="L33">        return repo.save(jd);</span>
+    }
+
+    public List&lt;JobDescription&gt; getAll() {
+<span class="fc" id="L37">        return repo.findAll();</span>
+    }
+
+    public JobDescription getById(Long id) {
+<span class="fc" id="L41">        return repo.findById(id).orElse(null);</span>
+    }
+
+    public void delete(Long id) {
+<span class="fc" id="L45">        repo.deleteById(id);</span>
+<span class="fc" id="L46">    }</span>
+
+    private void validateDescriptionWords(String description) {
+<span class="fc bfc" id="L49" title="All 4 branches covered.">        if (description == null || description.isBlank()) {</span>
+<span class="fc" id="L50">            throw new IllegalArgumentException(&quot;Description is required&quot;);</span>
+        }
+<span class="fc" id="L52">        int words = (int) java.util.Arrays.stream(description.trim().split(&quot;\\s+&quot;))</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">                .filter(w -&gt; !w.isBlank())</span>
+<span class="fc" id="L54">                .count();</span>
+<span class="fc bfc" id="L55" title="All 4 branches covered.">        if (words &lt; 10 || words &gt; 50) {</span>
+<span class="fc" id="L56">            throw new IllegalArgumentException(&quot;Job description must be between 10 and 50 words&quot;);</span>
+        }
+<span class="fc" id="L58">    }</span>
+
+    private void validateRange(String label, Integer min, Integer max) {
+<span class="fc bfc" id="L61" title="All 4 branches covered.">        if (min == null || max == null) {</span>
+<span class="fc" id="L62">            throw new IllegalArgumentException(label + &quot; min and max are required&quot;);</span>
+        }
+<span class="fc bfc" id="L64" title="All 4 branches covered.">        if (min &lt; 0 || max &lt; 0) {</span>
+<span class="fc" id="L65">            throw new IllegalArgumentException(label + &quot; cannot be negative&quot;);</span>
+        }
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (min &gt; max) {</span>
+<span class="fc" id="L68">            throw new IllegalArgumentException(label + &quot; min cannot be greater than max&quot;);</span>
+        }
+<span class="fc" id="L70">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

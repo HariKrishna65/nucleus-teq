@@ -1,0 +1,24 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/feedback'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "comments": "Strong problem-solving and communication.",
+      "rating": 4,
+      "result": "PASS",
+      "strengths": "Spring Boot fundamentals, REST APIs",
+      "weaknesses": "Needs deeper SQL optimization knowledge",
+      "areasCovered": "Java, Spring Boot, SQL, system design basics",
+      "interview": {
+        "id": 1
+      },
+      "panel": {
+        "id": 1
+      }
+    }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InterviewService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Interview Tracker</a> &gt; <a href="index.source.html" class="el_package">com.interview.tracker.service</a> &gt; <span class="el_source">InterviewService.java</span></div><h1>InterviewService.java</h1><pre class="source lang-java linenums">package com.interview.tracker.service;
+
+import com.interview.tracker.entity.Interview;
+import com.interview.tracker.entity.Panel;
+import com.interview.tracker.repository.InterviewRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class InterviewService {
+
+    private final InterviewRepository interviewRepository;
+
+<span class="fc" id="L16">    public InterviewService(InterviewRepository interviewRepository) {</span>
+<span class="fc" id="L17">        this.interviewRepository = interviewRepository;</span>
+<span class="fc" id="L18">    }</span>
+
+    public Interview scheduleInterview(Interview interview) {
+<span class="pc bpc" id="L21" title="1 of 4 branches missed.">        if (interview.getPanels() != null &amp;&amp; interview.getPanels().size() &gt; 2) {</span>
+<span class="fc" id="L22">            throw new IllegalArgumentException(&quot;Maximum 2 panel members allowed per interview&quot;);</span>
+        }
+<span class="pc bpc" id="L24" title="1 of 4 branches missed.">        if (interview.getPanels() != null &amp;&amp; interview.getPanels().size() == 1 </span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">            &amp;&amp; interview.getPanel() == null) {</span>
+<span class="fc" id="L26">            interview.setPanel(interview.getPanels().get(0));</span>
+        }
+<span class="pc bpc" id="L28" title="1 of 4 branches missed.">        if (interview.getInterviewerName() == null || interview.getInterviewerName().isBlank()) {</span>
+<span class="fc" id="L29">            interview.setInterviewerName(buildInterviewerName(interview));</span>
+        }
+<span class="pc bpc" id="L31" title="1 of 4 branches missed.">        if (interview.getStatus() == null || interview.getStatus().isBlank()) {</span>
+<span class="fc" id="L32">            interview.setStatus(&quot;PENDING&quot;);</span>
+        }
+
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if (interview.getRound() == null || interview.getRound().isBlank()) {</span>
+<span class="pc bpc" id="L36" title="1 of 4 branches missed.">            if (interview.getCandidate() != null &amp;&amp; interview.getCandidate().getStage() != null) {</span>
+<span class="fc" id="L37">                String stage = interview.getCandidate().getStage().toString();</span>
+<span class="fc bfc" id="L38" title="All 4 branches covered.">                switch (stage) {</span>
+<span class="fc" id="L39">                    case &quot;L1_TECH&quot; -&gt; interview.setRound(&quot;L1&quot;);</span>
+<span class="fc" id="L40">                    case &quot;L2_TECH&quot; -&gt; interview.setRound(&quot;L2&quot;);</span>
+<span class="fc" id="L41">                    case &quot;HR_ROUND&quot; -&gt; interview.setRound(&quot;HR&quot;);</span>
+<span class="fc" id="L42">                    default -&gt; interview.setRound(&quot;L1&quot;);</span>
+                }
+<span class="fc" id="L44">            } else {</span>
+<span class="fc" id="L45">                interview.setRound(&quot;L1&quot;);</span>
+            }
+        }
+
+<span class="fc" id="L49">        return interviewRepository.save(interview);</span>
+    }
+
+    public List&lt;Interview&gt; getByPanel(Long panelId) {
+<span class="fc" id="L53">        return interviewRepository.findAssignedToPanel(panelId);</span>
+    }
+
+    public Interview getById(Long id) {
+<span class="fc" id="L57">        return interviewRepository.findById(id).orElse(null);</span>
+    }
+
+    private String buildInterviewerName(Interview interview) {
+<span class="fc" id="L61">        List&lt;Panel&gt; panels = interview.getPanels();</span>
+<span class="pc bpc" id="L62" title="1 of 4 branches missed.">        if (panels != null &amp;&amp; !panels.isEmpty()) {</span>
+<span class="fc" id="L63">            String joined = panels.stream()</span>
+<span class="fc bfc" id="L64" title="All 4 branches covered.">                    .map(p -&gt; p.getName() != null &amp;&amp; !p.getName().isBlank() </span>
+<span class="fc" id="L65">                              ? p.getName() : p.getEmail())</span>
+<span class="pc bpc" id="L66" title="1 of 4 branches missed.">                    .filter(s -&gt; s != null &amp;&amp; !s.isBlank())</span>
+<span class="fc" id="L67">                    .distinct()</span>
+<span class="fc" id="L68">                    .collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            if (!joined.isBlank()) return joined;</span>
+        }
+<span class="fc" id="L71">        Panel p = interview.getPanel();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (p != null) {</span>
+<span class="fc bfc" id="L73" title="All 4 branches covered.">            if (p.getName() != null &amp;&amp; !p.getName().isBlank()) return p.getName();</span>
+<span class="pc bpc" id="L74" title="2 of 4 branches missed.">            if (p.getEmail() != null &amp;&amp; !p.getEmail().isBlank()) return p.getEmail();</span>
+        }
+<span class="fc" id="L76">        return &quot;Panel&quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

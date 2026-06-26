@@ -1,0 +1,17 @@
+com\interview\tracker\controller\AuthControllerValidationTest.class
+com\interview\tracker\dto\DtoValidationTest.class
+com\interview\tracker\controller\HrControllerTest$TestContext.class
+com\interview\tracker\entity\EntityAccessorTest.class
+com\interview\tracker\service\JobDescriptionServiceTest.class
+com\interview\tracker\service\JwtServiceTest.class
+com\interview\tracker\config\SecurityConfigTest.class
+com\interview\tracker\service\SecurityUtilTest.class
+com\interview\tracker\service\EmailServiceTest.class
+com\interview\tracker\service\InterviewServiceTest.class
+com\interview\tracker\controller\ControllerUnitTest.class
+com\interview\tracker\service\CandidateServiceTest.class
+com\interview\tracker\exception\GlobalExceptionHandlerTest.class
+com\interview\tracker\service\FeedbackServiceTest.class
+com\interview\tracker\TrackerApplicationTests.class
+com\interview\tracker\service\UserServiceTest.class
+com\interview\tracker\controller\HrControllerTest.class

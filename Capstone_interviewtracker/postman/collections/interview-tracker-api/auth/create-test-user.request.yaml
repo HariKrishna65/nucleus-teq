@@ -1,0 +1,20 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/auth/create-test-user'
+order: 7000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Test User",
+      "email": "test.user@example.com",
+      "password": "Password@123",
+      "role": "HR",
+      "phone": "+919876543210",
+      "city": "Hyderabad",
+      "state": "Telangana",
+      "country": "India"
+    }

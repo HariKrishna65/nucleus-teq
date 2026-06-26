@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FeedbackService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Interview Tracker</a> &gt; <a href="index.source.html" class="el_package">com.interview.tracker.service</a> &gt; <span class="el_source">FeedbackService.java</span></div><h1>FeedbackService.java</h1><pre class="source lang-java linenums">package com.interview.tracker.service;
+
+import com.interview.tracker.entity.Feedback;
+import com.interview.tracker.entity.Interview;
+import com.interview.tracker.entity.Panel;
+import com.interview.tracker.repository.FeedbackRepository;
+import com.interview.tracker.repository.InterviewRepository;
+import com.interview.tracker.repository.PanelRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static com.interview.tracker.constants.AppConstants.ROLE_HR;
+import static com.interview.tracker.constants.AppConstants.ROLE_PANEL;
+
+@Service
+public class FeedbackService {
+<span class="fc" id="L21">    private static final Logger log = LoggerFactory.getLogger(FeedbackService.class);</span>
+
+    private final FeedbackRepository feedbackRepository;
+    private final InterviewRepository interviewRepository;
+    private final PanelRepository panelRepository;
+
+    public FeedbackService(
+            FeedbackRepository feedbackRepository,
+            InterviewRepository interviewRepository,
+            PanelRepository panelRepository
+<span class="fc" id="L31">    ) {</span>
+<span class="fc" id="L32">        this.feedbackRepository = feedbackRepository;</span>
+<span class="fc" id="L33">        this.interviewRepository = interviewRepository;</span>
+<span class="fc" id="L34">        this.panelRepository = panelRepository;</span>
+<span class="fc" id="L35">    }</span>
+
+    public Feedback save(Feedback feedback) {
+<span class="fc bfc" id="L38" title="All 4 branches covered.">        if (feedback.getInterview() == null || feedback.getInterview().getId() == null) {</span>
+<span class="fc" id="L39">            throw new IllegalArgumentException(&quot;Interview is required&quot;);</span>
+        }
+<span class="pc bpc" id="L41" title="1 of 4 branches missed.">        if (feedback.getComments() == null || feedback.getComments().isBlank()) {</span>
+<span class="fc" id="L42">            throw new IllegalArgumentException(&quot;Comments are mandatory&quot;);</span>
+        }
+<span class="fc bfc" id="L44" title="All 6 branches covered.">        if (feedback.getRating() == null || feedback.getRating() &lt; 1 || feedback.getRating() &gt; 5) {</span>
+<span class="fc" id="L45">            throw new IllegalArgumentException(&quot;Rating must be between 1 and 5&quot;);</span>
+        }
+<span class="pc bpc" id="L47" title="1 of 4 branches missed.">        if (feedback.getStatus() == null || feedback.getStatus().isBlank()) {</span>
+<span class="fc" id="L48">            throw new IllegalArgumentException(&quot;Status is required (Selected/Rejected)&quot;);</span>
+        }
+
+<span class="fc" id="L51">        Long interviewId = feedback.getInterview().getId();</span>
+<span class="fc" id="L52">        Interview interview = interviewRepository.findById(interviewId)</span>
+<span class="fc" id="L53">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Interview not found&quot;));</span>
+
+<span class="fc" id="L55">        String role = SecurityUtil.currentRole();</span>
+
+<span class="fc" id="L57">        String email = SecurityUtil.currentEmail();</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">        if (ROLE_PANEL.equals(role) &amp;&amp; email != null) {</span>
+<span class="fc" id="L59">            Panel panel = panelRepository.findByEmail(email)</span>
+<span class="fc" id="L60">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Panel profile not found&quot;));</span>
+
+<span class="fc" id="L62">            boolean assigned =</span>
+<span class="pc bpc" id="L63" title="1 of 4 branches missed.">                    (interview.getPanel() != null &amp;&amp; interview.getPanel().getId().equals(panel.getId())) ||</span>
+<span class="pc bpc" id="L64" title="1 of 4 branches missed.">                    (interview.getPanels() != null &amp;&amp; interview.getPanels().stream().anyMatch(p -&gt; p.getId().equals(panel.getId())));</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if (!assigned) {</span>
+<span class="fc" id="L67">                throw new IllegalArgumentException(&quot;You are not assigned to this interview&quot;);</span>
+            }
+<span class="fc bfc" id="L69" title="All 2 branches covered.">            if (feedbackRepository.existsByInterview_IdAndPanel_Id(interviewId, panel.getId())) {</span>
+<span class="fc" id="L70">                throw new IllegalArgumentException(&quot;Feedback already submitted for this interview&quot;);</span>
+            }
+
+<span class="fc" id="L73">            feedback.setPanel(panel);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        } else if (!ROLE_HR.equals(role)) {</span>
+<span class="fc" id="L75">            throw new IllegalArgumentException(&quot;Access denied&quot;);</span>
+        }
+
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (interview.getInterviewTime() == null) {</span>
+<span class="nc" id="L79">            throw new IllegalArgumentException(&quot;Interview time is not scheduled&quot;);</span>
+        }
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (LocalDateTime.now().isBefore(interview.getInterviewTime())) {</span>
+<span class="fc" id="L82">            throw new IllegalArgumentException(&quot;Feedback can be submitted only after the interview time&quot;);</span>
+        }
+
+<span class="fc" id="L85">        Feedback saved = feedbackRepository.save(feedback);</span>
+<span class="fc" id="L86">        long submittedPanelCount = feedbackRepository.countDistinctPanelsByInterviewId(interviewId);</span>
+<span class="fc" id="L87">        int assignedPanelCount = getAssignedPanelCount(interview);</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        interview.setStatus(submittedPanelCount &gt;= assignedPanelCount ? &quot;COMPLETED&quot; : &quot;FEEDBACK_PENDING&quot;);</span>
+<span class="fc" id="L89">        interviewRepository.save(interview);</span>
+<span class="fc" id="L90">        log.info(&quot;Feedback submitted: feedbackId={}, interviewId={}, role={}&quot;, saved.getId(), interviewId, role);</span>
+<span class="fc" id="L91">        return saved;</span>
+    }
+
+    public Feedback getLatestByInterview(Long interviewId) {
+<span class="fc" id="L95">        Interview interview = interviewRepository.findById(interviewId)</span>
+<span class="fc" id="L96">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Interview not found&quot;));</span>
+
+<span class="fc" id="L98">        String role = SecurityUtil.currentRole();</span>
+<span class="fc" id="L99">        String email = SecurityUtil.currentEmail();</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (ROLE_PANEL.equals(role)) {</span>
+<span class="fc" id="L101">            Panel panel = panelRepository.findByEmail(email)</span>
+<span class="fc" id="L102">                    .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Panel profile not found&quot;));</span>
+<span class="fc" id="L103">            boolean assigned =</span>
+<span class="fc bfc" id="L104" title="All 4 branches covered.">                    (interview.getPanel() != null &amp;&amp; interview.getPanel().getId().equals(panel.getId())) ||</span>
+<span class="pc bpc" id="L105" title="1 of 4 branches missed.">                            (interview.getPanels() != null &amp;&amp; interview.getPanels().stream().anyMatch(p -&gt; p.getId().equals(panel.getId())));</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            if (!assigned) {</span>
+<span class="fc" id="L107">                throw new IllegalArgumentException(&quot;You are not assigned to this interview&quot;);</span>
+            }
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        } else if (!ROLE_HR.equals(role)) {</span>
+<span class="fc" id="L110">            throw new IllegalArgumentException(&quot;Access denied&quot;);</span>
+        }
+
+<span class="fc" id="L113">        Optional&lt;Feedback&gt; latest = feedbackRepository.findTopByInterview_IdOrderByIdDesc(interviewId);</span>
+<span class="fc" id="L114">        return latest.orElse(null);</span>
+    }
+
+    private int getAssignedPanelCount(Interview interview) {
+<span class="pc bpc" id="L118" title="1 of 4 branches missed.">        if (interview.getPanels() != null &amp;&amp; !interview.getPanels().isEmpty()) {</span>
+<span class="fc" id="L119">            return interview.getPanels().size();</span>
+        }
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        return interview.getPanel() == null ? 0 : 1;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

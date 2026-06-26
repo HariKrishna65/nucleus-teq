@@ -1,0 +1,23 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/jd'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "title": "Java Developer",
+      "description": "Backend engineer role focused on Spring Boot APIs.",
+      "skills": "Java, Spring Boot, SQL, REST",
+      "experienceMin": 2,
+      "experienceMax": 5,
+      "salaryMin": 600000,
+      "salaryMax": 1200000,
+      "experience": "2-5 years",
+      "salary": "6-12 LPA",
+      "location": "Hyderabad",
+      "jobType": "Full-time"
+    }

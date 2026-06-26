@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Interview Tracker</a> &gt; <a href="index.source.html" class="el_package">com.interview.tracker.service</a> &gt; <span class="el_source">EmailService.java</span></div><h1>EmailService.java</h1><pre class="source lang-java linenums">package com.interview.tracker.service;
+
+import com.interview.tracker.entity.User;
+import com.interview.tracker.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class EmailService {
+
+<span class="fc" id="L20">    private static final Logger log = LoggerFactory.getLogger(EmailService.class);</span>
+
+    private final JavaMailSender mailSender;
+    private final UserRepository userRepository;
+
+<span class="fc" id="L25">    public EmailService(JavaMailSender mailSender, UserRepository userRepository) {</span>
+<span class="fc" id="L26">        this.mailSender = mailSender;</span>
+<span class="fc" id="L27">        this.userRepository = userRepository;</span>
+<span class="fc" id="L28">    }</span>
+
+    @Value(&quot;${app.base.url:http://localhost:8080}&quot;)
+    private String baseUrl;
+
+    @Value(&quot;${app.frontend.url:http://localhost:5500/frontend/html}&quot;)
+    private String frontendUrl;
+
+    private String buildFrontendUrl(String page, String token) {
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        String normalizedBase = frontendUrl.endsWith(&quot;/&quot;) ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;</span>
+<span class="fc" id="L38">        return normalizedBase + &quot;/&quot; + page + &quot;?token=&quot; + token;</span>
+    }
+
+    @Value(&quot;${spring.mail.username}&quot;)
+    private String mailUsername;
+
+<span class="fc" id="L44">    private static final DateTimeFormatter EMAIL_DT = DateTimeFormatter.ofPattern(&quot;dd MMM yyyy, hh:mm a&quot;);</span>
+
+    public void sendVerificationEmail(User user) {
+<span class="fc" id="L47">        String token = UUID.randomUUID().toString();</span>
+<span class="fc" id="L48">        LocalDate expiry = LocalDate.now().plusDays(7);</span>
+
+<span class="fc" id="L50">        user.setVerificationToken(token);</span>
+<span class="fc" id="L51">        user.setTokenExpiry(expiry);</span>
+<span class="fc" id="L52">        userRepository.save(user);</span>
+
+<span class="fc" id="L54">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L55">        message.setTo(user.getEmail());</span>
+<span class="fc" id="L56">        message.setSubject(&quot;Verify your Interview Tracker Account&quot;);</span>
+<span class="fc" id="L57">        message.setFrom(mailUsername);</span>
+
+<span class="fc" id="L59">        String verificationUrl = buildFrontendUrl(&quot;verify-password.html&quot;, token);</span>
+<span class="fc" id="L60">        message.setText(</span>
+<span class="fc" id="L61">            &quot;Hello &quot; + user.getName() + &quot;,\n\n&quot; +</span>
+            &quot;Welcome to Interview Tracker!\n\n&quot; +
+            &quot;Please verify your email address by clicking the link below:\n\n&quot; +
+            verificationUrl + &quot;\n\n&quot; +
+            &quot;This link will expire in 7 days.\n\n&quot; +
+            &quot;After verification, you can set your password to complete your registration.\n\n&quot; +
+            &quot;Best regards,\n&quot; +
+            &quot;Interview Tracker Team&quot;
+        );
+
+        try {
+<span class="fc" id="L72">            mailSender.send(message);</span>
+<span class="fc" id="L73">            log.info(&quot;Verification email sent to: {}&quot;, user.getEmail());</span>
+<span class="fc" id="L74">        } catch (Exception e) {</span>
+<span class="fc" id="L75">            log.error(&quot;Failed to send verification email to: {}&quot;, user.getEmail(), e);</span>
+<span class="fc" id="L76">            throw new RuntimeException(&quot;Email sending failed&quot;, e);</span>
+<span class="fc" id="L77">        }</span>
+<span class="fc" id="L78">    }</span>
+
+    public void sendVerificationAndPasswordEmail(User user) {
+<span class="fc" id="L81">        String token = UUID.randomUUID().toString();</span>
+<span class="fc" id="L82">        LocalDate expiry = LocalDate.now().plusDays(7);</span>
+
+<span class="fc" id="L84">        user.setVerificationToken(token);</span>
+<span class="fc" id="L85">        user.setTokenExpiry(expiry);</span>
+<span class="fc" id="L86">        userRepository.save(user);</span>
+
+<span class="fc" id="L88">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L89">        message.setTo(user.getEmail());</span>
+<span class="fc" id="L90">        message.setSubject(&quot;Complete Your Interview Tracker Registration&quot;);</span>
+<span class="fc" id="L91">        message.setFrom(mailUsername);</span>
+
+<span class="fc" id="L93">        String verifyPasswordUrl = buildFrontendUrl(&quot;verify-password.html&quot;, token);</span>
+<span class="fc" id="L94">        message.setText(</span>
+<span class="fc" id="L95">            &quot;Hello &quot; + user.getName() + &quot;,\n\n&quot; +</span>
+            &quot;Welcome to Interview Tracker!\n\n&quot; +
+            &quot;Please complete your registration by clicking the link below:\n\n&quot; +
+            verifyPasswordUrl + &quot;\n\n&quot; +
+            &quot;This single link will allow you to:\n&quot; +
+            &quot;1. Verify your email address\n&quot; +
+            &quot;2. Set your secure password\n\n&quot; +
+            &quot;This link will expire in 7 days.\n\n&quot; +
+            &quot;Best regards,\n&quot; +
+            &quot;Interview Tracker Team&quot;
+        );
+
+        try {
+<span class="fc" id="L108">            mailSender.send(message);</span>
+<span class="fc" id="L109">            log.info(&quot;Combined verification &amp; password setup email sent to: {}&quot;, user.getEmail());</span>
+<span class="fc" id="L110">        } catch (Exception e) {</span>
+<span class="fc" id="L111">            log.error(&quot;Failed to send combined email to: {}&quot;, user.getEmail(), e);</span>
+<span class="fc" id="L112">            throw new RuntimeException(&quot;Email sending failed&quot;, e);</span>
+<span class="fc" id="L113">        }</span>
+<span class="fc" id="L114">    }</span>
+
+    public void sendPasswordSetEmail(User user) {
+<span class="fc" id="L117">        String token = UUID.randomUUID().toString();</span>
+<span class="fc" id="L118">        LocalDate expiry = LocalDate.now().plusDays(3);</span>
+
+<span class="fc" id="L120">        user.setVerificationToken(token);</span>
+<span class="fc" id="L121">        user.setTokenExpiry(expiry);</span>
+<span class="fc" id="L122">        userRepository.save(user);</span>
+
+<span class="fc" id="L124">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L125">        message.setTo(user.getEmail());</span>
+<span class="fc" id="L126">        message.setSubject(&quot;Set Your Password - Interview Tracker&quot;);</span>
+<span class="fc" id="L127">        message.setFrom(mailUsername);</span>
+
+<span class="fc" id="L129">        String setPasswordUrl = buildFrontendUrl(&quot;verify-password.html&quot;, token);</span>
+<span class="fc" id="L130">        message.setText(</span>
+<span class="fc" id="L131">            &quot;Hello &quot; + user.getName() + &quot;,\n\n&quot; +</span>
+            &quot;Your account has been verified! Now you need to set your password.\n\n&quot; +
+            &quot;Click the link below to set your password:\n\n&quot; +
+            setPasswordUrl + &quot;\n\n&quot; +
+            &quot;This link will expire in 3 days.\n\n&quot; +
+            &quot;If you didn't request this, please ignore this email.\n\n&quot; +
+            &quot;Best regards,\n&quot; +
+            &quot;Interview Tracker Team&quot;
+        );
+
+        try {
+<span class="fc" id="L142">            mailSender.send(message);</span>
+<span class="fc" id="L143">            log.info(&quot;Password set email sent to: {}&quot;, user.getEmail());</span>
+<span class="fc" id="L144">        } catch (Exception e) {</span>
+<span class="fc" id="L145">            log.error(&quot;Failed to send password set email to: {}&quot;, user.getEmail(), e);</span>
+<span class="fc" id="L146">            throw new RuntimeException(&quot;Email sending failed&quot;, e);</span>
+<span class="fc" id="L147">        }</span>
+<span class="fc" id="L148">    }</span>
+
+    public void sendPasswordResetEmail(User user) {
+<span class="fc" id="L151">        String token = UUID.randomUUID().toString();</span>
+<span class="fc" id="L152">        LocalDate expiry = LocalDate.now().plusDays(1);</span>
+
+<span class="fc" id="L154">        user.setVerificationToken(token);</span>
+<span class="fc" id="L155">        user.setTokenExpiry(expiry);</span>
+<span class="fc" id="L156">        userRepository.save(user);</span>
+
+<span class="fc" id="L158">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L159">        message.setTo(user.getEmail());</span>
+<span class="fc" id="L160">        message.setSubject(&quot;Reset Your Password - Interview Tracker&quot;);</span>
+<span class="fc" id="L161">        message.setFrom(mailUsername);</span>
+
+<span class="fc" id="L163">        String resetUrl = buildFrontendUrl(&quot;verify-password.html&quot;, token);</span>
+<span class="fc" id="L164">        message.setText(</span>
+<span class="fc" id="L165">            &quot;Hello &quot; + user.getName() + &quot;,\n\n&quot; +</span>
+            &quot;We received a request to reset your password.\n\n&quot; +
+            &quot;Click the link below to create a new password:\n\n&quot; +
+            resetUrl + &quot;\n\n&quot; +
+            &quot;This link will expire in 24 hours.\n\n&quot; +
+            &quot;If you didn't request this, please ignore this email or contact support.\n\n&quot; +
+            &quot;Best regards,\n&quot; +
+            &quot;Interview Tracker Team&quot;
+        );
+
+        try {
+<span class="fc" id="L176">            mailSender.send(message);</span>
+<span class="fc" id="L177">            log.info(&quot;Password reset email sent to: {}&quot;, user.getEmail());</span>
+<span class="fc" id="L178">        } catch (Exception e) {</span>
+<span class="fc" id="L179">            log.error(&quot;Failed to send password reset email to: {}&quot;, user.getEmail(), e);</span>
+<span class="fc" id="L180">            throw new RuntimeException(&quot;Email sending failed&quot;, e);</span>
+<span class="fc" id="L181">        }</span>
+<span class="fc" id="L182">    }</span>
+
+    public void sendPanelAssignmentEmails(User candidateUser, java.util.List&lt;com.interview.tracker.entity.Panel&gt; panels, com.interview.tracker.entity.Interview interview) {
+<span class="fc bfc" id="L185" title="All 4 branches covered.">        if (candidateUser == null || candidateUser.getEmail() == null) {</span>
+<span class="fc" id="L186">            throw new IllegalArgumentException(&quot;Candidate email not found&quot;);</span>
+        }
+<span class="fc bfc" id="L188" title="All 4 branches covered.">        if (panels == null || panels.isEmpty()) {</span>
+<span class="fc" id="L189">            throw new IllegalArgumentException(&quot;At least one panel member is required&quot;);</span>
+        }
+
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        String candidateName = candidateUser.getName() == null ? &quot;Candidate&quot; : candidateUser.getName();</span>
+<span class="fc" id="L193">        String candidateEmail = candidateUser.getEmail();</span>
+<span class="pc bpc" id="L194" title="1 of 8 branches missed.">        String jobTitle = (interview != null &amp;&amp; interview.getCandidate() != null &amp;&amp; interview.getCandidate().getJd() != null &amp;&amp; interview.getCandidate().getJd().getTitle() != null)</span>
+<span class="fc" id="L195">                ? interview.getCandidate().getJd().getTitle()</span>
+<span class="fc" id="L196">                : &quot;N/A&quot;;</span>
+<span class="fc bfc" id="L197" title="All 4 branches covered.">        String round = interview != null ? (interview.getRound() == null ? &quot;N/A&quot; : interview.getRound()) : &quot;N/A&quot;;</span>
+<span class="fc bfc" id="L198" title="All 4 branches covered.">        String focus = interview != null ? (interview.getFocusArea() == null ? &quot;General&quot; : interview.getFocusArea()) : &quot;General&quot;;</span>
+<span class="fc bfc" id="L199" title="All 4 branches covered.">        String time = (interview != null &amp;&amp; interview.getInterviewTime() != null) ? interview.getInterviewTime().format(EMAIL_DT) : &quot;To be scheduled&quot;;</span>
+<span class="fc bfc" id="L200" title="All 4 branches covered.">        String duration = (interview != null &amp;&amp; interview.getDuration() != null) ? interview.getDuration() + &quot; minutes&quot; : &quot;N/A&quot;;</span>
+<span class="fc bfc" id="L201" title="All 6 branches covered.">        String type = (interview != null &amp;&amp; interview.getInterviewType() != null &amp;&amp; !interview.getInterviewType().isBlank()) ? interview.getInterviewType() : &quot;N/A&quot;;</span>
+<span class="fc bfc" id="L202" title="All 6 branches covered.">        String meetingLink = (interview != null &amp;&amp; interview.getMeetingLink() != null &amp;&amp; !interview.getMeetingLink().isBlank()) ? interview.getMeetingLink() : &quot;N/A&quot;;</span>
+<span class="pc bpc" id="L203" title="1 of 6 branches missed.">        String notes = (interview != null &amp;&amp; interview.getNotes() != null &amp;&amp; !interview.getNotes().isBlank()) ? interview.getNotes() : &quot;N/A&quot;;</span>
+
+<span class="fc" id="L205">        String panelEmails = panels.stream()</span>
+<span class="fc" id="L206">                .map(com.interview.tracker.entity.Panel::getEmail)</span>
+<span class="fc bfc" id="L207" title="All 4 branches covered.">                .filter(e -&gt; e != null &amp;&amp; !e.isBlank())</span>
+<span class="fc" id="L208">                .distinct()</span>
+<span class="fc" id="L209">                .collect(Collectors.joining(&quot;, &quot;));</span>
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        for (com.interview.tracker.entity.Panel p : panels) {</span>
+<span class="fc bfc" id="L212" title="All 4 branches covered.">            if (p.getEmail() == null || p.getEmail().isBlank()) continue;</span>
+
+<span class="fc" id="L214">            SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L215">            message.setTo(p.getEmail());</span>
+<span class="fc" id="L216">            message.setSubject(&quot;New Interview Assigned - Interview Tracker&quot;);</span>
+<span class="fc" id="L217">            message.setFrom(mailUsername);</span>
+
+<span class="fc" id="L219">            message.setText(</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">                    &quot;Hello &quot; + (p.getName() == null ? &quot;Panel Member&quot; : p.getName()) + &quot;,\n\n&quot; +</span>
+                    &quot;You have been assigned to an interview.\n\n&quot; +
+                    &quot;Candidate: &quot; + candidateName + &quot; (&quot; + candidateEmail + &quot;)\n&quot; +
+                    &quot;Job: &quot; + jobTitle + &quot;\n&quot; +
+                    &quot;Round: &quot; + round + &quot;\n&quot; +
+                    &quot;Focus area: &quot; + focus + &quot;\n&quot; +
+                    &quot;Time: &quot; + time + &quot;\n&quot; +
+                    &quot;Duration: &quot; + duration + &quot;\n&quot; +
+                    &quot;Type: &quot; + type + &quot;\n&quot; +
+                    &quot;Meeting link: &quot; + meetingLink + &quot;\n&quot; +
+                    &quot;Notes: &quot; + notes + &quot;\n\n&quot; +
+                    &quot;Please login to Interview Tracker to view details.\n\n&quot; +
+                    &quot;Best regards,\n&quot; +
+                    &quot;Interview Tracker Team&quot;
+            );
+<span class="fc" id="L235">            mailSender.send(message);</span>
+<span class="fc" id="L236">        }</span>
+
+<span class="fc" id="L238">        SimpleMailMessage candidateMsg = new SimpleMailMessage();</span>
+<span class="fc" id="L239">        candidateMsg.setTo(candidateEmail);</span>
+<span class="fc" id="L240">        candidateMsg.setSubject(&quot;Panel Assigned to Your Application - Interview Tracker&quot;);</span>
+<span class="fc" id="L241">        candidateMsg.setFrom(mailUsername);</span>
+<span class="fc" id="L242">        candidateMsg.setText(</span>
+                &quot;Hello &quot; + candidateName + &quot;,\n\n&quot; +
+                &quot;Your application has been assigned to panel member(s): &quot; + panelEmails + &quot;.\n\n&quot; +
+                &quot;Job: &quot; + jobTitle + &quot;\n&quot; +
+                &quot;Round: &quot; + round + &quot;\n&quot; +
+                &quot;Focus area: &quot; + focus + &quot;\n&quot; +
+                &quot;Time: &quot; + time + &quot;\n&quot; +
+                &quot;Duration: &quot; + duration + &quot;\n&quot; +
+                &quot;Type: &quot; + type + &quot;\n&quot; +
+                &quot;Meeting link: &quot; + meetingLink + &quot;\n\n&quot; +
+                &quot;You will be notified if the interview time changes.\n\n&quot; +
+                &quot;Best regards,\n&quot; +
+                &quot;Interview Tracker Team&quot;
+        );
+<span class="fc" id="L256">        mailSender.send(candidateMsg);</span>
+<span class="fc" id="L257">    }</span>
+
+    public void sendCandidateSelectedEmail(User candidateUser, String jobTitle) {
+<span class="pc bpc" id="L260" title="1 of 6 branches missed.">        if (candidateUser == null || candidateUser.getEmail() == null || candidateUser.getEmail().isBlank()) return;</span>
+<span class="pc bpc" id="L261" title="1 of 4 branches missed.">        String name = (candidateUser.getName() == null || candidateUser.getName().isBlank()) ? &quot;Candidate&quot; : candidateUser.getName();</span>
+<span class="pc bpc" id="L262" title="1 of 4 branches missed.">        String title = (jobTitle == null || jobTitle.isBlank()) ? &quot;the role&quot; : jobTitle;</span>
+
+<span class="fc" id="L264">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L265">        message.setTo(candidateUser.getEmail());</span>
+<span class="fc" id="L266">        message.setSubject(&quot;Congratulations! You are selected - Interview Tracker&quot;);</span>
+<span class="fc" id="L267">        message.setFrom(mailUsername);</span>
+<span class="fc" id="L268">        message.setText(</span>
+                &quot;Hello &quot; + name + &quot;,\n\n&quot; +
+                        &quot;Congratulations! You have been selected for &quot; + title + &quot;.\n\n&quot; +
+                        &quot;Our HR team will contact you shortly with next steps.\n\n&quot; +
+                        &quot;Best regards,\n&quot; +
+                        &quot;Interview Tracker Team&quot;
+        );
+<span class="fc" id="L275">        mailSender.send(message);</span>
+<span class="fc" id="L276">        log.info(&quot;Selection email sent to: {}&quot;, candidateUser.getEmail());</span>
+<span class="fc" id="L277">    }</span>
+
+    public void sendCandidateRejectedEmail(User candidateUser, String jobTitle) {
+<span class="pc bpc" id="L280" title="1 of 6 branches missed.">        if (candidateUser == null || candidateUser.getEmail() == null || candidateUser.getEmail().isBlank()) return;</span>
+<span class="pc bpc" id="L281" title="1 of 4 branches missed.">        String name = (candidateUser.getName() == null || candidateUser.getName().isBlank()) ? &quot;Candidate&quot; : candidateUser.getName();</span>
+<span class="pc bpc" id="L282" title="1 of 4 branches missed.">        String title = (jobTitle == null || jobTitle.isBlank()) ? &quot;the role&quot; : jobTitle;</span>
+
+<span class="fc" id="L284">        SimpleMailMessage message = new SimpleMailMessage();</span>
+<span class="fc" id="L285">        message.setTo(candidateUser.getEmail());</span>
+<span class="fc" id="L286">        message.setSubject(&quot;Update on your application - Interview Tracker&quot;);</span>
+<span class="fc" id="L287">        message.setFrom(mailUsername);</span>
+<span class="fc" id="L288">        message.setText(</span>
+                &quot;Hello &quot; + name + &quot;,\n\n&quot; +
+                        &quot;Thank you for taking the time to interview for &quot; + title + &quot;.\n\n&quot; +
+                        &quot;At this moment we will not be moving forward with your application.\n\n&quot; +
+                        &quot;We wish you all the best in your job search.\n\n&quot; +
+                        &quot;Best regards,\n&quot; +
+                        &quot;Interview Tracker Team&quot;
+        );
+<span class="fc" id="L296">        mailSender.send(message);</span>
+<span class="fc" id="L297">        log.info(&quot;Rejection email sent to: {}&quot;, candidateUser.getEmail());</span>
+<span class="fc" id="L298">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

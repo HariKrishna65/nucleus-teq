@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FeedbackController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Interview Tracker</a> &gt; <a href="index.source.html" class="el_package">com.interview.tracker.controller</a> &gt; <span class="el_source">FeedbackController.java</span></div><h1>FeedbackController.java</h1><pre class="source lang-java linenums">package com.interview.tracker.controller;
+
+import com.interview.tracker.entity.Feedback;
+import com.interview.tracker.service.FeedbackService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import static com.interview.tracker.constants.AppConstants.FEEDBACK;
+
+@RestController
+@RequestMapping(FEEDBACK)
+public class FeedbackController {
+
+    private final FeedbackService feedbackService;
+
+<span class="fc" id="L16">    public FeedbackController(FeedbackService feedbackService) {</span>
+<span class="fc" id="L17">        this.feedbackService = feedbackService;</span>
+<span class="fc" id="L18">    }</span>
+
+    @PostMapping
+    public ResponseEntity&lt;Feedback&gt; submit(@Valid @RequestBody Feedback feedback) {
+<span class="fc" id="L22">        return ResponseEntity.ok(feedbackService.save(feedback));</span>
+    }
+
+    @GetMapping(&quot;/interview/{interviewId}&quot;)
+    public ResponseEntity&lt;Feedback&gt; getLatestByInterview(@PathVariable Long interviewId) {
+<span class="fc" id="L27">        return ResponseEntity.ok(feedbackService.getLatestByInterview(interviewId));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

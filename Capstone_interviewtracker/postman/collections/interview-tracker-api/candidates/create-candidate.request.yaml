@@ -1,0 +1,22 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/candidates'
+order: 1000
+body:
+  type: formdata
+  content:
+    - key: candidate
+      type: text
+      contentType: application/json
+      value: |-
+        {
+          "name": "Candidate One",
+          "email": "candidate@example.com",
+          "phone": "+919876543211",
+          "experience": 3,
+          "skills": ["Java", "Spring Boot"],
+          "jdId": 1
+        }
+    - key: file
+      type: file
+      src: ''

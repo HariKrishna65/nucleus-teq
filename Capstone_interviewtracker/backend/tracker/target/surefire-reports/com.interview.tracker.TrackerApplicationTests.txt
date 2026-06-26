@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.interview.tracker.TrackerApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.97 s -- in com.interview.tracker.TrackerApplicationTests

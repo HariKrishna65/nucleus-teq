@@ -1,0 +1,13 @@
+$kind: collection
+name: 'Interview Tracker API'
+description: 'Reference collection generated from the Capstone Interview Tracker backend controllers.'
+variables:
+  - key: base_url
+    value: 'http://localhost:8080'
+  - key: authToken
+    value: ''
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{authToken}}'
