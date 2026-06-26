@@ -4,6 +4,7 @@ import jwt
 from passlib.context import CryptContext
 
 from backend.database.config import settings
+from backend.schemas.token import TokenPayload
 
 
 password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -30,5 +31,10 @@ def create_access_token(user_id: str, email: str, role: str) -> str:
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 
-def decode_access_token(token: str) -> dict:
-    return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+def decode_access_token(token: str) -> TokenPayload:
+    payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    return TokenPayload(**payload)
+
+
+def get_token_expiry_seconds() -> int:
+    return settings.jwt_expire_minutes * 60

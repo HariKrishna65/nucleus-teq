@@ -27,3 +27,12 @@ async def login(request: LoginRequest) -> TokenResponse:
 @router.get("/me", response_model=UserResponse)
 async def get_profile(current_user: User = Depends(get_current_user)) -> UserResponse:
     return build_user_response(current_user)
+
+
+@router.get("/validate-token")
+async def validate_token(current_user: User = Depends(get_current_user)) -> dict[str, str]:
+    return {
+        "message": "Token is valid",
+        "user_id": str(current_user.id),
+        "role": current_user.role.value,
+    }

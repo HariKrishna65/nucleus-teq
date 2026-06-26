@@ -7,7 +7,12 @@ from backend.constants.status import AccountStatus
 from backend.models.user import User
 from backend.schemas.request.auth_request import LoginRequest, UserRegistrationRequest
 from backend.schemas.response.auth_response import TokenResponse, UserResponse
-from backend.utils.security import create_access_token, hash_password, verify_password
+from backend.utils.security import (
+    create_access_token,
+    get_token_expiry_seconds,
+    hash_password,
+    verify_password,
+)
 
 
 def build_user_response(user: User) -> UserResponse:
@@ -81,4 +86,8 @@ async def login_user(request: LoginRequest) -> TokenResponse:
         )
 
     access_token = create_access_token(str(user.id), user.email, user.role.value)
-    return TokenResponse(access_token=access_token, user=build_user_response(user))
+    return TokenResponse(
+        access_token=access_token,
+        expires_in=get_token_expiry_seconds(),
+        user=build_user_response(user),
+    )
