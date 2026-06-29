@@ -70,6 +70,15 @@ def get_current_user(request: Request) -> dict:
     return user
 
 
+def require_role(*allowed_roles: str):
+    def role_checker(current_user: dict = Depends(get_current_user)) -> dict:
+        if current_user.get("role", "").upper() not in allowed_roles:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
+        return current_user
+
+    return role_checker
+
+
 @app.get("/health")
 def health_check():
     return {"service": "user-service", "status": "ok"}
@@ -129,3 +138,18 @@ def get_profile(current_user: dict = Depends(get_current_user)):
         "phone": current_user["phone"],
         "role": current_user["role"],
     }
+
+
+@app.get("/auth/patient-dashboard")
+def patient_dashboard(current_user: dict = Depends(require_role("PATIENT"))):
+    return {"message": "Patient dashboard access granted", "role": current_user["role"]}
+
+
+@app.get("/auth/doctor-dashboard")
+def doctor_dashboard(current_user: dict = Depends(require_role("DOCTOR"))):
+    return {"message": "Doctor dashboard access granted", "role": current_user["role"]}
+
+
+@app.get("/auth/admin-dashboard")
+def admin_dashboard(current_user: dict = Depends(require_role("ADMIN"))):
+    return {"message": "Admin dashboard access granted", "role": current_user["role"]}
