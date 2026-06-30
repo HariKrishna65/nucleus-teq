@@ -1,4 +1,4 @@
-from mongodb_config import build_mongodb_uri, get_database_name
+from backend.database import build_mongodb_uri, get_database_name
 
 
 def test_build_mongodb_uri_from_environment(monkeypatch):

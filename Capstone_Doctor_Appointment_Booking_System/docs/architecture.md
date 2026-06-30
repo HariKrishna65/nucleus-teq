@@ -6,26 +6,27 @@
 - Allow admins to monitor platform activity
 
 ## Proposed Architecture
-```mermaid
-flowchart LR
-    A[React Frontend] --> U[User Service]
-    A --> AP[Appointment Service]
-    U --> M[MongoDB]
-    AP --> M
-    U --> J[JWT Auth]
-    AP --> J
-```
+Frontend React app
+  ├─> Backend API
+  │    ├─ User Service
+  │    └─ Appointment Service
+  └─> MongoDB
+
+- React frontend communicates with backend APIs
+- FastAPI backend handles authentication, user management, and appointment workflows
+- MongoDB stores users, doctor profiles, and appointment data
+- JWT protects authentication and role-based access
 
 ## Backend Modules
-- user-service/: authentication, registration, roles, and user management
-- appointment-service/: doctor availability, appointment booking, and appointment history
-- shared configs and docs for common setup and service communication
+- `backend/routers/`: separate API route files for auth and appointment workflows
+- `backend/services/`: shared business logic and data access helpers
+- `backend/database.py`: centralized MongoDB connection configuration
 
 ## Frontend Modules
-- src/components/: reusable UI components
-- src/pages/: login, register, doctor list, booking, doctor dashboard, admin dashboard
-- src/services/: API integration utilities
-- src/context/: auth state and app context
+- `src/components/`: reusable UI components
+- `src/pages/`: login, register, doctor list, booking, doctor dashboard, admin dashboard
+- `src/services/`: API integration utilities
+- `src/context/`: auth state and app context
 
 ## Security Plan
 - JWT-based authentication
