@@ -12,7 +12,8 @@ SECRET_KEY = "doctor-appointment-secret-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use PBKDF2-SHA256 to avoid bcrypt backend compatibility issues in this environment.
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 USERS_DB: Dict[str, dict] = {
     "doctor@example.com": {
