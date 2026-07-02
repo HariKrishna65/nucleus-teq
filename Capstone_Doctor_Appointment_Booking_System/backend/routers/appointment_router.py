@@ -7,12 +7,14 @@ from backend.services.appointment_service import (
     DoctorProfileOut,
     _read_doctor_profile,
     _store_doctor_profile,
-    get_mongo_status,
-    search_doctor_profiles,
+    appointments_collection,
     create_slot,
-    list_slots,
     create_appointment,
+    get_mongo_status,
     list_appointments_for_doctor,
+    list_appointments_for_patient,
+    list_slots,
+    search_doctor_profiles,
 )
 from backend.services.auth_service import require_role
 
@@ -82,8 +84,16 @@ def get_slots(doctor_id: str | None = None, date: str | None = None):
 @router.post("/appointments/book", status_code=201)
 def book_appointment(appt: dict, current_user: dict = Depends(require_role("PATIENT"))):
     appt["patient_email"] = current_user.get("email")
-    created = create_appointment(appt)
+    try:
+        created = create_appointment(appt)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     return created
+
+
+@router.get("/appointments/patient")
+def appointments_for_patient(current_user: dict = Depends(require_role("PATIENT"))):
+    return list_appointments_for_patient(current_user.get("email"))
 
 
 @router.get("/appointments/doctor/{doctor_id}")

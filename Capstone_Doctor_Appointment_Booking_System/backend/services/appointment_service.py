@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict
 
 from pydantic import BaseModel
@@ -46,11 +47,13 @@ class AppointmentCreate(BaseModel):
     doctor_id: str
     appointment_date: str
     slot_time: str
-    patient_email: str
+    patient_email: str | None = None
 
 
 class AppointmentOut(AppointmentCreate):
     id: str | None = None
+    created_at: str | None = None
+    status: str | None = None
 
 
 def _read_doctor_profile(email: str) -> dict | None:
@@ -116,13 +119,23 @@ def get_mongo_status() -> dict:
 
 
 def create_slot(slot_data: dict) -> dict:
+    doctor_id = slot_data.get("doctor_id")
+    date = slot_data.get("date")
+    time = slot_data.get("time")
+    if not doctor_id or not date or not time:
+        raise ValueError("doctor_id, date, and time are required for a slot")
+
     if slots_collection is not None:
-        res = slots_collection.insert_one(slot_data)
-        slot = dict(slot_data)
-        slot["id"] = str(res.inserted_id)
+        existing = slots_collection.find_one({"doctor_id": doctor_id, "date": date, "time": time})
+        if existing:
+            raise ValueError("Slot already exists")
+        res = slots_collection.insert_one({"doctor_id": doctor_id, "date": date, "time": time, "booked": False})
+        slot = {"doctor_id": doctor_id, "date": date, "time": time, "booked": False, "id": str(res.inserted_id)}
         return slot
-    # in-memory fallback
-    return slot_data
+
+    slot = dict(slot_data)
+    slot["booked"] = False
+    return slot
 
 
 def list_slots(doctor_id: str | None = None, date: str | None = None) -> list[dict]:
@@ -133,27 +146,67 @@ def list_slots(doctor_id: str | None = None, date: str | None = None) -> list[di
         if date:
             query["date"] = date
         docs = slots_collection.find(query)
-        return [dict(s, **{"id": str(s.get("_id"))}) for s in docs]
+        slots = []
+        for s in docs:
+            slot = dict(s)
+            slot["id"] = str(slot.pop("_id", ""))
+            slots.append(slot)
+        return slots
     return []
 
 
 def create_appointment(appointment_data: dict) -> dict:
+    appointment_date = appointment_data.get("appointment_date")
+    slot_time = appointment_data.get("slot_time")
+    doctor_id = appointment_data.get("doctor_id")
+
+    if not doctor_id or not appointment_date or not slot_time:
+        raise ValueError("Missing required booking fields")
+
+    if slots_collection is not None:
+        slot = slots_collection.find_one({"doctor_id": doctor_id, "date": appointment_date, "time": slot_time})
+        if not slot:
+            raise ValueError("Selected slot is not available")
+        if slot.get("booked"):
+            raise ValueError("Selected slot is already booked")
+
+    appointment_data["status"] = "CONFIRMED"
+    appointment_data["created_at"] = datetime.utcnow().isoformat()
     if appointments_collection is not None:
         res = appointments_collection.insert_one(appointment_data)
         appt = dict(appointment_data)
         appt["id"] = str(res.inserted_id)
-        # Optionally mark slot as booked
-        try:
-            if slots_collection is not None:
-                slots_collection.update_one({"doctor_id": appt["doctor_id"], "date": appt["appointment_date"], "time": appt["slot_time"]}, {"$set": {"booked": True}})
-        except Exception:
-            pass
+        if slots_collection is not None:
+            slots_collection.update_one(
+                {"doctor_id": doctor_id, "date": appointment_date, "time": slot_time},
+                {"$set": {"booked": True}},
+            )
         return appt
-    return appointment_data
+
+    appt = dict(appointment_data)
+    appt["id"] = "local"
+    return appt
 
 
 def list_appointments_for_doctor(doctor_id: str) -> list[dict]:
     if appointments_collection is not None:
         docs = appointments_collection.find({"doctor_id": doctor_id})
-        return [dict(a, **{"id": str(a.get("_id"))}) for a in docs]
+        appointments = []
+        for a in docs:
+            appointment = dict(a)
+            appointment["id"] = str(appointment.pop("_id", ""))
+            appointments.append(appointment)
+        return appointments
+    return []
+
+
+def list_appointments_for_patient(patient_email: str) -> list[dict]:
+    if appointments_collection is not None:
+        docs = appointments_collection.find({"patient_email": patient_email})
+        appointments = []
+        for a in docs:
+            appointment = dict(a)
+            appointment["id"] = str(appointment.pop("_id", ""))
+            appointments.append(appointment)
+        return appointments
     return []
