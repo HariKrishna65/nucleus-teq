@@ -9,6 +9,10 @@ from backend.services.appointment_service import (
     _store_doctor_profile,
     get_mongo_status,
     search_doctor_profiles,
+    create_slot,
+    list_slots,
+    create_appointment,
+    list_appointments_for_doctor,
 )
 from backend.services.auth_service import require_role
 
@@ -59,3 +63,29 @@ def search_doctors(
     if not results:
         return []
     return results
+
+
+# Slots endpoints
+@router.post("/appointments/slots", status_code=201)
+def add_slot(slot: dict, current_user: dict = Depends(require_role("DOCTOR"))):
+    # doctors add available slots
+    s = create_slot(slot)
+    return s
+
+
+@router.get("/appointments/slots")
+def get_slots(doctor_id: str | None = None, date: str | None = None):
+    return list_slots(doctor_id=doctor_id, date=date)
+
+
+# Appointment endpoints
+@router.post("/appointments/book", status_code=201)
+def book_appointment(appt: dict, current_user: dict = Depends(require_role("PATIENT"))):
+    appt["patient_email"] = current_user.get("email")
+    created = create_appointment(appt)
+    return created
+
+
+@router.get("/appointments/doctor/{doctor_id}")
+def appointments_for_doctor(doctor_id: str, current_user: dict = Depends(require_role("DOCTOR"))):
+    return list_appointments_for_doctor(doctor_id)

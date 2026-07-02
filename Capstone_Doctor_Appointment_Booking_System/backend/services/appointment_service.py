@@ -6,6 +6,9 @@ from backend.database import connect_to_mongo
 
 mongo_client, mongo_db, mongo_status = connect_to_mongo()
 doctor_profiles_collection = mongo_db["doctor_profiles"] if mongo_db is not None else None
+# Collections for slots and appointments
+slots_collection = mongo_db["slots"] if mongo_db is not None else None
+appointments_collection = mongo_db["appointments"] if mongo_db is not None else None
 
 doctor_profiles: Dict[str, dict] = {}
 
@@ -26,6 +29,28 @@ class DoctorProfileOut(BaseModel):
     experience_years: int
     consultation_fee: float
     clinic_address: str
+
+
+# Slot and appointment models
+class SlotCreate(BaseModel):
+    doctor_id: str
+    date: str  # YYYY-MM-DD
+    time: str  # HH:MM
+
+
+class SlotOut(SlotCreate):
+    id: str | None = None
+
+
+class AppointmentCreate(BaseModel):
+    doctor_id: str
+    appointment_date: str
+    slot_time: str
+    patient_email: str
+
+
+class AppointmentOut(AppointmentCreate):
+    id: str | None = None
 
 
 def _read_doctor_profile(email: str) -> dict | None:
@@ -88,3 +113,47 @@ def search_doctor_profiles(q: str | None = None, specialization: str | None = No
 
 def get_mongo_status() -> dict:
     return mongo_status
+
+
+def create_slot(slot_data: dict) -> dict:
+    if slots_collection is not None:
+        res = slots_collection.insert_one(slot_data)
+        slot = dict(slot_data)
+        slot["id"] = str(res.inserted_id)
+        return slot
+    # in-memory fallback
+    return slot_data
+
+
+def list_slots(doctor_id: str | None = None, date: str | None = None) -> list[dict]:
+    if slots_collection is not None:
+        query = {}
+        if doctor_id:
+            query["doctor_id"] = doctor_id
+        if date:
+            query["date"] = date
+        docs = slots_collection.find(query)
+        return [dict(s, **{"id": str(s.get("_id"))}) for s in docs]
+    return []
+
+
+def create_appointment(appointment_data: dict) -> dict:
+    if appointments_collection is not None:
+        res = appointments_collection.insert_one(appointment_data)
+        appt = dict(appointment_data)
+        appt["id"] = str(res.inserted_id)
+        # Optionally mark slot as booked
+        try:
+            if slots_collection is not None:
+                slots_collection.update_one({"doctor_id": appt["doctor_id"], "date": appt["appointment_date"], "time": appt["slot_time"]}, {"$set": {"booked": True}})
+        except Exception:
+            pass
+        return appt
+    return appointment_data
+
+
+def list_appointments_for_doctor(doctor_id: str) -> list[dict]:
+    if appointments_collection is not None:
+        docs = appointments_collection.find({"doctor_id": doctor_id})
+        return [dict(a, **{"id": str(a.get("_id"))}) for a in docs]
+    return []
