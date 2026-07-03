@@ -11,6 +11,13 @@ doctor_profiles_collection = mongo_db["doctor_profiles"] if mongo_db is not None
 slots_collection = mongo_db["slots"] if mongo_db is not None else None
 appointments_collection = mongo_db["appointments"] if mongo_db is not None else None
 
+if slots_collection is not None:
+    slots_collection.create_index(
+        [("doctor_id", 1), ("date", 1), ("time", 1)],
+        unique=True,
+        name="unique_slot",
+    )
+
 doctor_profiles: Dict[str, dict] = {}
 
 
@@ -177,10 +184,12 @@ def create_appointment(appointment_data: dict) -> dict:
         appt = dict(appointment_data)
         appt["id"] = str(res.inserted_id)
         if slots_collection is not None:
-            slots_collection.update_one(
-                {"doctor_id": doctor_id, "date": appointment_date, "time": slot_time},
+            update_result = slots_collection.update_one(
+                {"doctor_id": doctor_id, "date": appointment_date, "time": slot_time, "booked": False},
                 {"$set": {"booked": True}},
             )
+            if update_result.modified_count != 1:
+                raise ValueError("Selected slot was already booked")
         return appt
 
     appt = dict(appointment_data)
