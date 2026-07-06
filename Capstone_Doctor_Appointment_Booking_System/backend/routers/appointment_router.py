@@ -10,6 +10,9 @@ from backend.services.appointment_service import (
     appointments_collection,
     create_slot,
     create_appointment,
+    get_appointment_by_id,
+    cancel_appointment,
+    appointments_local,
     get_mongo_status,
     list_appointments_for_doctor,
     list_appointments_for_patient,
@@ -99,3 +102,49 @@ def appointments_for_patient(current_user: dict = Depends(require_role("PATIENT"
 @router.get("/appointments/doctor/{doctor_id}")
 def appointments_for_doctor(doctor_id: str, current_user: dict = Depends(require_role("DOCTOR"))):
     return list_appointments_for_doctor(doctor_id)
+
+
+@router.get("/appointments/{appointment_id}")
+def get_appointment(appointment_id: str, current_user: dict = Depends(require_role("PATIENT", "DOCTOR", "ADMIN"))):
+    appt = get_appointment_by_id(appointment_id)
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    # Patients can only fetch their own
+    role = current_user.get("role", "").upper()
+    if role == "PATIENT" and appt.get("patient_email") != current_user.get("email"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    if role == "DOCTOR" and appt.get("doctor_id") != current_user.get("email"):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    return appt
+
+
+@router.post("/appointments/cancel")
+def cancel_appointment_endpoint(payload: dict, current_user: dict = Depends(require_role("PATIENT", "DOCTOR", "ADMIN"))):
+    appointment_id = payload.get("appointment_id")
+    if not appointment_id:
+        raise HTTPException(status_code=400, detail="appointment_id is required")
+
+    try:
+        requester = current_user.get("email")
+        cancelled = cancel_appointment(appointment_id, requester_email=requester)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return cancelled
+
+
+@router.get("/appointments/admin")
+def admin_list_appointments(current_user: dict = Depends(require_role("ADMIN"))):
+    # Admin can list all appointments
+    if appointments_collection is not None:
+        docs = appointments_collection.find()
+        result = []
+        for a in docs:
+            appt = dict(a)
+            appt["id"] = str(appt.pop("_id", ""))
+            result.append(appt)
+        return result
+
+    return list(appointments_local.values())

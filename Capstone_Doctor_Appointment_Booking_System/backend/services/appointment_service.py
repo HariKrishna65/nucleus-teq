@@ -1,9 +1,12 @@
 from datetime import datetime
 from typing import Dict
+from uuid import uuid4
 
 from pydantic import BaseModel
 
 from backend.database import connect_to_mongo
+
+from bson.objectid import ObjectId
 
 mongo_client, mongo_db, mongo_status = connect_to_mongo()
 doctor_profiles_collection = mongo_db["doctor_profiles"] if mongo_db is not None else None
@@ -18,7 +21,10 @@ if slots_collection is not None:
         name="unique_slot",
     )
 
+# In-memory fallbacks when Mongo is not available
 doctor_profiles: Dict[str, dict] = {}
+slots_local: Dict[str, dict] = {}
+appointments_local: Dict[str, dict] = {}
 
 
 class DoctorProfileCreate(BaseModel):
@@ -140,8 +146,12 @@ def create_slot(slot_data: dict) -> dict:
         slot = {"doctor_id": doctor_id, "date": date, "time": time, "booked": False, "id": str(res.inserted_id)}
         return slot
 
-    slot = dict(slot_data)
-    slot["booked"] = False
+    # Local in-memory storage
+    key = f"{doctor_id}:{date}:{time}"
+    if key in slots_local:
+        raise ValueError("Slot already exists")
+    slot = {"doctor_id": doctor_id, "date": date, "time": time, "booked": False, "id": str(uuid4())}
+    slots_local[key] = slot
     return slot
 
 
@@ -159,7 +169,14 @@ def list_slots(doctor_id: str | None = None, date: str | None = None) -> list[di
             slot["id"] = str(slot.pop("_id", ""))
             slots.append(slot)
         return slots
-    return []
+    results = []
+    for s in slots_local.values():
+        if doctor_id and s["doctor_id"] != doctor_id:
+            continue
+        if date and s["date"] != date:
+            continue
+        results.append(dict(s))
+    return results
 
 
 def create_appointment(appointment_data: dict) -> dict:
@@ -172,6 +189,13 @@ def create_appointment(appointment_data: dict) -> dict:
 
     if slots_collection is not None:
         slot = slots_collection.find_one({"doctor_id": doctor_id, "date": appointment_date, "time": slot_time})
+        if not slot:
+            raise ValueError("Selected slot is not available")
+        if slot.get("booked"):
+            raise ValueError("Selected slot is already booked")
+    else:
+        key = f"{doctor_id}:{appointment_date}:{slot_time}"
+        slot = slots_local.get(key)
         if not slot:
             raise ValueError("Selected slot is not available")
         if slot.get("booked"):
@@ -192,8 +216,15 @@ def create_appointment(appointment_data: dict) -> dict:
                 raise ValueError("Selected slot was already booked")
         return appt
 
+    # Local in-memory booking
+    appt_id = str(uuid4())
     appt = dict(appointment_data)
-    appt["id"] = "local"
+    appt["id"] = appt_id
+    appointments_local[appt_id] = appt
+    # mark slot booked
+    key = f"{doctor_id}:{appointment_date}:{slot_time}"
+    if key in slots_local:
+        slots_local[key]["booked"] = True
     return appt
 
 
@@ -206,7 +237,11 @@ def list_appointments_for_doctor(doctor_id: str) -> list[dict]:
             appointment["id"] = str(appointment.pop("_id", ""))
             appointments.append(appointment)
         return appointments
-    return []
+    results = []
+    for a in appointments_local.values():
+        if a.get("doctor_id") == doctor_id:
+            results.append(dict(a))
+    return results
 
 
 def list_appointments_for_patient(patient_email: str) -> list[dict]:
@@ -218,4 +253,68 @@ def list_appointments_for_patient(patient_email: str) -> list[dict]:
             appointment["id"] = str(appointment.pop("_id", ""))
             appointments.append(appointment)
         return appointments
-    return []
+    results = []
+    for a in appointments_local.values():
+        if a.get("patient_email") == patient_email:
+            results.append(dict(a))
+    return results
+
+
+def get_appointment_by_id(appointment_id: str) -> dict | None:
+    if appointments_collection is not None:
+        try:
+            doc = appointments_collection.find_one({"_id": ObjectId(appointment_id)})
+        except Exception:
+            return None
+        if not doc:
+            return None
+        appt = dict(doc)
+        appt["id"] = str(appt.pop("_id", ""))
+        return appt
+
+    return appointments_local.get(appointment_id)
+
+
+def update_appointment_status(appointment_id: str, status: str) -> dict:
+    if appointments_collection is not None:
+        try:
+            res = appointments_collection.update_one({"_id": ObjectId(appointment_id)}, {"$set": {"status": status}})
+            if res.matched_count != 1:
+                raise ValueError("Appointment not found")
+            doc = appointments_collection.find_one({"_id": ObjectId(appointment_id)})
+            doc["id"] = str(doc.pop("_id", ""))
+            return doc
+        except Exception as exc:
+            raise
+
+    appt = appointments_local.get(appointment_id)
+    if not appt:
+        raise ValueError("Appointment not found")
+    appt["status"] = status
+    return appt
+
+
+def cancel_appointment(appointment_id: str, requester_email: str | None = None) -> dict:
+    appt = get_appointment_by_id(appointment_id)
+    if not appt:
+        raise ValueError("Appointment not found")
+
+    # Authorization: if requester is patient, ensure ownership
+    if requester_email and appt.get("patient_email") and requester_email != appt.get("patient_email"):
+        raise ValueError("Not authorized to cancel this appointment")
+
+    # Update status and free slot
+    appt = update_appointment_status(appointment_id, "CANCELLED")
+
+    doctor_id = appt.get("doctor_id")
+    appointment_date = appt.get("appointment_date")
+    slot_time = appt.get("slot_time")
+
+    if slots_collection is not None:
+        slots_collection.update_one({"doctor_id": doctor_id, "date": appointment_date, "time": slot_time}, {"$set": {"booked": False}})
+    else:
+        key = f"{doctor_id}:{appointment_date}:{slot_time}"
+        if key in slots_local:
+            slots_local[key]["booked"] = False
+
+    return appt
