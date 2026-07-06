@@ -10,6 +10,13 @@ from backend.services.appointment_service import (
     get_mongo_status,
     search_doctor_profiles,
 )
+from backend.services.appointment_service import (
+    AppointmentCreate,
+    AppointmentOut,
+    create_appointment,
+    get_appointment_by_id,
+    update_appointment_status,
+)
 from backend.services.auth_service import require_role
 
 router = APIRouter(tags=["appointments"])
@@ -59,3 +66,43 @@ def search_doctors(
     if not results:
         return []
     return results
+
+
+
+
+# --- Appointments and Mock Payments ---
+
+
+@router.post("/appointments/create", response_model=dict)
+def api_create_appointment(payload: dict):
+    created = create_appointment(payload)
+    return {"appointment_id": created["appointment_id"], "amount": created.get("amount")}
+
+
+@router.get("/appointments/{appointment_id}")
+def api_get_appointment(appointment_id: str):
+    appt = get_appointment_by_id(appointment_id)
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    return appt
+
+
+@router.post("/payments/initiate")
+def api_initiate_payment(appointment_id: str):
+    appt = get_appointment_by_id(appointment_id)
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    # Return a mock payment intent id and the amount
+    payment_intent_id = f"pi_{appointment_id[:8]}"
+    return {"payment_intent_id": payment_intent_id, "amount": appt.get("amount")}
+
+
+@router.post("/payments/confirm")
+def api_confirm_payment(appointment_id: str, transaction_id: str | None = None):
+    appt = get_appointment_by_id(appointment_id)
+    if not appt:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    tx = {"transaction_id": transaction_id or f"tx_{appointment_id[:8]}", "amount": appt.get("amount"), "status": "SUCCESS"}
+    updated = update_appointment_status(appointment_id, "PAID", transaction=tx)
+    return {"appointment": updated, "transaction": tx}

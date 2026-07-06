@@ -7,7 +7,28 @@ from backend.database import connect_to_mongo
 mongo_client, mongo_db, mongo_status = connect_to_mongo()
 doctor_profiles_collection = mongo_db["doctor_profiles"] if mongo_db is not None else None
 
+appointments_collection = mongo_db["appointments"] if mongo_db is not None else None
 doctor_profiles: Dict[str, dict] = {}
+appointments: Dict[str, dict] = {}
+
+from datetime import datetime
+from uuid import uuid4
+
+
+class AppointmentCreate(BaseModel):
+    patient_email: str
+    doctor_email: str
+    slot: str
+
+
+class AppointmentOut(BaseModel):
+    appointment_id: str
+    patient_email: str
+    doctor_email: str
+    slot: str
+    status: str
+    amount: float | None = None
+    transactions: list[dict] | None = None
 
 
 class DoctorProfileCreate(BaseModel):
@@ -88,3 +109,68 @@ def search_doctor_profiles(q: str | None = None, specialization: str | None = No
 
 def get_mongo_status() -> dict:
     return mongo_status
+
+
+def create_appointment(appointment_data: dict) -> dict:
+    # attach amount from doctor's consultation_fee when available
+    doctor_email = appointment_data.get("doctor_email")
+    amount = None
+    profile = _read_doctor_profile(doctor_email) if doctor_email else None
+    if profile and profile.get("consultation_fee") is not None:
+        amount = float(profile.get("consultation_fee"))
+
+    appointment_id = str(uuid4())
+    now = datetime.utcnow().isoformat() + "Z"
+    record = {
+        "appointment_id": appointment_id,
+        "patient_email": appointment_data.get("patient_email"),
+        "doctor_email": doctor_email,
+        "slot": appointment_data.get("slot"),
+        "status": "PENDING",
+        "amount": amount,
+        "transactions": [],
+        "created_at": now,
+    }
+
+    if appointments_collection is not None:
+        appointments_collection.insert_one(record)
+        rec = dict(record)
+        rec.pop("_id", None)
+        return rec
+
+    appointments[appointment_id] = record
+    return record
+
+
+def get_appointment_by_id(appointment_id: str) -> dict | None:
+    if appointments_collection is not None:
+        doc = appointments_collection.find_one({"appointment_id": appointment_id})
+        if not doc:
+            return None
+        doc.pop("_id", None)
+        return doc
+    return appointments.get(appointment_id)
+
+
+def update_appointment_status(appointment_id: str, status: str, transaction: dict | None = None) -> dict | None:
+    if appointments_collection is not None:
+        update_doc = {"$set": {"status": status}}
+        if transaction:
+            update_doc.setdefault("$push", {}).setdefault("transactions", transaction)
+        appointments_collection.update_one({"appointment_id": appointment_id}, update_doc)
+        return get_appointment_by_id(appointment_id)
+
+    rec = appointments.get(appointment_id)
+    if not rec:
+        return None
+    rec["status"] = status
+    if transaction:
+        rec.setdefault("transactions", []).append(transaction)
+    return rec
+
+
+def cancel_appointment(appointment_id: str) -> bool:
+    if appointments_collection is not None:
+        res = appointments_collection.delete_one({"appointment_id": appointment_id})
+        return res.deleted_count > 0
+    return appointments.pop(appointment_id, None) is not None
