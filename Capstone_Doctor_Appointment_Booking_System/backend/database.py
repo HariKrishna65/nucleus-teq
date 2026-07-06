@@ -1,31 +1,22 @@
 import os
-from pathlib import Path
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
-load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
-
-
-def _get_env(*names: str, default: str = "") -> str:
-    for name in names:
-        value = os.getenv(name, "").strip()
-        if value:
-            return value
-    return default
+load_dotenv()
 
 
 def build_mongodb_uri() -> str:
-    uri = _get_env("MONGODB_URI", "MONGO_URI", "DATABASE_URL", "MONGODB_CONNECTION_STRING")
+    uri = os.getenv("MONGODB_URI", "").strip()
     if uri:
         return uri
 
-    username = _get_env("MONGODB_USERNAME", "MONGO_USERNAME")
-    password = _get_env("MONGODB_PASSWORD", "MONGO_PASSWORD")
-    host = _get_env("MONGODB_HOST", "MONGO_HOST", default="localhost")
-    port = _get_env("MONGODB_PORT", "MONGO_PORT", default="27017")
-    use_srv = _get_env("MONGODB_USE_SRV", "MONGO_USE_SRV", default="false").lower() == "true"
+    username = os.getenv("MONGODB_USERNAME", "").strip()
+    password = os.getenv("MONGODB_PASSWORD", "").strip()
+    host = os.getenv("MONGODB_HOST", "localhost").strip()
+    port = os.getenv("MONGODB_PORT", "27017").strip()
+    use_srv = os.getenv("MONGODB_USE_SRV", "false").lower() == "true"
 
     if username and password:
         encoded_username = quote_plus(username)
@@ -40,7 +31,7 @@ def build_mongodb_uri() -> str:
 
 
 def get_database_name() -> str:
-    return _get_env("MONGODB_DB_NAME", "MONGO_DB_NAME", "DB_NAME", default="doctor_appointment")
+    return os.getenv("MONGODB_DB_NAME", "doctor_appointment")
 
 
 def connect_to_mongo():
@@ -51,6 +42,6 @@ def connect_to_mongo():
         client = MongoClient(uri, serverSelectionTimeoutMS=5000)
         client.admin.command("ping")
         db = client[db_name]
-        return client, db, {"connected": True, "database": db_name, "uri_configured": bool(uri)}
+        return client, db, {"connected": True}
     except Exception as exc:
-        return None, None, {"connected": False, "database": db_name, "error": str(exc), "uri_configured": bool(uri)}
+        return None, None, {"connected": False, "error": str(exc)}
