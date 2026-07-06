@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const API_BASE = 'http://127.0.0.1:8000';
+const API_BASE = 'http://127.0.0.1:8001';
 
 function InputField({ label, name, type = 'text', value, onChange, placeholder }) {
   return (
@@ -117,11 +117,69 @@ function BookingForm({ form, onChange, onSubmit }) {
   );
 }
 
+function SlotForm({ form, onChange, onSubmit }) {
+  return (
+    <form onSubmit={onSubmit}>
+      <h2>Create Slot</h2>
+      <InputField label="Doctor Email" name="doctor_id" value={form.doctor_id} onChange={onChange} placeholder="Doctor Email" />
+      <InputField label="Date" name="date" type="date" value={form.date} onChange={onChange} />
+      <InputField label="Time" name="time" value={form.time} onChange={onChange} placeholder="Time Slot (e.g. 10:00)" />
+      <button type="submit">Create Slot</button>
+    </form>
+  );
+}
+
+function SlotSearchForm({ form, onChange, onSubmit, slots }) {
+  return (
+    <div>
+      <form onSubmit={onSubmit}>
+        <h2>Search Slots</h2>
+        <InputField label="Doctor Email" name="doctor_id" value={form.doctor_id} onChange={onChange} placeholder="Doctor Email" />
+        <InputField label="Date" name="date" type="date" value={form.date} onChange={onChange} />
+        <button type="submit">Search Slots</button>
+      </form>
+      {slots.length > 0 && (
+        <div style={{ marginTop: '1rem' }}>
+          <h3>Available Slots</h3>
+          <ul>
+            {slots.map((slot) => (
+              <li key={slot.id}>
+                {slot.doctor_id} | {slot.date} | {slot.time} | booked: {slot.booked ? 'yes' : 'no'}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppointmentList({ appointments }) {
+  return (
+    <div>
+      <h2>My Appointments</h2>
+      {appointments.length === 0 ? (
+        <p>No appointments yet.</p>
+      ) : (
+        <ul>
+          {appointments.map((appt) => (
+            <li key={appt.id}>
+              Doctor: {appt.doctor_id} | Date: {appt.appointment_date} | Time: {appt.slot_time} | Status: {appt.status}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [screen, setScreen] = useState('login');
   const [token, setToken] = useState('');
   const [profile, setProfile] = useState(null);
   const [doctorProfile, setDoctorProfile] = useState(null);
+  const [appointments, setAppointments] = useState([]);
+  const [slots, setSlots] = useState([]);
   const [form, setForm] = useState({
     full_name: '',
     email: '',
@@ -142,6 +200,15 @@ function App() {
     appointment_date: '',
     slot_time: '',
   });
+  const [slotForm, setSlotForm] = useState({
+    doctor_id: '',
+    date: '',
+    time: '',
+  });
+  const [slotSearchForm, setSlotSearchForm] = useState({
+    doctor_id: '',
+    date: '',
+  });
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
@@ -154,6 +221,14 @@ function App() {
 
   const handleBookingChange = (e) => {
     setBookingForm({ ...bookingForm, [e.target.name]: e.target.value });
+  };
+
+  const handleSlotChange = (e) => {
+    setSlotForm({ ...slotForm, [e.target.name]: e.target.value });
+  };
+
+  const handleSlotSearchChange = (e) => {
+    setSlotSearchForm({ ...slotSearchForm, [e.target.name]: e.target.value });
   };
 
   const handleRegister = async (e) => {
@@ -219,9 +294,84 @@ function App() {
     }
   };
 
+  const handleSlotSubmit = async (e) => {
+    e.preventDefault();
+    if (!slotForm.doctor_id || !slotForm.date || !slotForm.time) {
+      setMessage('Please fill all slot fields');
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/appointments/slots`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(slotForm),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setMessage('Slot created successfully');
+      setSlotForm({ doctor_id: '', date: '', time: '' });
+    } else {
+      setMessage(data.detail || 'Unable to create slot');
+    }
+  };
+
+  const handleSlotSearch = async (e) => {
+    e.preventDefault();
+    const query = new URLSearchParams();
+    if (slotSearchForm.doctor_id) query.append('doctor_id', slotSearchForm.doctor_id);
+    if (slotSearchForm.date) query.append('date', slotSearchForm.date);
+    const response = await fetch(`${API_BASE}/appointments/slots?${query.toString()}`);
+    const data = await response.json();
+    if (response.ok) {
+      setSlots(data);
+      setMessage('Slots loaded');
+    } else {
+      setMessage(data.detail || 'Unable to load slots');
+    }
+  };
+
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    setMessage('Appointment booking UI ready. Backend booking endpoint can be wired next.');
+    if (!bookingForm.doctor_id || !bookingForm.appointment_date || !bookingForm.slot_time) {
+      setMessage('Please fill all booking fields');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/appointments/book`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bookingForm),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setMessage('Appointment booked successfully');
+        setBookingForm({ doctor_id: '', appointment_date: '', slot_time: '' });
+        await loadPatientAppointments();
+      } else {
+        setMessage(data.detail || 'Booking failed');
+      }
+    } catch (err) {
+      setMessage('Network error while booking appointment');
+    }
+  };
+
+  const loadPatientAppointments = async () => {
+    const response = await fetch(`${API_BASE}/appointments/patient`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setAppointments(data);
+    } else {
+      setMessage(data.detail || 'Unable to load appointments');
+    }
   };
 
   return (
@@ -249,7 +399,18 @@ function App() {
       {screen === 'doctor-profile' && token && (
         <DoctorProfileForm form={doctorForm} onChange={handleDoctorChange} onSubmit={handleDoctorProfileSubmit} doctorProfile={doctorProfile} />
       )}
-      {screen === 'booking' && token && <BookingForm form={bookingForm} onChange={handleBookingChange} onSubmit={handleBookingSubmit} />}
+      {screen === 'slots' && token && (
+        <div>
+          <SlotForm form={slotForm} onChange={handleSlotChange} onSubmit={handleSlotSubmit} />
+          <SlotSearchForm form={slotSearchForm} onChange={handleSlotSearchChange} onSubmit={handleSlotSearch} slots={slots} />
+        </div>
+      )}
+      {screen === 'booking' && token && (
+        <>
+          <BookingForm form={bookingForm} onChange={handleBookingChange} onSubmit={handleBookingSubmit} />
+          <AppointmentList appointments={appointments} />
+        </>
+      )}
     </div>
   );
 }
