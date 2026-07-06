@@ -143,6 +143,7 @@ function App() {
     slot_time: '',
   });
   const [message, setMessage] = useState('');
+  const [appointmentResult, setAppointmentResult] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -221,7 +222,67 @@ function App() {
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
-    setMessage('Appointment booking UI ready. Backend booking endpoint can be wired next.');
+    setMessage('Booking appointment...');
+
+    // ensure profile is loaded
+    if (!profile) {
+      await handleProfile();
+    }
+
+    const payload = {
+      patient_email: profile?.email || form.email,
+      doctor_email: bookingForm.doctor_id,
+      slot: `${bookingForm.appointment_date} ${bookingForm.slot_time}`,
+    };
+
+    try {
+      const resp = await fetch(`${API_BASE}/appointments/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        setMessage(data.detail || 'Failed to create appointment');
+        return;
+      }
+
+      const { appointment_id, amount } = data;
+      setMessage(`Appointment created (${appointment_id}).`);
+
+      // If amount exists, simulate payment flow
+      if (amount) {
+        setMessage((m) => m + ` Initiating payment for ₹${amount}...`);
+        const initResp = await fetch(`${API_BASE}/payments/initiate?appointment_id=${appointment_id}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const initData = await initResp.json();
+        if (!initResp.ok) {
+          setMessage(initData.detail || 'Failed to initiate payment');
+          return;
+        }
+
+        // Immediately confirm the mock payment
+        const confirmResp = await fetch(`${API_BASE}/payments/confirm?appointment_id=${appointment_id}&transaction_id=tx_${Date.now()}`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const confirmData = await confirmResp.json();
+        if (!confirmResp.ok) {
+          setMessage(confirmData.detail || 'Payment confirmation failed');
+          return;
+        }
+
+        setAppointmentResult(confirmData.appointment || confirmData);
+        setMessage('Payment completed and appointment updated to PAID.');
+      } else {
+        setAppointmentResult({ appointment_id, amount: null, status: 'PENDING' });
+        setMessage('Appointment created without payment.');
+      }
+    } catch (err) {
+      setMessage('Network error when booking appointment');
+    }
   };
 
   return (
@@ -250,6 +311,12 @@ function App() {
         <DoctorProfileForm form={doctorForm} onChange={handleDoctorChange} onSubmit={handleDoctorProfileSubmit} doctorProfile={doctorProfile} />
       )}
       {screen === 'booking' && token && <BookingForm form={bookingForm} onChange={handleBookingChange} onSubmit={handleBookingSubmit} />}
+      {appointmentResult && (
+        <div style={{ marginTop: '1rem', border: '1px solid #cbd5e1', padding: '1rem' }}>
+          <h3>Appointment Result</h3>
+          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(appointmentResult, null, 2)}</pre>
+        </div>
+      )}
     </div>
   );
 }
