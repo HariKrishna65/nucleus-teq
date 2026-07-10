@@ -1,0 +1,60 @@
+import { useForm } from 'react-hook-form';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { api } from '../services/api';
+
+export default function RegisterPage({ fixedRole = 'PATIENT', title = 'Create account' }) {
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm({
+    defaultValues: { role: fixedRole, gender: 'FEMALE' },
+  });
+  const role = fixedRole || watch('role');
+  const navigate = useNavigate();
+
+  const submit = async (values) => {
+    const payload = { ...values };
+    if (role === 'DOCTOR') {
+      delete payload.gender;
+      delete payload.date_of_birth;
+    }
+    delete payload.role;
+    try {
+      await api.post(role === 'DOCTOR' ? '/auth/doctor/register' : '/auth/patient/register', payload);
+      toast.success(role === 'DOCTOR' ? 'Doctor registration submitted for admin approval' : 'Registration successful');
+      navigate(role === 'DOCTOR' ? '/doctor/login' : '/patient/login');
+    } catch (error) {
+      const detail = error.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : 'Please correct the registration details');
+    }
+  };
+
+  return <main className="auth-card">
+    <h1>{title}</h1>
+    <form onSubmit={handleSubmit(submit)}>
+      <label>Full name<input {...register('full_name', { required: true, minLength: 2, pattern: /^[A-Za-z ]+$/ })} /></label>
+      {errors.full_name && <small>Enter a valid name</small>}
+      <label>Email<input type="email" {...register('email', { required: true })} /></label>
+      <label>Phone<input inputMode="numeric" {...register('phone', { required: true, pattern: /^\d{10}$/ })} /></label>
+      <label>Password<input type="password" {...register('password', { required: true, pattern: /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,12}$/ })} /></label>
+      {!fixedRole && <label>Account type<select {...register('role')}><option>PATIENT</option><option>DOCTOR</option></select></label>}
+      {role === 'PATIENT' && <>
+        <label>Gender<select {...register('gender')}><option>FEMALE</option><option>MALE</option><option>OTHER</option></select></label>
+        <label>Date of birth<input type="date" {...register('date_of_birth', { required: true })} /></label>
+      </>}
+      {role === 'DOCTOR' && <>
+        <label>Qualification<input {...register('qualification', { required: true })} /></label>
+        <label>Specialization<input {...register('specialization', { required: true })} /></label>
+        <label>Experience<input type="number" min="0" {...register('experience', { valueAsNumber: true })} /></label>
+        <label>License number<input {...register('license_number', { required: true })} /></label>
+        <label>Consultation fee<input type="number" min="0" {...register('consultation_fee', { required: true, valueAsNumber: true })} /></label>
+        <label>Clinic address<textarea {...register('clinic_address', { required: true })} /></label>
+      </>}
+      <button disabled={isSubmitting}>Register</button>
+    </form>
+    <p>Already registered? <Link to={role === 'DOCTOR' ? '/doctor/login' : '/patient/login'}>Sign in</Link></p>
+    <p className="auth-links">
+      <Link to="/patient/register">Patient register</Link>
+      <Link to="/doctor/register">Doctor register</Link>
+      <Link to="/admin/login">Admin login</Link>
+    </p>
+  </main>;
+}
