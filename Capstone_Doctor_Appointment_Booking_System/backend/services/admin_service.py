@@ -1,7 +1,5 @@
 import logging
 
-from fastapi import HTTPException
-
 from backend.enums.appointment import AppointmentStatus, CancellationRequestStatus
 from backend.database import database as db_service
 from backend.services.shared_service import utcnow, enrich, get_user_by_id
@@ -9,6 +7,11 @@ from backend.constants import (
     APPOINTMENT_NOT_FOUND_MESSAGE,
     NO_PENDING_CANCELLATION_MESSAGE,
     APPOINTMENT_CANNOT_BE_CANCELLED_MESSAGE,
+)
+from backend.exceptions import (
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
 )
 
 
@@ -27,11 +30,11 @@ def accept_doctor_cancellation(appointment_id):
     appointments = db_service.get_appointments()
     item = next((a for a in appointments if a["id"] == appointment_id), None)
     if not item:
-        raise HTTPException(404, APPOINTMENT_NOT_FOUND_MESSAGE)
+        raise NotFoundException(APPOINTMENT_NOT_FOUND_MESSAGE)
     if item.get("doctor_cancellation_status") != CancellationRequestStatus.PENDING.value:
-        raise HTTPException(400, NO_PENDING_CANCELLATION_MESSAGE)
+        raise BadRequestException(NO_PENDING_CANCELLATION_MESSAGE)
     if item["status"] in {AppointmentStatus.COMPLETED.value, AppointmentStatus.CANCELLED.value}:
-        raise HTTPException(409, APPOINTMENT_CANNOT_BE_CANCELLED_MESSAGE)
+        raise ConflictException(APPOINTMENT_CANNOT_BE_CANCELLED_MESSAGE)
     item["status"] = AppointmentStatus.CANCELLED.value
     item["doctor_cancellation_status"] = CancellationRequestStatus.APPROVED.value
     item["doctor_cancellation_reviewed_at"] = utcnow().isoformat()
@@ -49,9 +52,9 @@ def reject_doctor_cancellation(appointment_id):
     appointments = db_service.get_appointments()
     item = next((a for a in appointments if a["id"] == appointment_id), None)
     if not item:
-        raise HTTPException(404, APPOINTMENT_NOT_FOUND_MESSAGE)
+        raise NotFoundException(APPOINTMENT_NOT_FOUND_MESSAGE)
     if item.get("doctor_cancellation_status") != CancellationRequestStatus.PENDING.value:
-        raise HTTPException(400, NO_PENDING_CANCELLATION_MESSAGE)
+        raise BadRequestException(NO_PENDING_CANCELLATION_MESSAGE)
     item["doctor_cancellation_status"] = CancellationRequestStatus.REJECTED.value
     item["doctor_cancellation_reviewed_at"] = utcnow().isoformat()
     db_service.save_appointments(appointments)

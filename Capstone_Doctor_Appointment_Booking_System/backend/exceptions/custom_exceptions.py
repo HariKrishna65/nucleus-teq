@@ -1,4 +1,4 @@
-﻿from fastapi import HTTPException, status
+from fastapi import HTTPException, status
 
 from backend.constants.messages import (
     ACCOUNT_INACTIVE_MESSAGE,
@@ -33,6 +33,16 @@ class ForbiddenException(HTTPException):
 class NotFoundException(HTTPException):
     def __init__(self, detail: str):
         super().__init__(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+
+class ConflictException(HTTPException):
+    def __init__(self, detail: str):
+        super().__init__(status_code=status.HTTP_409_CONFLICT, detail=detail)
+
+
+class UnprocessableEntityException(HTTPException):
+    def __init__(self, detail: str):
+        super().__init__(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
 
 
 class EmailAlreadyRegisteredException(BadRequestException):
