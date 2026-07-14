@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from backend.exceptions import register_exception_handlers
-from backend.routers.auth_router import router as auth_router
+from backend.routers.auth_router import router as auth_router, profile_router
 
 app = FastAPI(
     title="Doctor Appointment Booking System Backend",
@@ -10,6 +10,7 @@ app = FastAPI(
 )
 register_exception_handlers(app)
 app.include_router(auth_router)
+app.include_router(profile_router)
 
 
 @app.get("/health", tags=["health"])
