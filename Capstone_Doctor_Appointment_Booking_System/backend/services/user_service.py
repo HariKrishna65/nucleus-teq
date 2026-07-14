@@ -51,3 +51,91 @@ def create_user(payload: AccountCreate) -> dict:
     users.append(user)
     save_users(users)
     return user
+
+
+SELF_UPDATE_FIELDS_BY_ROLE = {
+    UserRole.PATIENT.value: {"name", "phone", "gender", "date_of_birth"},
+    UserRole.DOCTOR.value: {
+        "name",
+        "phone",
+        "qualification",
+        "specialization",
+        "experience",
+        "license_number",
+        "consultation_fee",
+        "clinic_address",
+    },
+}
+PATIENT_PROFILE_UPDATE_FIELDS = SELF_UPDATE_FIELDS_BY_ROLE[UserRole.PATIENT.value]
+DOCTOR_PROFILE_UPDATE_FIELDS = SELF_UPDATE_FIELDS_BY_ROLE[UserRole.DOCTOR.value]
+
+
+def clean_profile_changes(changes: dict, allowed_fields: set[str]) -> dict:
+    cleaned_changes = {}
+    for key, value in changes.items():
+        if key not in allowed_fields or value is None:
+            continue
+        cleaned_changes[key] = value.isoformat() if key == "date_of_birth" else value
+    return cleaned_changes
+
+
+def update_user(user_id: str, changes: dict, allowed_fields: set[str] | None = None) -> dict | None:
+    users = get_users()
+    user = next((item for item in users if item["id"] == user_id), None)
+    if not user:
+        return None
+    allowed = allowed_fields or {
+        "name",
+        "phone",
+        "gender",
+        "qualification",
+        "specialization",
+        "experience",
+        "license_number",
+        "consultation_fee",
+        "clinic_address",
+        "active",
+        "approval_status",
+    }
+    cleaned_changes = clean_profile_changes(changes, allowed)
+    user.update(cleaned_changes)
+    save_users(users)
+    return user
+
+
+def request_doctor_profile_update(doctor_id: str, changes: dict) -> dict | None:
+    users = get_users()
+    doctor = next((item for item in users if item["id"] == doctor_id and item["role"] == UserRole.DOCTOR.value), None)
+    if not doctor:
+        return None
+    cleaned_changes = clean_profile_changes(changes, DOCTOR_PROFILE_UPDATE_FIELDS)
+    doctor["pending_profile_changes"] = cleaned_changes
+    doctor["profile_change_status"] = ApprovalStatus.PENDING.value if cleaned_changes else None
+    save_users(users)
+    return doctor
+
+
+def accept_doctor_profile_update(doctor_id: str) -> dict | None:
+    users = get_users()
+    doctor = next((item for item in users if item["id"] == doctor_id and item["role"] == UserRole.DOCTOR.value), None)
+    if not doctor:
+        return None
+    pending_changes = doctor.get("pending_profile_changes") or {}
+    if not pending_changes:
+        return doctor
+    doctor.update({key: value for key, value in pending_changes.items() if key in DOCTOR_PROFILE_UPDATE_FIELDS})
+    doctor["pending_profile_changes"] = None
+    doctor["profile_change_status"] = ApprovalStatus.APPROVED.value
+    save_users(users)
+    return doctor
+
+
+def reject_doctor_profile_update(doctor_id: str) -> dict | None:
+    users = get_users()
+    doctor = next((item for item in users if item["id"] == doctor_id and item["role"] == UserRole.DOCTOR.value), None)
+    if not doctor:
+        return None
+    doctor["pending_profile_changes"] = None
+    doctor["profile_change_status"] = None
+    save_users(users)
+    return doctor
