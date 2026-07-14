@@ -31,7 +31,7 @@ export default function RegisterPage({ fixedRole = 'PATIENT', title = 'Create ac
   return <main className="auth-card">
     <h1>{title}</h1>
     <form onSubmit={handleSubmit(submit)}>
-      <label>Full name<input {...register('full_name', { required: true, minLength: 2, pattern: /^[A-Za-z ]+$/ })} /></label>
+      <label>Full name<input {...register('full_name', { required: true, minLength: 2, pattern: /^[A-Za-z' -]+$/ })} /></label>
       {errors.full_name && <small>Enter a valid name</small>}
       <label>Email<input type="email" {...register('email', { required: true })} /></label>
       <label>Phone<input inputMode="numeric" {...register('phone', { required: true, pattern: /^\d{10}$/ })} /></label>
