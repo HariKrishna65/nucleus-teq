@@ -1,0 +1,7 @@
+﻿AUTHENTICATION_ERROR_MESSAGE = "Invalid authentication credentials"
+DOCTOR_NOT_FOUND_MESSAGE = "Doctor not found"
+EMAIL_ALREADY_REGISTERED_MESSAGE = "Email already registered"
+INCORRECT_EMAIL_OR_PASSWORD_MESSAGE = "Incorrect email or password"
+INSUFFICIENT_PRIVILEGES_MESSAGE = "Insufficient privileges"
+ACCOUNT_PENDING_APPROVAL_MESSAGE = "Doctor account is pending admin approval"
+ACCOUNT_INACTIVE_MESSAGE = "Account is inactive"
