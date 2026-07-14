@@ -45,3 +45,20 @@ def _validate_slot_window(starts_at, ends_at):
         raise HTTPException(422, "Slot times must include a timezone")
     if starts_at <= utcnow() or ends_at <= starts_at:
         raise HTTPException(400, "Slot must be a valid future time range")
+
+
+def doctor_list(specialization=None, location=None, min_experience=None, max_fee=None, available=None, include_inactive=False):
+    doctors = [
+        public_user(user)
+        for user in db_service.get_users()
+        if user.get("role") == UserRole.DOCTOR.value and (include_inactive or user.get("active", True))
+    ]
+    if specialization: doctors = [d for d in doctors if specialization.lower() in d.get("specialization", "").lower()]
+    if location: doctors = [d for d in doctors if location.lower() in d.get("clinic_address", "").lower()]
+    if min_experience is not None: doctors = [d for d in doctors if (d.get("experience") or 0) >= min_experience]
+    if max_fee is not None: doctors = [d for d in doctors if (d.get("consultation_fee") or 0) <= max_fee]
+    slots = db_service.get_slots()
+    for doctor in doctors:
+        doctor["available_slots"] = [s for s in slots if s["doctor_id"] == doctor["id"] and not s["booked"] and parse(s["starts_at"]) > utcnow()]
+    if available: doctors = [d for d in doctors if d["available_slots"]]
+    return doctors

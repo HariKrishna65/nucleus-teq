@@ -35,3 +35,13 @@ router.add_api_route("/profile/me", current_profile, methods=["GET"], tags=["pro
 router.add_api_route("/patient/profile/me", update_patient_profile, methods=["PATCH"], tags=["profiles"])
 router.add_api_route("/doctor/profile/me", request_doctor_profile_change, methods=["PATCH"], tags=["profiles"])
 router.add_api_route("/users/me", current_profile, methods=["GET"], tags=["profiles"], include_in_schema=False)
+
+@router.get("/doctors", tags=["doctors"])
+def doctors(specialization: str | None=None, location: str | None=None, min_experience: int | None=None, max_fee: float | None=None, available: bool=False, user=Depends(get_current_user)):
+    return platform_service.doctor_list(specialization, location, min_experience, max_fee, available)
+
+@router.get("/doctors/{doctor_id}", tags=["doctors"])
+def doctor(doctor_id: str, user=Depends(get_current_user)):
+    result = next((d for d in platform_service.doctor_list() if d["id"] == doctor_id), None)
+    if not result: raise HTTPException(404, "Doctor not found")
+    return result
