@@ -1,0 +1,17 @@
+from fastapi import FastAPI
+
+from backend.exceptions import register_exception_handlers
+from backend.routers.auth_router import router as auth_router
+
+app = FastAPI(
+    title="Doctor Appointment Booking System Backend",
+    version="1.0",
+    description="Backend API for user registration and account management.",
+)
+register_exception_handlers(app)
+app.include_router(auth_router)
+
+
+@app.get("/health", tags=["health"])
+def health_check():
+    return {"status": "ok", "message": "Backend is running"}
