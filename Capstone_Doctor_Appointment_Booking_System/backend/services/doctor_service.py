@@ -27,6 +27,10 @@ from backend.exceptions import (
     NotFoundException,
     UnprocessableEntityException,
 )
+from fastapi import HTTPException
+
+from backend.database import database as db_service
+from backend.services.shared_service import utcnow, parse, enrich
 
 
 logger = logging.getLogger("doctor_booking.doctor_service")
