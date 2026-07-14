@@ -1,13 +1,13 @@
-﻿import re
+import re
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
 
 from backend.enums.user import UserRole
 
 
-NAME_PATTERN = re.compile(r"^[A-Za-z ]+$")
+NAME_PATTERN = re.compile(r"^[A-Za-z' -]+$")
 PASSWORD_PATTERN = re.compile(r"^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,12}$")
 
 
@@ -26,10 +26,17 @@ class AccountCreate(BaseModel):
     consultation_fee: float | None = Field(default=None, ge=0)
     clinic_address: str | None = None
 
+    @field_validator("email")
+    @classmethod
+    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
+        if not v.lower().endswith("@gmail.com"):
+            raise ValueError("Email must end with @gmail.com")
+        return v
+
     @model_validator(mode="after")
     def validate_registration(self):
         if not NAME_PATTERN.fullmatch(self.full_name.strip()):
-            raise ValueError("Full name must contain alphabets and spaces only")
+            raise ValueError("Full name must contain alphabets, spaces, hyphens, and apostrophes only")
         if not PASSWORD_PATTERN.fullmatch(self.password):
             raise ValueError(
                 "Password must be 8-12 characters and include an uppercase letter and special character"
@@ -54,10 +61,17 @@ class PatientCreate(BaseModel):
     gender: Literal["MALE", "FEMALE", "OTHER"]
     date_of_birth: date
 
+    @field_validator("email")
+    @classmethod
+    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
+        if not v.lower().endswith("@gmail.com"):
+            raise ValueError("Email must end with @gmail.com")
+        return v
+
     @model_validator(mode="after")
     def validate_patient_registration(self):
         if not NAME_PATTERN.fullmatch(self.full_name.strip()):
-            raise ValueError("Full name must contain alphabets and spaces only")
+            raise ValueError("Full name must contain alphabets, spaces, hyphens, and apostrophes only")
         if not PASSWORD_PATTERN.fullmatch(self.password):
             raise ValueError("Password must be 8-12 characters and include an uppercase letter and special character")
         if self.date_of_birth >= date.today():
@@ -77,10 +91,17 @@ class DoctorCreate(BaseModel):
     consultation_fee: float = Field(ge=0)
     clinic_address: str
 
+    @field_validator("email")
+    @classmethod
+    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
+        if not v.lower().endswith("@gmail.com"):
+            raise ValueError("Email must end with @gmail.com")
+        return v
+
     @model_validator(mode="after")
     def validate_doctor_registration(self):
         if not NAME_PATTERN.fullmatch(self.full_name.strip()):
-            raise ValueError("Full name must contain alphabets and spaces only")
+            raise ValueError("Full name must contain alphabets, spaces, hyphens, and apostrophes only")
         if not PASSWORD_PATTERN.fullmatch(self.password):
             raise ValueError("Password must be 8-12 characters and include an uppercase letter and special character")
         return self
@@ -90,3 +111,9 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+    @field_validator("email")
+    @classmethod
+    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
+        if not v.lower().endswith("@gmail.com"):
+            raise ValueError("Email must end with @gmail.com")
+        return v
