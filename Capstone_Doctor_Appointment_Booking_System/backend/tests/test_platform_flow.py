@@ -72,54 +72,8 @@ def test_get_doctors_api_does_not_accept_name_input(tmp_path, monkeypatch):
     assert {"specialization", "location", "min_experience", "max_fee", "available"}.issubset(parameter_names)
 
 
-def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
+def test_legacy_appointment_doctor_endpoints_are_removed(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    admin_headers = register_admin(client, "admin@example.com")
     patient_headers = register(client, "PATIENT", "patient@example.com")
-    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
-
-    patient_update = client.patch(
-        "/patient/profile/me",
-        headers=patient_headers,
-        json={"name": "Updated Patient", "gender": "FEMALE", "date_of_birth": "1991-02-03"},
-    )
-    assert patient_update.status_code == 200
-    assert patient_update.json()["name"] == "Updated Patient"
-    assert patient_update.json()["gender"] == "FEMALE"
-    assert patient_update.json()["date_of_birth"] == "1991-02-03"
-    assert "qualification" not in patient_update.json()
-
-    patient_doctor_field = client.patch(
-        "/patient/profile/me",
-        headers=patient_headers,
-        json={"qualification": "MBBS"},
-    )
-    assert patient_doctor_field.status_code == 422
-
-    doctor_update = client.patch(
-        "/doctor/profile/me",
-        headers=doctor_headers,
-        json={"specialization": "Neurology", "license_number": "MED-999", "consultation_fee": 750},
-    )
-    assert doctor_update.status_code == 200
-    assert doctor_update.json()["status"] == "PENDING"
-    assert doctor_update.json()["pending_profile_changes"]["specialization"] == "Neurology"
-    assert client.get("/profile/me", headers=doctor_headers).json()["specialization"] == "Cardiology"
-
-    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
-    pending_changes = client.get("/admin/doctors/profile-changes", headers=admin_headers)
-    assert pending_changes.status_code == 200
-    assert pending_changes.json()[0]["id"] == doctor_id
-
-    accepted = client.patch(f"/admin/doctors/{doctor_id}/profile-change/accept", headers=admin_headers)
-    assert accepted.status_code == 200
-    assert accepted.json()["specialization"] == "Neurology"
-    assert accepted.json()["license_number"] == "MED-999"
-    assert accepted.json()["consultation_fee"] == 750
-
-    doctor_patient_field = client.patch(
-        "/doctor/profile/me",
-        headers=doctor_headers,
-        json={"gender": "OTHER"},
-    )
-    assert doctor_patient_field.status_code == 422
+    assert client.get("/appointments/doctors", headers=patient_headers).status_code == 404
+    assert client.post("/appointments/book", headers=patient_headers).status_code == 404
