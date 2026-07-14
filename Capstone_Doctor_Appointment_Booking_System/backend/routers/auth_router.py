@@ -10,6 +10,8 @@ from backend.services.auth_service import assert_account_can_login, authenticate
 from backend.services.user_service import create_user, get_user_by_email
 from backend.schemas.request.user import AccountCreate, DoctorCreate, LoginRequest, PatientCreate
 from backend.schemas.response.user import AccountResponse
+from backend.schemas.response.doctor import DoctorResponse
+from backend.schemas.response.patient import PatientResponse
 from backend.services.shared_service import public_user
 
 
@@ -36,13 +38,13 @@ router.add_api_route(
 )
 
 
-@router.post("/patient/register", response_model=AccountResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/patient/register", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
 def register_patient(payload: PatientCreate):
     data = payload.model_dump()
     return register_account(AccountCreate(**data, role=UserRole.PATIENT.value))
 
 
-@router.post("/doctor/register", response_model=AccountResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/doctor/register", response_model=DoctorResponse, status_code=status.HTTP_201_CREATED)
 def register_doctor(payload: DoctorCreate):
     data = payload.model_dump()
     return register_account(AccountCreate(**data, role=UserRole.DOCTOR.value))
