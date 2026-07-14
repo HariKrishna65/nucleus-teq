@@ -1,9 +1,10 @@
-// Defines the protected patient-facing route structure for the React app.
+// Defines the public, auth, and dashboard routes for the React app.
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './AuthContext';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import HomePage from './pages/HomePage';
 
 export default function App() {
   const { token } = useAuth();
@@ -15,6 +16,7 @@ export default function App() {
     <Route path="/admin/login" element={<LoginPage role="ADMIN" title="Admin login" showRegister={false} />} />
     <Route path="/patient/register" element={<RegisterPage fixedRole="PATIENT" title="Patient registration" />} />
     <Route path="/doctor/register" element={<RegisterPage fixedRole="DOCTOR" title="Doctor registration" />} />
-    <Route path="/" element={token ? <DashboardPage /> : <Navigate to="/patient/login" replace />} />
+    <Route path="/dashboard" element={token ? <DashboardPage /> : <Navigate to="/patient/login" replace />} />
+    <Route path="/" element={<HomePage />} />
   </Routes>;
 }

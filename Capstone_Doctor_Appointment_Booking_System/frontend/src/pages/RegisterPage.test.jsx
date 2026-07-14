@@ -3,9 +3,9 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import RegisterPage from './RegisterPage';
-import { api } from '../services/api';
+import { api } from '../api';
 
-vi.mock('../services/api', () => ({
+vi.mock('../api', () => ({
   api: { post: vi.fn() },
 }));
 
