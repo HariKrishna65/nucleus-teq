@@ -1,0 +1,9 @@
+﻿from enum import Enum
+
+
+class AppointmentStatus(str, Enum):
+    PENDING_PAYMENT = "PENDING_PAYMENT"
+    BOOKED = "BOOKED"
+    COMPLETED = "COMPLETED"
+    MISSED_APPOINTMENT = "MISSED_APPOINTMENT"
+    CANCELLED = "CANCELLED"

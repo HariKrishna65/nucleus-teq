@@ -36,3 +36,8 @@ class SlotCreate(BaseModel):
 class SlotUpdate(BaseModel):
     starts_at: datetime
     ends_at: datetime
+
+
+class AppointmentCreate(BaseModel):
+    doctor_id: str
+    slot_id: str
