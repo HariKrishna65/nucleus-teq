@@ -35,6 +35,3 @@ router.add_api_route("/profile/me", current_profile, methods=["GET"], tags=["pro
 router.add_api_route("/patient/profile/me", update_patient_profile, methods=["PATCH"], tags=["profiles"])
 router.add_api_route("/doctor/profile/me", request_doctor_profile_change, methods=["PATCH"], tags=["profiles"])
 router.add_api_route("/users/me", current_profile, methods=["GET"], tags=["profiles"], include_in_schema=False)
-
-router.add_api_route("/profile/me", platform_service.public_profile, methods=["GET"], tags=["profiles"])
-router.add_api_route("/users/me", platform_service.public_profile, methods=["GET"], tags=["profiles"], include_in_schema=False)

@@ -62,3 +62,120 @@ def test_role_access_is_enforced(tmp_path, monkeypatch):
     assert client.post("/doctor/slots", headers=patient_headers, json={"starts_at": "2030-01-01T10:00:00Z", "ends_at": "2030-01-01T10:30:00Z"}).status_code == 403
     assert client.get("/admin/statistics", headers=patient_headers).status_code == 403
     assert client.post("/appointments", headers=doctor_headers, json={"doctor_id": "doctor-1", "slot_id": "slot-1"}).status_code == 403
+
+
+def test_get_doctors_api_does_not_accept_name_input(tmp_path, monkeypatch):
+    configure_store(tmp_path, monkeypatch); client = TestClient(app)
+    parameters = client.get("/openapi.json").json()["paths"]["/doctors"]["get"]["parameters"]
+    parameter_names = {parameter["name"] for parameter in parameters}
+    assert "name" not in parameter_names
+    assert {"specialization", "location", "min_experience", "max_fee", "available"}.issubset(parameter_names)
+
+
+def test_legacy_appointment_doctor_endpoints_are_removed(tmp_path, monkeypatch):
+    configure_store(tmp_path, monkeypatch); client = TestClient(app)
+    patient_headers = register(client, "PATIENT", "patient@example.com")
+    assert client.get("/appointments/doctors", headers=patient_headers).status_code == 404
+    assert client.post("/appointments/book", headers=patient_headers).status_code == 404
+
+
+def test_doctor_cancellation_requires_reason_and_admin_approval(tmp_path, monkeypatch):
+    configure_store(tmp_path, monkeypatch); client = TestClient(app)
+    admin_headers = register_admin(client, "admin@example.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
+    patient_headers = register(client, "PATIENT", "patient@example.com")
+    starts = datetime.now(timezone.utc) + timedelta(days=4)
+    slot = client.post(
+        "/doctor/slots",
+        headers=doctor_headers,
+        json={"starts_at": starts.isoformat(), "ends_at": (starts + timedelta(minutes=30)).isoformat()},
+    )
+    assert slot.status_code == 201
+    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    appointment = client.post("/appointments", headers=patient_headers, json={"doctor_id": doctor_id, "slot_id": slot.json()["id"]})
+    assert appointment.status_code == 201
+    appointment_id = appointment.json()["id"]
+    payment = client.post("/payments", headers=patient_headers, json={"appointment_id": appointment_id, "method": "UPI"})
+    assert payment.status_code == 201
+
+    missing_reason = client.post(
+        f"/doctor/appointments/{appointment_id}/cancel-request",
+        headers=doctor_headers,
+        json={},
+    )
+    assert missing_reason.status_code == 422
+
+    requested = client.post(
+        f"/doctor/appointments/{appointment_id}/cancel-request",
+        headers=doctor_headers,
+        json={"reason": "Emergency surgery"},
+    )
+    assert requested.status_code == 200
+    assert requested.json()["status"] == "BOOKED"
+    assert requested.json()["doctor_cancellation_status"] == "PENDING"
+    assert requested.json()["doctor_cancellation_reason"] == "Emergency surgery"
+
+    pending = client.get("/admin/appointments/cancellation-requests", headers=admin_headers)
+    assert pending.status_code == 200
+    assert pending.json()[0]["id"] == appointment_id
+
+    approved = client.patch(
+        f"/admin/appointments/{appointment_id}/cancellation-request/accept",
+        headers=admin_headers,
+    )
+    assert approved.status_code == 200
+    assert approved.json()["status"] == "CANCELLED"
+    assert approved.json()["doctor_cancellation_status"] == "APPROVED"
+
+
+def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
+    configure_store(tmp_path, monkeypatch); client = TestClient(app)
+    admin_headers = register_admin(client, "admin@example.com")
+    patient_headers = register(client, "PATIENT", "patient@example.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
+
+    patient_update = client.patch(
+        "/patient/profile/me",
+        headers=patient_headers,
+        json={"name": "Updated Patient", "gender": "FEMALE", "date_of_birth": "1991-02-03"},
+    )
+    assert patient_update.status_code == 200
+    assert patient_update.json()["name"] == "Updated Patient"
+    assert patient_update.json()["gender"] == "FEMALE"
+    assert patient_update.json()["date_of_birth"] == "1991-02-03"
+    assert "qualification" not in patient_update.json()
+
+    patient_doctor_field = client.patch(
+        "/patient/profile/me",
+        headers=patient_headers,
+        json={"qualification": "MBBS"},
+    )
+    assert patient_doctor_field.status_code == 422
+
+    doctor_update = client.patch(
+        "/doctor/profile/me",
+        headers=doctor_headers,
+        json={"specialization": "Neurology", "license_number": "MED-999", "consultation_fee": 750},
+    )
+    assert doctor_update.status_code == 200
+    assert doctor_update.json()["status"] == "PENDING"
+    assert doctor_update.json()["pending_profile_changes"]["specialization"] == "Neurology"
+    assert client.get("/profile/me", headers=doctor_headers).json()["specialization"] == "Cardiology"
+
+    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    pending_changes = client.get("/admin/doctors/profile-changes", headers=admin_headers)
+    assert pending_changes.status_code == 200
+    assert pending_changes.json()[0]["id"] == doctor_id
+
+    accepted = client.patch(f"/admin/doctors/{doctor_id}/profile-change/accept", headers=admin_headers)
+    assert accepted.status_code == 200
+    assert accepted.json()["specialization"] == "Neurology"
+    assert accepted.json()["license_number"] == "MED-999"
+    assert accepted.json()["consultation_fee"] == 750
+
+    doctor_patient_field = client.patch(
+        "/doctor/profile/me",
+        headers=doctor_headers,
+        json={"gender": "OTHER"},
+    )
+    assert doctor_patient_field.status_code == 422
