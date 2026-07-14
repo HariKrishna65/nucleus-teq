@@ -10,6 +10,7 @@ from backend.enums.user import ApprovalStatus, UserRole
 from backend.database import database as db_service
 from backend.services.user_service import get_user_by_id
 
+BOOKING_LOCK = Lock()
 logger = logging.getLogger("doctor_booking.appointments")
 DOCTOR_ONLY_PROFILE_FIELDS = {
     "qualification",
@@ -98,19 +99,20 @@ def delete_slot(doctor_id, slot_id):
 
 
 def book(patient, payload):
-    doctor = get_user_by_id(payload.doctor_id)
-    if not doctor or doctor.get("role") != UserRole.DOCTOR.value or not doctor.get("active", True) or doctor.get("approval_status") != ApprovalStatus.APPROVED.value:
-        raise HTTPException(404, "Doctor not found")
-    slots = db_service.get_slots(); slot = next((s for s in slots if s["id"] == payload.slot_id and s["doctor_id"] == payload.doctor_id), None)
-    if not slot: raise HTTPException(404, "Availability slot not found")
-    if slot["booked"]: raise HTTPException(409, "Slot is already booked")
-    if parse(slot["starts_at"]) <= utcnow(): raise HTTPException(400, "Past slots cannot be booked")
-    slot["booked"] = True
-    appointment = {"id": str(uuid4()), "patient_id": patient["id"], "doctor_id": payload.doctor_id, "slot_id": slot["id"], "starts_at": slot["starts_at"], "ends_at": slot["ends_at"], "status": AppointmentStatus.PENDING_PAYMENT.value, "payment_status": PaymentStatus.PENDING.value, "created_at": utcnow().isoformat()}
-    appointments = db_service.get_appointments(); appointments.append(appointment)
-    db_service.save_slots(slots); db_service.save_appointments(appointments)
-    logger.info("Appointment reserved appointment_id=%s patient_id=%s doctor_id=%s slot_id=%s", appointment["id"], patient["id"], payload.doctor_id, slot["id"])
-    return enrich(appointment)
+    with BOOKING_LOCK:
+        doctor = get_user_by_id(payload.doctor_id)
+        if not doctor or doctor.get("role") != UserRole.DOCTOR.value or not doctor.get("active", True) or doctor.get("approval_status") != ApprovalStatus.APPROVED.value:
+            raise HTTPException(404, "Doctor not found")
+        slots = db_service.get_slots(); slot = next((s for s in slots if s["id"] == payload.slot_id and s["doctor_id"] == payload.doctor_id), None)
+        if not slot: raise HTTPException(404, "Availability slot not found")
+        if slot["booked"]: raise HTTPException(409, "Slot is already booked")
+        if parse(slot["starts_at"]) <= utcnow(): raise HTTPException(400, "Past slots cannot be booked")
+        slot["booked"] = True
+        appointment = {"id": str(uuid4()), "patient_id": patient["id"], "doctor_id": payload.doctor_id, "slot_id": slot["id"], "starts_at": slot["starts_at"], "ends_at": slot["ends_at"], "status": AppointmentStatus.PENDING_PAYMENT.value, "payment_status": PaymentStatus.PENDING.value, "created_at": utcnow().isoformat()}
+        appointments = db_service.get_appointments(); appointments.append(appointment)
+        db_service.save_slots(slots); db_service.save_appointments(appointments)
+        logger.info("Appointment reserved appointment_id=%s patient_id=%s doctor_id=%s slot_id=%s", appointment["id"], patient["id"], payload.doctor_id, slot["id"])
+        return enrich(appointment)
 
 
 def enrich(item):
