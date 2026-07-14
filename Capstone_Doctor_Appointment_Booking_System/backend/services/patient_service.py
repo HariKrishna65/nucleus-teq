@@ -2,15 +2,12 @@ import logging
 from datetime import timedelta
 from uuid import uuid4
 
-from fastapi import HTTPException
-
 from backend.enums.appointment import AppointmentStatus, PaymentStatus
 from backend.enums.user import ApprovalStatus, UserRole
 from backend.database import database as db_service
 from backend.services.user_service import get_user_by_id
 from backend.services.shared_service import BOOKING_LOCK, utcnow, parse, enrich, public_user
 from backend.constants import (
-    DOCTOR_NOT_FOUND_MESSAGE,
     SLOT_NOT_FOUND_MESSAGE,
     SLOT_ALREADY_BOOKED_MESSAGE,
     PAST_SLOT_BOOKING_MESSAGE,
@@ -19,6 +16,12 @@ from backend.constants import (
     APPOINTMENT_CANNOT_BE_CANCELLED_MESSAGE,
     CANCELLATION_TIME_LIMIT_EXCEEDED_MESSAGE,
     CANCELLATION_WINDOW_HOURS,
+)
+from backend.exceptions import (
+    BadRequestException,
+    ConflictException,
+    DoctorNotFoundException,
+    NotFoundException,
 )
 
 
@@ -51,15 +54,15 @@ def book(patient, payload):
     with BOOKING_LOCK:
         doctor = get_user_by_id(payload.doctor_id)
         if not doctor or doctor.get("role") != UserRole.DOCTOR.value or not doctor.get("active", True) or doctor.get("approval_status") != ApprovalStatus.APPROVED.value:
-            raise HTTPException(404, DOCTOR_NOT_FOUND_MESSAGE)
+            raise DoctorNotFoundException()
         slots = db_service.get_slots()
         slot = next((s for s in slots if s["id"] == payload.slot_id and s["doctor_id"] == payload.doctor_id), None)
         if not slot:
-            raise HTTPException(404, SLOT_NOT_FOUND_MESSAGE)
+            raise NotFoundException(SLOT_NOT_FOUND_MESSAGE)
         if slot["booked"]:
-            raise HTTPException(409, SLOT_ALREADY_BOOKED_MESSAGE)
+            raise ConflictException(SLOT_ALREADY_BOOKED_MESSAGE)
         if parse(slot["starts_at"]) <= utcnow():
-            raise HTTPException(400, PAST_SLOT_BOOKING_MESSAGE)
+            raise BadRequestException(PAST_SLOT_BOOKING_MESSAGE)
         slot["booked"] = True
         appointment = {
             "id": str(uuid4()),
@@ -85,9 +88,9 @@ def pay(patient_id, appointment_id, method):
     appointments = db_service.get_appointments()
     item = next((a for a in appointments if a["id"] == appointment_id and a["patient_id"] == patient_id), None)
     if not item:
-        raise HTTPException(404, APPOINTMENT_NOT_FOUND_MESSAGE)
+        raise NotFoundException(APPOINTMENT_NOT_FOUND_MESSAGE)
     if item["payment_status"] == PaymentStatus.PAID.value:
-        raise HTTPException(409, APPOINTMENT_ALREADY_PAID_MESSAGE)
+        raise ConflictException(APPOINTMENT_ALREADY_PAID_MESSAGE)
     payment_method = method.value if hasattr(method, "value") else method
     payment = {
         "id": str(uuid4()),
@@ -110,11 +113,11 @@ def cancel(patient_id, appointment_id):
     appointments = db_service.get_appointments()
     item = next((a for a in appointments if a["id"] == appointment_id and a["patient_id"] == patient_id), None)
     if not item:
-        raise HTTPException(404, APPOINTMENT_NOT_FOUND_MESSAGE)
+        raise NotFoundException(APPOINTMENT_NOT_FOUND_MESSAGE)
     if item["status"] in {AppointmentStatus.COMPLETED.value, AppointmentStatus.CANCELLED.value}:
-        raise HTTPException(409, APPOINTMENT_CANNOT_BE_CANCELLED_MESSAGE)
+        raise ConflictException(APPOINTMENT_CANNOT_BE_CANCELLED_MESSAGE)
     if parse(item["starts_at"]) - utcnow() < timedelta(hours=CANCELLATION_WINDOW_HOURS):
-        raise HTTPException(400, CANCELLATION_TIME_LIMIT_EXCEEDED_MESSAGE)
+        raise BadRequestException(CANCELLATION_TIME_LIMIT_EXCEEDED_MESSAGE)
     item["status"] = AppointmentStatus.CANCELLED.value
     slots = db_service.get_slots()
     slot = next((s for s in slots if s["id"] == item["slot_id"]), None)
