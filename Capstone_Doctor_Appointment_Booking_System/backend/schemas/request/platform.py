@@ -54,3 +54,8 @@ class DoctorCancellationRequest(BaseModel):
 
 class StatusUpdate(BaseModel):
     status: Literal[AppointmentStatus.COMPLETED, AppointmentStatus.MISSED_APPOINTMENT]
+
+
+class ActivationUpdate(BaseModel):
+    active: bool
+

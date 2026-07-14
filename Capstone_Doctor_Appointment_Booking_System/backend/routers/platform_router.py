@@ -76,3 +76,57 @@ def request_doctor_cancel(appointment_id: str, payload: DoctorCancellationReques
 
 @router.patch("/appointments/{appointment_id}/status", tags=["appointments"])
 def status(appointment_id: str, payload: StatusUpdate, user=Depends(require_role(UserRole.DOCTOR.value))): return platform_service.set_status(user["id"], appointment_id, payload.status)
+
+@router.get("/admin/statistics", tags=["admin"])
+def statistics(user=Depends(require_role(UserRole.ADMIN.value))):
+    users, appointments = db_service.get_users(), db_service.get_appointments()
+    return {"total_doctors": sum(u.get("role")==UserRole.DOCTOR.value for u in users), "total_patients": sum(u.get("role")==UserRole.PATIENT.value for u in users), "total_appointments": len(appointments), "completed_appointments": sum(a["status"]==AppointmentStatus.COMPLETED.value for a in appointments), "cancelled_appointments": sum(a["status"]==AppointmentStatus.CANCELLED.value for a in appointments), "active_doctors": sum(u.get("role")==UserRole.DOCTOR.value and u.get("active", True) for u in users), "pending_doctors": sum(u.get("role")==UserRole.DOCTOR.value and u.get("approval_status")==ApprovalStatus.PENDING.value for u in users)}
+
+@router.get("/admin/appointments", tags=["admin"])
+def monitor(user=Depends(require_role(UserRole.ADMIN.value))): return [platform_service.enrich(a) for a in db_service.get_appointments()]
+
+@router.get("/admin/appointments/cancellation-requests", tags=["admin"])
+def cancellation_requests(user=Depends(require_role(UserRole.ADMIN.value))):
+    return platform_service.pending_doctor_cancellations()
+
+@router.patch("/admin/appointments/{appointment_id}/cancellation-request/accept", tags=["admin"])
+def accept_cancellation_request(appointment_id: str, user=Depends(require_role(UserRole.ADMIN.value))):
+    return platform_service.accept_doctor_cancellation(appointment_id)
+
+@router.patch("/admin/appointments/{appointment_id}/cancellation-request/reject", tags=["admin"])
+def reject_cancellation_request(appointment_id: str, user=Depends(require_role(UserRole.ADMIN.value))):
+    return platform_service.reject_doctor_cancellation(appointment_id)
+
+@router.get("/admin/doctors", tags=["admin"])
+def admin_doctors(user=Depends(require_role(UserRole.ADMIN.value))):
+    return platform_service.doctor_list(include_inactive=True)
+
+@router.get("/admin/doctors/profile-changes", tags=["admin"])
+def pending_doctor_profile_changes(user=Depends(require_role(UserRole.ADMIN.value))):
+    doctors = [
+        platform_service.public_user(doctor)
+        for doctor in db_service.get_users()
+        if doctor.get("role") == UserRole.DOCTOR.value and doctor.get("pending_profile_changes")
+    ]
+    return doctors
+
+@router.patch("/admin/doctors/{doctor_id}/profile-change/accept", tags=["admin"])
+def accept_doctor_profile_change(doctor_id: str, user=Depends(require_role(UserRole.ADMIN.value))):
+    doctor = accept_doctor_profile_update(doctor_id)
+    if not doctor:
+        raise HTTPException(404, "Doctor not found")
+    return platform_service.public_user(doctor)
+
+@router.patch("/admin/doctors/{doctor_id}/profile-change/reject", tags=["admin"])
+def reject_doctor_profile_change(doctor_id: str, user=Depends(require_role(UserRole.ADMIN.value))):
+    doctor = reject_doctor_profile_update(doctor_id)
+    if not doctor:
+        raise HTTPException(404, "Doctor not found")
+    return platform_service.public_user(doctor)
+
+@router.patch("/admin/doctors/{doctor_id}/activation", tags=["admin"])
+def activation(doctor_id: str, payload: ActivationUpdate, user=Depends(require_role(UserRole.ADMIN.value))):
+    doctor = get_user_by_id(doctor_id)
+    if not doctor or doctor["role"] != UserRole.DOCTOR.value: raise HTTPException(404, "Doctor not found")
+    status = ApprovalStatus.APPROVED.value if payload.active else ApprovalStatus.SUSPENDED.value
+    return platform_service.public_user(update_user(doctor_id, {"active": payload.active, "approval_status": status}))

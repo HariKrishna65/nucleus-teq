@@ -179,3 +179,58 @@ def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
         json={"gender": "OTHER"},
     )
     assert doctor_patient_field.status_code == 422
+
+
+def test_doctor_can_update_slot_and_admin_can_see_inactive_doctors(tmp_path, monkeypatch):
+    configure_store(tmp_path, monkeypatch); client = TestClient(app)
+    admin_headers = register_admin(client, "admin@example.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
+    starts = datetime.now(timezone.utc) + timedelta(days=3)
+    slot = client.post(
+        "/doctor/slots",
+        headers=doctor_headers,
+        json={"starts_at": starts.isoformat(), "ends_at": (starts + timedelta(minutes=30)).isoformat()},
+    )
+    assert slot.status_code == 201
+    moved = client.put(
+        f"/doctor/slots/{slot.json()['id']}",
+        headers=doctor_headers,
+        json={"starts_at": (starts + timedelta(hours=1)).isoformat(), "ends_at": (starts + timedelta(hours=1, minutes=30)).isoformat()},
+    )
+    assert moved.status_code == 200
+    assert moved.json()["starts_at"] == (starts + timedelta(hours=1)).isoformat()
+
+    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    disabled = client.patch(f"/admin/doctors/{doctor_id}/activation", headers=admin_headers, json={"active": False})
+    assert disabled.status_code == 200
+    doctors = client.get("/admin/doctors", headers=admin_headers)
+    assert doctors.status_code == 200
+    assert doctors.json()[0]["active"] is False
+    assert doctors.json()[0]["approval_status"] == "SUSPENDED"
+
+
+def register_admin(client, email):
+    users = db_service.get_users()
+    users.append(
+        {
+            "id": "admin-1",
+            "name": "Admin User",
+            "email": email,
+            "phone": "9999999999",
+            "role": "ADMIN",
+            "gender": None,
+            "date_of_birth": None,
+            "qualification": None,
+            "specialization": None,
+            "experience": None,
+            "license_number": None,
+            "consultation_fee": None,
+            "clinic_address": None,
+            "active": True,
+            "approval_status": "APPROVED",
+            "hashed_password": hash_password("Secure@1"),
+        }
+    )
+    db_service.save_users(users)
+    token = client.post("/auth/admin/login", json={"email": email, "password": "Secure@1"}).json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}

@@ -1,4 +1,8 @@
-from fastapi import FastAPI
+﻿from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import logging
+import time
+from fastapi import Request
 
 from backend.exceptions import register_exception_handlers
 from backend.routers.auth_router import router as auth_router
@@ -7,9 +11,24 @@ from backend.routers.platform_router import router as platform_router
 app = FastAPI(
     title="Doctor Appointment Booking System Backend",
     version="1.0",
-    description="Backend API with JWT authentication and role based access control.",
+    description="Backend API for user authentication, doctor profiles, and appointment operations.",
 )
 register_exception_handlers(app)
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+logger = logging.getLogger("doctor_booking.api")
+
+@app.middleware("http")
+async def request_logging(request: Request, call_next):
+    started = time.perf_counter()
+    try:
+        response = await call_next(request)
+        logger.info("%s %s status=%s duration_ms=%.2f", request.method, request.url.path, response.status_code, (time.perf_counter()-started)*1000)
+        return response
+    except Exception:
+        logger.exception("%s %s failed", request.method, request.url.path)
+        raise
+
 app.include_router(auth_router)
 app.include_router(platform_router)
 
