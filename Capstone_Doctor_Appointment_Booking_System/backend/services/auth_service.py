@@ -53,3 +53,12 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_
         raise AuthenticationCredentialsException()
     assert_account_can_login(user)
     return user
+
+
+def require_role(required_role: str):
+    def role_dependency(current_user: dict = Depends(get_current_user)) -> dict:
+        if current_user.get("role") != required_role:
+            raise ForbiddenException()
+        return current_user
+
+    return role_dependency
