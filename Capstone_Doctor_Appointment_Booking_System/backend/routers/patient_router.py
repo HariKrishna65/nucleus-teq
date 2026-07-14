@@ -6,7 +6,6 @@ from backend.services.user_service import PATIENT_PROFILE_UPDATE_FIELDS, update_
 from backend.services import patient_service
 from backend.services.shared_service import public_user, enrich
 from backend.database import database as db_service
-from backend.services.shared_service import enrich
 from backend.schemas.request.patient import (
     PatientProfileUpdate,
     AppointmentCreate,
@@ -42,6 +41,8 @@ def book(payload: AppointmentCreate, user=Depends(require_role(UserRole.PATIENT.
 
 @router.get("/appointments", tags=["appointments"])
 def history(status: str | None = None, user=Depends(get_current_user)):
+    # Imports here to avoid circular dependencies
+    from backend.services.shared_service import enrich
     key = "patient_id" if user["role"] == UserRole.PATIENT.value else "doctor_id"
     items = [a for a in db_service.get_appointments() if a.get(key) == user["id"]]
     if status:
