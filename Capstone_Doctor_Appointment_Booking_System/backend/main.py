@@ -1,4 +1,4 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 import time
@@ -7,6 +7,7 @@ from fastapi import Request
 from backend.exceptions import register_exception_handlers
 from backend.routers.auth_router import router as auth_router
 from backend.routers.platform_router import router as platform_router
+from backend.routers.admin_router import router as admin_router
 
 app = FastAPI(
     title="Doctor Appointment Booking System Backend",
@@ -31,6 +32,7 @@ async def request_logging(request: Request, call_next):
 
 app.include_router(auth_router)
 app.include_router(platform_router)
+app.include_router(admin_router)
 
 
 @app.get("/health", tags=["health"])
