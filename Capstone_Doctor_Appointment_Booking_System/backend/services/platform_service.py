@@ -62,3 +62,37 @@ def doctor_list(specialization=None, location=None, min_experience=None, max_fee
         doctor["available_slots"] = [s for s in slots if s["doctor_id"] == doctor["id"] and not s["booked"] and parse(s["starts_at"]) > utcnow()]
     if available: doctors = [d for d in doctors if d["available_slots"]]
     return doctors
+
+
+def create_slot(doctor_id, payload):
+    _validate_slot_window(payload.starts_at, payload.ends_at)
+    slots = db_service.get_slots()
+    if any(s["doctor_id"] == doctor_id and parse(s["starts_at"]) < payload.ends_at and payload.starts_at < parse(s["ends_at"]) for s in slots):
+        raise HTTPException(409, "Slot overlaps existing availability")
+    slot = {"id": str(uuid4()), "doctor_id": doctor_id, "starts_at": payload.starts_at.isoformat(), "ends_at": payload.ends_at.isoformat(), "booked": False}
+    slots.append(slot); db_service.save_slots(slots); return slot
+
+
+def update_slot(doctor_id, slot_id, payload):
+    _validate_slot_window(payload.starts_at, payload.ends_at)
+    slots = db_service.get_slots()
+    slot = next((s for s in slots if s["id"] == slot_id and s["doctor_id"] == doctor_id), None)
+    if not slot:
+        raise HTTPException(404, "Slot not found")
+    if slot["booked"]:
+        raise HTTPException(409, "Booked slots cannot be edited")
+    if any(
+        s["id"] != slot_id and s["doctor_id"] == doctor_id and parse(s["starts_at"]) < payload.ends_at and payload.starts_at < parse(s["ends_at"])
+        for s in slots
+    ):
+        raise HTTPException(409, "Slot overlaps existing availability")
+    slot.update({"starts_at": payload.starts_at.isoformat(), "ends_at": payload.ends_at.isoformat()})
+    db_service.save_slots(slots)
+    return slot
+
+
+def delete_slot(doctor_id, slot_id):
+    slots = db_service.get_slots(); slot = next((s for s in slots if s["id"] == slot_id and s["doctor_id"] == doctor_id), None)
+    if not slot: raise HTTPException(404, "Slot not found")
+    if slot["booked"]: raise HTTPException(409, "Booked slots cannot be deleted")
+    db_service.save_slots([s for s in slots if s["id"] != slot_id])

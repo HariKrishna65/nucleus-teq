@@ -26,3 +26,13 @@ class DoctorProfileUpdate(BaseModel):
     license_number: str | None = None
     consultation_fee: float | None = Field(default=None, ge=0)
     clinic_address: str | None = None
+
+
+class SlotCreate(BaseModel):
+    starts_at: datetime
+    ends_at: datetime
+
+
+class SlotUpdate(BaseModel):
+    starts_at: datetime
+    ends_at: datetime

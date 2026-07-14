@@ -45,3 +45,15 @@ def doctor(doctor_id: str, user=Depends(get_current_user)):
     result = next((d for d in platform_service.doctor_list() if d["id"] == doctor_id), None)
     if not result: raise HTTPException(404, "Doctor not found")
     return result
+
+@router.get("/doctor/slots", tags=["availability"])
+def own_slots(user=Depends(require_role(UserRole.DOCTOR.value))): return [s for s in db_service.get_slots() if s["doctor_id"] == user["id"]]
+
+@router.post("/doctor/slots", tags=["availability"], status_code=201)
+def add_slot(payload: SlotCreate, user=Depends(require_role(UserRole.DOCTOR.value))): return platform_service.create_slot(user["id"], payload)
+
+@router.put("/doctor/slots/{slot_id}", tags=["availability"])
+def edit_slot(slot_id: str, payload: SlotUpdate, user=Depends(require_role(UserRole.DOCTOR.value))): return platform_service.update_slot(user["id"], slot_id, payload)
+
+@router.delete("/doctor/slots/{slot_id}", tags=["availability"])
+def remove_slot(slot_id: str, user=Depends(require_role(UserRole.DOCTOR.value))): platform_service.delete_slot(user["id"], slot_id); return {"deleted": True}
