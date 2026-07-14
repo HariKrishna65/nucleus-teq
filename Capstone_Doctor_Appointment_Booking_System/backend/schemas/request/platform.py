@@ -46,3 +46,11 @@ class AppointmentCreate(BaseModel):
 class PaymentCreate(BaseModel):
     appointment_id: str
     method: PaymentMethod = PaymentMethod.CARD
+
+
+class DoctorCancellationRequest(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class StatusUpdate(BaseModel):
+    status: Literal[AppointmentStatus.COMPLETED, AppointmentStatus.MISSED_APPOINTMENT]

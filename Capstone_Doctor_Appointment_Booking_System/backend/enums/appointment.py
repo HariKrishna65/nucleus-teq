@@ -19,3 +19,9 @@ class PaymentStatus(str, Enum):
     PENDING = "PENDING"
     PAID = "PAID"
     SUCCESS = "SUCCESS"
+
+
+class CancellationRequestStatus(str, Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"

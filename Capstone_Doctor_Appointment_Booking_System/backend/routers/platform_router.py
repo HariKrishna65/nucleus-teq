@@ -66,3 +66,13 @@ def history(status: str | None=None, user=Depends(get_current_user)): return pla
 
 @router.post("/payments", tags=["payments"], status_code=201)
 def payment(payload: PaymentCreate, user=Depends(require_role(UserRole.PATIENT.value))): return platform_service.pay(user["id"], payload.appointment_id, payload.method)
+
+@router.post("/appointments/{appointment_id}/cancel", tags=["appointments"])
+def cancel(appointment_id: str, user=Depends(require_role(UserRole.PATIENT.value))): return platform_service.cancel(user["id"], appointment_id)
+
+@router.post("/doctor/appointments/{appointment_id}/cancel-request", tags=["appointments"])
+def request_doctor_cancel(appointment_id: str, payload: DoctorCancellationRequest, user=Depends(require_role(UserRole.DOCTOR.value))):
+    return platform_service.request_doctor_cancellation(user["id"], appointment_id, payload.reason)
+
+@router.patch("/appointments/{appointment_id}/status", tags=["appointments"])
+def status(appointment_id: str, payload: StatusUpdate, user=Depends(require_role(UserRole.DOCTOR.value))): return platform_service.set_status(user["id"], appointment_id, payload.status)

@@ -138,3 +138,28 @@ def pay(patient_id, appointment_id, method):
     db_service.save_payments(payments); db_service.save_appointments(appointments)
     logger.info("Payment completed appointment_id=%s payment_id=%s method=%s", appointment_id, payment["id"], method)
     return payment
+
+
+def cancel(patient_id, appointment_id):
+    appointments = db_service.get_appointments(); item = next((a for a in appointments if a["id"] == appointment_id and a["patient_id"] == patient_id), None)
+    if not item: raise HTTPException(404, "Appointment not found")
+    if item["status"] in {AppointmentStatus.COMPLETED.value, AppointmentStatus.CANCELLED.value}: raise HTTPException(409, "Appointment cannot be cancelled")
+    if parse(item["starts_at"]) - utcnow() < timedelta(hours=2): raise HTTPException(400, "Cancellation is allowed only up to two hours before the appointment")
+    item["status"] = AppointmentStatus.CANCELLED.value; slots = db_service.get_slots(); next(s for s in slots if s["id"] == item["slot_id"])["booked"] = False
+    db_service.save_appointments(appointments); db_service.save_slots(slots)
+    logger.info("Appointment cancelled appointment_id=%s patient_id=%s", appointment_id, patient_id)
+    return enrich(item)
+
+
+def request_doctor_cancellation(doctor_id, appointment_id, reason):
+    appointments = db_service.get_appointments()
+    item = next((a for a in appointments if a["id"] == appointment_id and a["doctor_id"] == doctor_id), None)
+    if not item: raise HTTPException(404, "Appointment not found")
+    if item["status"] in {AppointmentStatus.COMPLETED.value, AppointmentStatus.CANCELLED.value}: raise HTTPException(409, "Appointment cannot be cancelled")
+    if parse(item["starts_at"]) - utcnow() < timedelta(hours=2): raise HTTPException(400, "Cancellation is allowed only up to two hours before the appointment")
+    item["doctor_cancellation_reason"] = reason.strip()
+    item["doctor_cancellation_status"] = CancellationRequestStatus.PENDING.value
+    item["doctor_cancellation_requested_at"] = utcnow().isoformat()
+    db_service.save_appointments(appointments)
+    logger.info("Doctor cancellation requested appointment_id=%s doctor_id=%s", appointment_id, doctor_id)
+    return enrich(item)
