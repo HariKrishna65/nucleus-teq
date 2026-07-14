@@ -1,4 +1,4 @@
-import json
+﻿import json
 
 from fastapi.testclient import TestClient
 
@@ -6,7 +6,7 @@ from backend.main import app
 from backend.database import database as db_service
 
 
-def test_patient_registration(tmp_path, monkeypatch):
+def test_patient_registration_and_login(tmp_path, monkeypatch):
     users_file = tmp_path / "users.json"
     users_file.write_text("[]", encoding="utf-8")
     monkeypatch.setattr(db_service, "USERS_FILE", users_file)
@@ -28,6 +28,30 @@ def test_patient_registration(tmp_path, monkeypatch):
 
     stored = json.loads(users_file.read_text(encoding="utf-8"))[0]
     assert stored["hashed_password"] != payload["password"]
+
+    login = client.post(
+        "/auth/patient/login",
+        json={"email": payload["email"], "password": payload["password"]},
+    )
+    assert login.status_code == 200
+    assert login.json()["access_token"]
+
+    profile = client.get(
+        "/profile/me",
+        headers={"Authorization": f"Bearer {login.json()['access_token']}"},
+    )
+    assert profile.status_code == 200
+    doctor_only_fields = {
+        "qualification",
+        "specialization",
+        "experience",
+        "license_number",
+        "consultation_fee",
+        "clinic_address",
+        "active",
+        "approval_status",
+    }
+    assert doctor_only_fields.isdisjoint(profile.json())
 
 
 def test_registration_validation(tmp_path, monkeypatch):
@@ -68,3 +92,7 @@ def test_doctor_registration_requires_admin_approval_before_login(tmp_path, monk
     assert response.status_code == 201
     assert response.json()["active"] is False
     assert response.json()["approval_status"] == "PENDING"
+
+    login = client.post("/auth/doctor/login", json={"email": payload["email"], "password": payload["password"]})
+    assert login.status_code == 403
+    assert login.json()["detail"] == "Doctor account is pending admin approval"
