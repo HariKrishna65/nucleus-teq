@@ -56,3 +56,32 @@ def _login_for_role(payload: LoginRequest, expected_role: str):
     access_token = create_access_token(data={"sub": user["id"], "email": user["email"], "role": user["role"]})
     logger.info("Login succeeded user_id=%s role=%s", user["id"], user["role"])
     return {"access_token": access_token, "token_type": os.getenv("TOKEN_TYPE_BEARER", "bearer")}
+
+
+@router.post("/patient/login")
+def patient_login(payload: LoginRequest):
+    return _login_for_role(payload, UserRole.PATIENT.value)
+
+
+@router.post("/doctor/login")
+def doctor_login(payload: LoginRequest):
+    return _login_for_role(payload, UserRole.DOCTOR.value)
+
+
+@router.post("/admin/login")
+def admin_login(payload: LoginRequest):
+    return _login_for_role(payload, UserRole.ADMIN.value)
+
+
+@router.post("/token")
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = authenticate_user(form_data.username, form_data.password)
+    if not user:
+        logger.warning("Login failed email=%s", form_data.username)
+        raise InvalidCredentialsException()
+    assert_account_can_login(user)
+
+    access_token = create_access_token(data={"sub": user["id"], "email": user["email"], "role": user["role"]})
+    logger.info("Login succeeded user_id=%s role=%s", user["id"], user["role"])
+    token_response = {"access_token": access_token, "token_type": os.getenv("TOKEN_TYPE_BEARER", "bearer")}
+    return token_response
