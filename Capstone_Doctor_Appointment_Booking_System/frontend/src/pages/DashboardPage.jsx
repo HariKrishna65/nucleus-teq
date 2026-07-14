@@ -1,3 +1,4 @@
+// Renders the signed-in user dashboard with profile and appointment workflows.
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../hooks/useAuth';

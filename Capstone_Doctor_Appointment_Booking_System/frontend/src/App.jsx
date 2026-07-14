@@ -1,3 +1,4 @@
+// Defines the protected patient-facing route structure for the React app.
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import LoginPage from './pages/LoginPage';

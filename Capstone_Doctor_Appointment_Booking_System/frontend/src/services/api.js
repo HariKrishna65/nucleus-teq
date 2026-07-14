@@ -1,3 +1,4 @@
+// Centralizes HTTP requests to the backend API and attaches auth headers.
 import axios from 'axios';
 
 export const api = axios.create({

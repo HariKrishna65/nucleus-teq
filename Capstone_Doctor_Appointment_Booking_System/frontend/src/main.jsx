@@ -1,3 +1,4 @@
+// Mounts the React application with routing, auth state, and toast notifications.
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';

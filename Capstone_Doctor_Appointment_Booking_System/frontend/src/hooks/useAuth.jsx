@@ -1,3 +1,4 @@
+// Provides authentication state, token persistence, and auth actions to the UI.
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';

@@ -1,3 +1,4 @@
+/* Defines global layout, form, dashboard, and component styling for the app. */
 :root { font-family: Inter, system-ui, sans-serif; color: #17324d; background: #edf6f5; }
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100vh; }
