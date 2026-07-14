@@ -41,3 +41,8 @@ class SlotUpdate(BaseModel):
 class AppointmentCreate(BaseModel):
     doctor_id: str
     slot_id: str
+
+
+class PaymentCreate(BaseModel):
+    appointment_id: str
+    method: PaymentMethod = PaymentMethod.CARD

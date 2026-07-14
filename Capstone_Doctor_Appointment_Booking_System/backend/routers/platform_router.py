@@ -57,3 +57,12 @@ def edit_slot(slot_id: str, payload: SlotUpdate, user=Depends(require_role(UserR
 
 @router.delete("/doctor/slots/{slot_id}", tags=["availability"])
 def remove_slot(slot_id: str, user=Depends(require_role(UserRole.DOCTOR.value))): platform_service.delete_slot(user["id"], slot_id); return {"deleted": True}
+
+@router.post("/appointments", tags=["appointments"], status_code=201)
+def book(payload: AppointmentCreate, user=Depends(require_role(UserRole.PATIENT.value))): return platform_service.book(user, payload)
+
+@router.get("/appointments", tags=["appointments"])
+def history(status: str | None=None, user=Depends(get_current_user)): return platform_service.appointments_for(user, status)
+
+@router.post("/payments", tags=["payments"], status_code=201)
+def payment(payload: PaymentCreate, user=Depends(require_role(UserRole.PATIENT.value))): return platform_service.pay(user["id"], payload.appointment_id, payload.method)

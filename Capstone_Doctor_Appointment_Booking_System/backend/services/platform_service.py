@@ -119,3 +119,22 @@ def enrich(item):
     result = dict(item); doctor = get_user_by_id(item["doctor_id"]); patient = get_user_by_id(item["patient_id"])
     result["doctor"] = public_user(doctor) if doctor else None; result["patient"] = public_user(patient) if patient else None
     return result
+
+
+def appointments_for(user, status=None):
+    key = "patient_id" if user["role"] == UserRole.PATIENT.value else "doctor_id"
+    items = [a for a in db_service.get_appointments() if a.get(key) == user["id"]]
+    if status: items = [a for a in items if a["status"] == status]
+    return [enrich(a) for a in sorted(items, key=lambda a: a["starts_at"])]
+
+
+def pay(patient_id, appointment_id, method):
+    appointments = db_service.get_appointments(); item = next((a for a in appointments if a["id"] == appointment_id and a["patient_id"] == patient_id), None)
+    if not item: raise HTTPException(404, "Appointment not found")
+    if item["payment_status"] == PaymentStatus.PAID.value: raise HTTPException(409, "Appointment is already paid")
+    payment_method = method.value if hasattr(method, "value") else method
+    payment = {"id": str(uuid4()), "appointment_id": appointment_id, "amount": get_user_by_id(item["doctor_id"]).get("consultation_fee", 0), "method": payment_method, "status": PaymentStatus.SUCCESS.value, "paid_at": utcnow().isoformat()}
+    payments = db_service.get_payments(); payments.append(payment); item.update({"payment_status": PaymentStatus.PAID.value, "status": AppointmentStatus.BOOKED.value})
+    db_service.save_payments(payments); db_service.save_appointments(appointments)
+    logger.info("Payment completed appointment_id=%s payment_id=%s method=%s", appointment_id, payment["id"], method)
+    return payment
