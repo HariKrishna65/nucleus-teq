@@ -1,3 +1,4 @@
+// Defines the public, auth, and dashboard routes for the React app.
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import LoginPage from './pages/LoginPage';

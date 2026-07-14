@@ -1,3 +1,4 @@
+// Renders the healthcare landing page with doctor discovery and primary actions.
 import { Link } from 'react-router-dom';
 
 const featuredDoctors = [
