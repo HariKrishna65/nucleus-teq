@@ -33,9 +33,9 @@ def register(client, role, email, admin_headers=None):
 
 def test_end_to_end_booking_payment_and_cancellation(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    admin_headers = register_admin(client, "admin@example.com")
-    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
-    patient_headers = register(client, "PATIENT", "patient@example.com")
+    admin_headers = register_admin(client, "admin@gmail.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@gmail.com", admin_headers)
+    patient_headers = register(client, "PATIENT", "patient@gmail.com")
     starts = datetime.now(timezone.utc) + timedelta(days=2)
     slot = client.post("/doctor/slots", headers=doctor_headers, json={"starts_at": starts.isoformat(), "ends_at": (starts + timedelta(minutes=30)).isoformat()})
     assert slot.status_code == 201
@@ -56,9 +56,9 @@ def test_end_to_end_booking_payment_and_cancellation(tmp_path, monkeypatch):
 
 def test_role_access_is_enforced(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    admin_headers = register_admin(client, "admin@example.com")
-    patient_headers = register(client, "PATIENT", "patient@example.com")
-    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
+    admin_headers = register_admin(client, "admin@gmail.com")
+    patient_headers = register(client, "PATIENT", "patient@gmail.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@gmail.com", admin_headers)
     assert client.post("/doctor/slots", headers=patient_headers, json={"starts_at": "2030-01-01T10:00:00Z", "ends_at": "2030-01-01T10:30:00Z"}).status_code == 403
     assert client.get("/admin/statistics", headers=patient_headers).status_code == 403
     assert client.post("/appointments", headers=doctor_headers, json={"doctor_id": "doctor-1", "slot_id": "slot-1"}).status_code == 403
@@ -74,16 +74,16 @@ def test_get_doctors_api_does_not_accept_name_input(tmp_path, monkeypatch):
 
 def test_legacy_appointment_doctor_endpoints_are_removed(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    patient_headers = register(client, "PATIENT", "patient@example.com")
+    patient_headers = register(client, "PATIENT", "patient@gmail.com")
     assert client.get("/appointments/doctors", headers=patient_headers).status_code == 404
     assert client.post("/appointments/book", headers=patient_headers).status_code == 404
 
 
 def test_doctor_cancellation_requires_reason_and_admin_approval(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    admin_headers = register_admin(client, "admin@example.com")
-    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
-    patient_headers = register(client, "PATIENT", "patient@example.com")
+    admin_headers = register_admin(client, "admin@gmail.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@gmail.com", admin_headers)
+    patient_headers = register(client, "PATIENT", "patient@gmail.com")
     starts = datetime.now(timezone.utc) + timedelta(days=4)
     slot = client.post(
         "/doctor/slots",
@@ -130,9 +130,9 @@ def test_doctor_cancellation_requires_reason_and_admin_approval(tmp_path, monkey
 
 def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    admin_headers = register_admin(client, "admin@example.com")
-    patient_headers = register(client, "PATIENT", "patient@example.com")
-    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
+    admin_headers = register_admin(client, "admin@gmail.com")
+    patient_headers = register(client, "PATIENT", "patient@gmail.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@gmail.com", admin_headers)
 
     patient_update = client.patch(
         "/patient/profile/me",
@@ -183,8 +183,8 @@ def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
 
 def test_doctor_can_update_slot_and_admin_can_see_inactive_doctors(tmp_path, monkeypatch):
     configure_store(tmp_path, monkeypatch); client = TestClient(app)
-    admin_headers = register_admin(client, "admin@example.com")
-    doctor_headers = register(client, "DOCTOR", "doctor@example.com", admin_headers)
+    admin_headers = register_admin(client, "admin@gmail.com")
+    doctor_headers = register(client, "DOCTOR", "doctor@gmail.com", admin_headers)
     starts = datetime.now(timezone.utc) + timedelta(days=3)
     slot = client.post(
         "/doctor/slots",

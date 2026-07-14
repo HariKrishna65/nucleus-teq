@@ -5,8 +5,9 @@ import time
 from fastapi import Request
 
 from backend.exceptions import register_exception_handlers
-from backend.routers.auth_router import router as auth_router
-from backend.routers.platform_router import router as platform_router
+from backend.routers.auth_router import router as auth_router, profile_router
+from backend.routers.doctor_router import router as doctor_router
+from backend.routers.patient_router import router as patient_router
 from backend.routers.admin_router import router as admin_router
 
 app = FastAPI(
@@ -31,7 +32,9 @@ async def request_logging(request: Request, call_next):
         raise
 
 app.include_router(auth_router)
-app.include_router(platform_router)
+app.include_router(profile_router)
+app.include_router(doctor_router)
+app.include_router(patient_router)
 app.include_router(admin_router)
 
 

@@ -1,18 +1,9 @@
-﻿from datetime import date, datetime
+from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.enums.appointment import AppointmentStatus, PaymentMethod
-
-
-class PatientProfileUpdate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    name: str | None = Field(default=None, min_length=2)
-    phone: str | None = Field(default=None, pattern=r"^\d{10}$")
-    gender: Literal["MALE", "FEMALE", "OTHER"] | None = None
-    date_of_birth: date | None = None
+from backend.enums.appointment import AppointmentStatus
 
 
 class DoctorProfileUpdate(BaseModel):
@@ -38,24 +29,9 @@ class SlotUpdate(BaseModel):
     ends_at: datetime
 
 
-class AppointmentCreate(BaseModel):
-    doctor_id: str
-    slot_id: str
-
-
-class PaymentCreate(BaseModel):
-    appointment_id: str
-    method: PaymentMethod = PaymentMethod.CARD
-
-
 class DoctorCancellationRequest(BaseModel):
     reason: str = Field(min_length=3, max_length=500)
 
 
 class StatusUpdate(BaseModel):
     status: Literal[AppointmentStatus.COMPLETED, AppointmentStatus.MISSED_APPOINTMENT]
-
-
-class ActivationUpdate(BaseModel):
-    active: bool
-

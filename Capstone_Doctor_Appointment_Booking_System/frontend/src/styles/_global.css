@@ -1,0 +1,32 @@
+/* Defines global layout, form, dashboard, and component styling for the app. */
+:root { font-family: Inter, system-ui, sans-serif; color: #17324d; background: #edf6f5; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+.auth-card { margin: 8vh auto; }
+.auth-card { width: min(92vw, 460px); padding: 2rem; background: white; border-radius: 18px; box-shadow: 0 18px 50px #17324d20; }
+form { display: grid; gap: 1rem; }
+label { display: grid; gap: .35rem; font-weight: 600; }
+input, select, button { padding: .8rem; border: 1px solid #b9ccca; border-radius: 8px; font: inherit; }
+button { border: 0; color: white; background: #087f70; cursor: pointer; font-weight: 700; }
+button:disabled { opacity: .6; }
+input[type="checkbox"] { width: auto; accent-color: #087f70; }
+small { color: #b42318; }
+.app-shell header { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 1rem 5vw; background: #073b4c; color: white; }
+.app-shell header div, .app-shell nav { display: flex; align-items: center; gap: 1rem; }
+.app-shell header strong { font-size: 1.4rem; }.app-shell header button { background: #ef476f; }
+.app-shell main { width: min(1180px, 92vw); margin: 2rem auto; }
+section { margin-bottom: 3rem; }.grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(245px,1fr)); gap: 1rem; }
+article { background: white; padding: 1.2rem; border-radius: 14px; box-shadow: 0 8px 30px #17324d14; }
+.filters,.inline { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }.filters input { flex: 1 1 180px; }
+.slot { display: block; width: 100%; margin: .4rem 0; background: #118ab2; }.secondary { background: #6c757d; margin-left: .4rem; }
+.active-filter { background: #073b4c; }
+.status { display: inline-block; padding: .3rem .6rem; margin: .4rem .4rem .4rem 0; border-radius: 99px; background: #e1f5f2; font-size: .8rem; font-weight: 800; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 1rem; }.stats article { display:grid; gap:.4rem; text-transform:capitalize; }.stats strong { font-size:2rem; }
+textarea { min-height: 80px; padding: .8rem; border: 1px solid #b9ccca; border-radius: 8px; }
+.actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .8rem; }
+.profile-form { align-items: end; }
+.checkline { display: flex; align-items: center; gap: .5rem; padding: .55rem .75rem; background: white; border: 1px solid #b9ccca; border-radius: 8px; }
+.payment-panel { border: 2px solid #118ab2; }
+.payment-panel.paid { border-color: #087f70; animation: successPulse .7s ease; }
+@keyframes successPulse { 0% { transform: scale(.98); } 60% { transform: scale(1.02); } 100% { transform: scale(1); } }
+@media(max-width:650px){.app-shell header span{display:none}.inline{display:grid}.app-shell header{padding:.8rem 4vw}}

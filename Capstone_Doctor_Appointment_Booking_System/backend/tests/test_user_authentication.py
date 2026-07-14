@@ -15,7 +15,7 @@ def test_patient_registration_and_login(tmp_path, monkeypatch):
     client = TestClient(app)
     payload = {
         "full_name": "Jane Patient",
-        "email": "jane@example.com",
+        "email": "jane@gmail.com",
         "password": "Secure@1",
         "phone": "9876543210",
         "gender": "FEMALE",
@@ -78,7 +78,7 @@ def test_doctor_registration_requires_admin_approval_before_login(tmp_path, monk
     client = TestClient(app)
     payload = {
         "full_name": "Dana Doctor",
-        "email": "doctor@example.com",
+        "email": "doctor@gmail.com",
         "password": "Secure@1",
         "phone": "9876543210",
         "qualification": "MBBS",
