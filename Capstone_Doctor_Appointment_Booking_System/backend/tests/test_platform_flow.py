@@ -39,7 +39,7 @@ def test_end_to_end_booking_payment_and_cancellation(tmp_path, monkeypatch):
     starts = datetime.now(timezone.utc) + timedelta(days=2)
     slot = client.post("/doctor/slots", headers=doctor_headers, json={"starts_at": starts.isoformat(), "ends_at": (starts + timedelta(minutes=30)).isoformat()})
     assert slot.status_code == 201
-    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    doctor_id = client.get("/doctor/profile", headers=doctor_headers).json()["id"]
     appointment = client.post("/appointments", headers=patient_headers, json={"doctor_id": doctor_id, "slot_id": slot.json()["id"]})
     assert appointment.status_code == 201
     duplicate = client.post("/appointments", headers=patient_headers, json={"doctor_id": doctor_id, "slot_id": slot.json()["id"]})
@@ -91,7 +91,7 @@ def test_doctor_cancellation_requires_reason_and_admin_approval(tmp_path, monkey
         json={"starts_at": starts.isoformat(), "ends_at": (starts + timedelta(minutes=30)).isoformat()},
     )
     assert slot.status_code == 201
-    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    doctor_id = client.get("/doctor/profile", headers=doctor_headers).json()["id"]
     appointment = client.post("/appointments", headers=patient_headers, json={"doctor_id": doctor_id, "slot_id": slot.json()["id"]})
     assert appointment.status_code == 201
     appointment_id = appointment.json()["id"]
@@ -135,7 +135,7 @@ def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
     doctor_headers = register(client, "DOCTOR", "doctor@gmail.com", admin_headers)
 
     patient_update = client.patch(
-        "/patient/profile/me",
+        "/patient/profile",
         headers=patient_headers,
         json={"name": "Updated Patient", "gender": "FEMALE", "date_of_birth": "1991-02-03"},
     )
@@ -146,23 +146,23 @@ def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
     assert "qualification" not in patient_update.json()
 
     patient_doctor_field = client.patch(
-        "/patient/profile/me",
+        "/patient/profile",
         headers=patient_headers,
         json={"qualification": "MBBS"},
     )
     assert patient_doctor_field.status_code == 422
 
     doctor_update = client.patch(
-        "/doctor/profile/me",
+        "/doctor/profile",
         headers=doctor_headers,
         json={"specialization": "Neurology", "license_number": "MED-999", "consultation_fee": 750},
     )
     assert doctor_update.status_code == 200
     assert doctor_update.json()["status"] == "PENDING"
     assert doctor_update.json()["pending_profile_changes"]["specialization"] == "Neurology"
-    assert client.get("/profile/me", headers=doctor_headers).json()["specialization"] == "Cardiology"
+    assert client.get("/doctor/profile", headers=doctor_headers).json()["specialization"] == "Cardiology"
 
-    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    doctor_id = client.get("/doctor/profile", headers=doctor_headers).json()["id"]
     pending_changes = client.get("/admin/doctors/profile-changes", headers=admin_headers)
     assert pending_changes.status_code == 200
     assert pending_changes.json()[0]["id"] == doctor_id
@@ -174,7 +174,7 @@ def test_profile_update_fields_are_role_specific(tmp_path, monkeypatch):
     assert accepted.json()["consultation_fee"] == 750
 
     doctor_patient_field = client.patch(
-        "/doctor/profile/me",
+        "/doctor/profile",
         headers=doctor_headers,
         json={"gender": "OTHER"},
     )
@@ -200,7 +200,7 @@ def test_doctor_can_update_slot_and_admin_can_see_inactive_doctors(tmp_path, mon
     assert moved.status_code == 200
     assert moved.json()["starts_at"] == (starts + timedelta(hours=1)).isoformat()
 
-    doctor_id = client.get("/profile/me", headers=doctor_headers).json()["id"]
+    doctor_id = client.get("/doctor/profile", headers=doctor_headers).json()["id"]
     disabled = client.patch(f"/admin/doctors/{doctor_id}/activation", headers=admin_headers, json={"active": False})
     assert disabled.status_code == 200
     doctors = client.get("/admin/doctors", headers=admin_headers)

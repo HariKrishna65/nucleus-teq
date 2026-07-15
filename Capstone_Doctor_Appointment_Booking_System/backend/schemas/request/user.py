@@ -36,6 +36,7 @@ class AccountCreate(BaseModel):
     @field_validator("email")
     @classmethod
     def email_must_be_gmail(cls, value: EmailStr) -> EmailStr:
+        
         return validate_gmail_email(value)
 
     @model_validator(mode="after")

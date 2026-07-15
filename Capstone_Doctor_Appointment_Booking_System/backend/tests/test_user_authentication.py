@@ -37,7 +37,7 @@ def test_patient_registration_and_login(tmp_path, monkeypatch):
     assert login.json()["access_token"]
 
     profile = client.get(
-        "/profile/me",
+        "/patient/profile",
         headers={"Authorization": f"Bearer {login.json()['access_token']}"},
     )
     assert profile.status_code == 200

@@ -97,6 +97,7 @@ function ProfilePanel({ user, onRefresh, onLogout }) {
 
   const save = async (event) => {
     event.preventDefault();
+    if (user?.role === 'ADMIN') return;
     try {
       const payload = user?.role === 'DOCTOR'
         ? {
@@ -115,7 +116,7 @@ function ProfilePanel({ user, onRefresh, onLogout }) {
           gender: form.gender,
           date_of_birth: form.date_of_birth,
         };
-      const profileEndpoint = user?.role === 'DOCTOR' ? '/doctor/profile/me' : '/patient/profile/me';
+      const profileEndpoint = user?.role === 'DOCTOR' ? '/doctor/profile' : '/patient/profile';
       await api.patch(profileEndpoint, payload);
       toast.success(user?.role === 'DOCTOR' ? 'Profile update submitted for approval' : 'Profile updated');
       onRefresh();
@@ -163,34 +164,36 @@ function ProfilePanel({ user, onRefresh, onLogout }) {
           </article>
         ))}
       </div>
-      <form className="inline profile-form" onSubmit={save}>
-        <label>
-          Name
-          <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
-        </label>
-        <label>
-          Phone
-          <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
-        </label>
-        {user?.role === 'PATIENT' && (
-          <>
-            <label>
-              Gender
-              <select value={form.gender} onChange={(event) => setForm({ ...form, gender: event.target.value })}>
-                <option value="">Select</option>
-                <option>FEMALE</option>
-                <option>MALE</option>
-                <option>OTHER</option>
-              </select>
-            </label>
-            <label>
-              Date of birth
-              <input type="date" value={form.date_of_birth} onChange={(event) => setForm({ ...form, date_of_birth: event.target.value })} />
-            </label>
-          </>
-        )}
-        {user?.role !== 'DOCTOR' && <button type="submit">Update profile</button>}
-      </form>
+      {user?.role !== 'ADMIN' && (
+        <form className="inline profile-form" onSubmit={save}>
+          <label>
+            Name
+            <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+          </label>
+          <label>
+            Phone
+            <input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+          </label>
+          {user?.role === 'PATIENT' && (
+            <>
+              <label>
+                Gender
+                <select value={form.gender} onChange={(event) => setForm({ ...form, gender: event.target.value })}>
+                  <option value="">Select</option>
+                  <option>FEMALE</option>
+                  <option>MALE</option>
+                  <option>OTHER</option>
+                </select>
+              </label>
+              <label>
+                Date of birth
+                <input type="date" value={form.date_of_birth} onChange={(event) => setForm({ ...form, date_of_birth: event.target.value })} />
+              </label>
+            </>
+          )}
+          {user?.role !== 'DOCTOR' && <button type="submit">Update profile</button>}
+        </form>
+      )}
       {user?.role === 'DOCTOR' && (
         <form className="inline profile-form" onSubmit={save}>
           <label>
@@ -241,9 +244,9 @@ function PatientDashboard({ activeSection }) {
   const loadAppointments = () => api.get('/appointments').then(({ data }) => setAppointments(data)).catch(message);
 
   useEffect(() => {
-    loadDoctors();
-    loadAppointments();
-  }, []);
+    if (activeSection === 'find') loadDoctors();
+    if (activeSection === 'appointments') loadAppointments();
+  }, [activeSection]);
 
   const book = async (doctorId, slotId) => {
     try {
@@ -252,7 +255,6 @@ function PatientDashboard({ activeSection }) {
       setPaymentDone(false);
       toast.success('Slot reserved. Complete payment to confirm.');
       loadDoctors();
-      loadAppointments();
     } catch (error) {
       message(error);
     }
@@ -265,8 +267,8 @@ function PatientDashboard({ activeSection }) {
       setPaymentDone(true);
       setPaymentForm({ cardNumber: '', expiryDate: '', cvv: '' });
       toast.success('Payment successful');
-      loadAppointments();
-      loadDoctors();
+      if (activeSection === 'appointments') loadAppointments();
+      if (activeSection === 'find') loadDoctors();
     } catch (error) {
       message(error);
     }
@@ -276,8 +278,8 @@ function PatientDashboard({ activeSection }) {
     try {
       await api.post(`/appointments/${appointmentId}/cancel`);
       toast.success('Appointment cancelled');
-      loadAppointments();
-      loadDoctors();
+      if (activeSection === 'appointments') loadAppointments();
+      if (activeSection === 'find') loadDoctors();
     } catch (error) {
       message(error);
     }
@@ -425,16 +427,13 @@ function DoctorDashboard({ activeSection }) {
   const [cancelReasons, setCancelReasons] = useState({});
   const [editingId, setEditingId] = useState(null);
 
-  const load = () => Promise.all([api.get('/doctor/slots'), api.get('/appointments')])
-    .then(([slotResponse, appointmentResponse]) => {
-      setSlots(slotResponse.data);
-      setAppointments(appointmentResponse.data);
-    })
-    .catch(message);
+  const loadSlots = () => api.get('/doctor/slots').then(({ data }) => setSlots(data)).catch(message);
+  const loadAppointments = () => api.get('/appointments').then(({ data }) => setAppointments(data)).catch(message);
 
   useEffect(() => {
-    load();
-  }, []);
+    if (activeSection === 'availability') loadSlots();
+    if (activeSection === 'snapshot' || activeSection === 'patients') loadAppointments();
+  }, [activeSection]);
 
   const resetForm = () => {
     setForm({ starts_at: '', ends_at: '' });
@@ -456,7 +455,7 @@ function DoctorDashboard({ activeSection }) {
         toast.success('Availability added');
       }
       resetForm();
-      load();
+      loadSlots();
     } catch (error) {
       message(error);
     }
@@ -474,7 +473,7 @@ function DoctorDashboard({ activeSection }) {
     try {
       await api.delete(`/doctor/slots/${slotId}`);
       toast.success('Availability removed');
-      load();
+      loadSlots();
     } catch (error) {
       message(error);
     }
@@ -484,7 +483,7 @@ function DoctorDashboard({ activeSection }) {
     try {
       await api.patch(`/appointments/${appointmentId}/status`, { status });
       toast.success(`Marked ${status}`);
-      load();
+      loadAppointments();
     } catch (error) {
       message(error);
     }
@@ -500,7 +499,7 @@ function DoctorDashboard({ activeSection }) {
       await api.post(`/doctor/appointments/${appointmentId}/cancel-request`, { reason });
       toast.success('Cancellation request sent for admin approval');
       setCancelReasons({ ...cancelReasons, [appointmentId]: '' });
-      load();
+      loadAppointments();
     } catch (error) {
       message(error);
     }
@@ -625,16 +624,14 @@ function AdminDashboard({ activeSection }) {
   const [cancellationRequests, setCancellationRequests] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState([]);
 
-  const load = () => Promise.all([
-    api.get('/admin/statistics'),
-    api.get('/admin/doctors'),
+  const loadStats = () => api.get('/admin/statistics').then(({ data }) => setStats(data)).catch(message);
+  const loadDoctors = () => api.get('/admin/doctors').then(({ data }) => setDoctors(data)).catch(message);
+  const loadActivity = () => Promise.all([
     api.get('/admin/appointments'),
     api.get('/admin/appointments/cancellation-requests'),
     api.get('/admin/doctors/leave-requests'),
   ])
-    .then(([statsResponse, doctorsResponse, appointmentsResponse, cancellationResponse, leaveResponse]) => {
-      setStats(statsResponse.data);
-      setDoctors(doctorsResponse.data);
+    .then(([appointmentsResponse, cancellationResponse, leaveResponse]) => {
       setAppointments(appointmentsResponse.data);
       setCancellationRequests(cancellationResponse.data);
       setLeaveRequests(leaveResponse.data);
@@ -642,14 +639,16 @@ function AdminDashboard({ activeSection }) {
     .catch(message);
 
   useEffect(() => {
-    load();
-  }, []);
+    if (activeSection === 'statistics') loadStats();
+    if (activeSection === 'doctors') loadDoctors();
+    if (activeSection === 'activity') loadActivity();
+  }, [activeSection]);
 
   const activate = async (doctorId, active) => {
     try {
       await api.patch(`/admin/doctors/${doctorId}/activation`, { active });
       toast.success('Doctor account updated');
-      load();
+      loadDoctors();
     } catch (error) {
       message(error);
     }
@@ -666,7 +665,7 @@ function AdminDashboard({ activeSection }) {
     try {
       await api.patch(`/admin/appointments/${appointmentId}/cancellation-request/${action}`);
       toast.success(`Cancellation request ${action}ed`);
-      load();
+      loadActivity();
     } catch (error) {
       message(error);
     }
@@ -676,7 +675,7 @@ function AdminDashboard({ activeSection }) {
     try {
       await api.patch(`/admin/doctors/leave-requests/${requestId}/${action}`);
       toast.success(`Leave request ${action}ed`);
-      load();
+      loadActivity();
     } catch (error) {
       message(error);
     }

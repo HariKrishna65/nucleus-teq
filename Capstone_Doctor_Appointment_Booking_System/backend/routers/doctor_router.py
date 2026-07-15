@@ -54,7 +54,7 @@ def status(appointment_id: str, payload: StatusUpdate, user=Depends(require_role
     return doctor_service.set_status(user["id"], appointment_id, payload.status)
 
 
-@router.patch("/doctor/profile/me")
+@router.patch("/doctor/profile")
 def request_doctor_profile_change(payload: DoctorProfileUpdate, user=Depends(require_role(UserRole.DOCTOR.value))):
     doctor = request_doctor_profile_update(user["id"], payload.model_dump(exclude_unset=True))
     if not doctor:

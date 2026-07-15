@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from backend.enums.user import UserRole, ApprovalStatus
 from backend.exceptions import EmailAlreadyRegisteredException, InvalidCredentialsException
-from backend.services.auth_service import assert_account_can_login, authenticate_user, create_access_token, get_current_user
+from backend.services.auth_service import assert_account_can_login, authenticate_user, create_access_token, require_role
 from backend.services.user_service import create_user, get_user_by_email
 from backend.schemas.request.user import AccountCreate, DoctorCreate, LoginRequest, PatientCreate
 from backend.schemas.response.user import AccountResponse
@@ -60,7 +60,11 @@ def _login_for_role(payload: LoginRequest, expected_role: str):
     assert_account_can_login(user)
     access_token = create_access_token(data={"sub": user["id"], "email": user["email"], "role": user["role"]})
     logger.info("Login succeeded user_id=%s role=%s", user["id"], user["role"])
-    return {"access_token": access_token, "token_type": os.getenv("TOKEN_TYPE_BEARER", "bearer")}
+    return {
+        "access_token": access_token,
+        "token_type": os.getenv("TOKEN_TYPE_BEARER", "bearer"),
+        "user": public_user(user),
+    }
 
 
 @router.post("/patient/login")
@@ -112,11 +116,16 @@ def request_activation(payload: LoginRequest):
     return {"message": "Reactivation request submitted. Pending admin approval."}
 
 
-@profile_router.get("/profile/me")
-def current_profile(user=Depends(get_current_user)):
+@profile_router.get("/patient/profile")
+def current_patient_profile(user=Depends(require_role(UserRole.PATIENT.value))):
     return public_user(user)
 
 
-@profile_router.get("/users/me", include_in_schema=False)
-def current_profile_alias(user=Depends(get_current_user)):
+@profile_router.get("/doctor/profile")
+def current_doctor_profile(user=Depends(require_role(UserRole.DOCTOR.value))):
+    return public_user(user)
+
+
+@profile_router.get("/admin/profile")
+def current_admin_profile(user=Depends(require_role(UserRole.ADMIN.value))):
     return public_user(user)

@@ -16,7 +16,7 @@ from backend.schemas.request.patient import (
 router = APIRouter()
 
 
-@router.patch("/patient/profile/me", tags=["profiles"])
+@router.patch("/patient/profile", tags=["profiles"])
 def update_patient_profile(payload: PatientProfileUpdate, user=Depends(require_role(UserRole.PATIENT.value))):
     return public_user(update_user(user["id"], payload.model_dump(exclude_unset=True), PATIENT_PROFILE_UPDATE_FIELDS))
 
