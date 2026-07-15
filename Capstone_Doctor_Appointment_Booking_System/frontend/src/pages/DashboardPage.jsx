@@ -1,6 +1,5 @@
 // Renders the signed-in user dashboard with profile and appointment workflows.
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
@@ -67,7 +66,7 @@ function DashboardSidebar({ user, activeSection, onSectionChange, logout }) {
   );
 }
 
-function ProfilePanel({ user, onRefresh }) {
+function ProfilePanel({ user, onRefresh, onLogout }) {
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -116,9 +115,20 @@ function ProfilePanel({ user, onRefresh }) {
           gender: form.gender,
           date_of_birth: form.date_of_birth,
         };
-      await api.patch('/profile/me', payload);
-      toast.success('Profile updated');
+      const profileEndpoint = user?.role === 'DOCTOR' ? '/doctor/profile/me' : '/patient/profile/me';
+      await api.patch(profileEndpoint, payload);
+      toast.success(user?.role === 'DOCTOR' ? 'Profile update submitted for approval' : 'Profile updated');
       onRefresh();
+    } catch (error) {
+      message(error);
+    }
+  };
+
+  const deactivateDoctor = async () => {
+    try {
+      await api.post('/doctor/profile/deactivate');
+      toast.success('Profile deactivated. Admin approval is required to activate again.');
+      onLogout();
     } catch (error) {
       message(error);
     }
@@ -208,6 +218,7 @@ function ProfilePanel({ user, onRefresh }) {
             <textarea value={form.clinic_address} onChange={(event) => setForm({ ...form, clinic_address: event.target.value })} />
           </label>
           <button type="submit">Request profile update</button>
+          <button type="button" className="secondary danger-action" onClick={deactivateDoctor}>Deactivate profile</button>
         </form>
       )}
     </section>
@@ -219,6 +230,7 @@ function PatientDashboard({ activeSection }) {
   const [appointments, setAppointments] = useState([]);
   const [pendingPayment, setPendingPayment] = useState(null);
   const [paymentDone, setPaymentDone] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({ cardNumber: '', expiryDate: '', cvv: '' });
   const [appointmentFilter, setAppointmentFilter] = useState('ALL');
   const [filters, setFilters] = useState({ name: '', specialization: '', location: '', min_experience: '', max_fee: '', available: false });
 
@@ -246,10 +258,12 @@ function PatientDashboard({ activeSection }) {
     }
   };
 
-  const completePayment = async () => {
+  const completePayment = async (event) => {
+    event.preventDefault();
     try {
       await api.post('/payments', { appointment_id: pendingPayment.id, method: 'CARD' });
       setPaymentDone(true);
+      setPaymentForm({ cardNumber: '', expiryDate: '', cvv: '' });
       toast.success('Payment successful');
       loadAppointments();
       loadDoctors();
@@ -308,7 +322,7 @@ function PatientDashboard({ activeSection }) {
               <div className="slot-list">
                 {doctor.available_slots.length ? doctor.available_slots.map((slot) => (
                   <button className="slot" key={slot.id} onClick={() => book(doctor.id, slot.id)}>
-                    {new Date(slot.starts_at).toLocaleString()}
+                    Book slot - {new Date(slot.starts_at).toLocaleString()}
                   </button>
                 )) : <p>No slots available</p>}
               </div>
@@ -330,7 +344,46 @@ function PatientDashboard({ activeSection }) {
               <p>{new Date(pendingPayment.starts_at).toLocaleString()}</p>
               <p>Amount: Rs.{pendingPayment.doctor?.consultation_fee || 0}</p>
               <span className="status">{paymentDone ? 'PAYMENT_SUCCESS' : 'PENDING_PAYMENT'}</span>
-              {!paymentDone && <button onClick={completePayment}>Complete payment</button>}
+              {!paymentDone && (
+                <form className="payment-form" onSubmit={completePayment}>
+                  <label>
+                    Card number
+                    <input
+                      inputMode="numeric"
+                      maxLength="19"
+                      pattern="[0-9 ]{16,19}"
+                      placeholder="1234 5678 9012 3456"
+                      required
+                      value={paymentForm.cardNumber}
+                      onChange={(event) => setPaymentForm({ ...paymentForm, cardNumber: event.target.value.replace(/[^\d ]/g, '') })}
+                    />
+                  </label>
+                  <label>
+                    Expiry date
+                    <input
+                      placeholder="MM/YY"
+                      pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
+                      required
+                      value={paymentForm.expiryDate}
+                      onChange={(event) => setPaymentForm({ ...paymentForm, expiryDate: event.target.value })}
+                    />
+                  </label>
+                  <label>
+                    CVV
+                    <input
+                      inputMode="numeric"
+                      maxLength="3"
+                      pattern="[0-9]{3}"
+                      placeholder="123"
+                      required
+                      type="password"
+                      value={paymentForm.cvv}
+                      onChange={(event) => setPaymentForm({ ...paymentForm, cvv: event.target.value.replace(/\D/g, '') })}
+                    />
+                  </label>
+                  <button type="submit">Complete payment</button>
+                </form>
+              )}
             </article>
           ) : <EmptyState title="No payment pending" copy="Reserve a doctor slot and your checkout summary will appear here." />}
         </section>
@@ -368,6 +421,8 @@ function DoctorDashboard({ activeSection }) {
   const [appointments, setAppointments] = useState([]);
   const [appointmentFilter, setAppointmentFilter] = useState('ALL');
   const [form, setForm] = useState({ starts_at: '', ends_at: '' });
+  const [leaveForm, setLeaveForm] = useState({ leave_date: '', reason: '' });
+  const [cancelReasons, setCancelReasons] = useState({});
   const [editingId, setEditingId] = useState(null);
 
   const load = () => Promise.all([api.get('/doctor/slots'), api.get('/appointments')])
@@ -435,6 +490,33 @@ function DoctorDashboard({ activeSection }) {
     }
   };
 
+  const requestAppointmentCancel = async (appointmentId) => {
+    const reason = cancelReasons[appointmentId] || '';
+    if (reason.trim().length < 3) {
+      toast.error('Cancellation reason must be at least 3 characters');
+      return;
+    }
+    try {
+      await api.post(`/doctor/appointments/${appointmentId}/cancel-request`, { reason });
+      toast.success('Cancellation request sent for admin approval');
+      setCancelReasons({ ...cancelReasons, [appointmentId]: '' });
+      load();
+    } catch (error) {
+      message(error);
+    }
+  };
+
+  const requestLeave = async (event) => {
+    event.preventDefault();
+    try {
+      await api.post('/doctor/leave-requests', leaveForm);
+      toast.success('Leave request sent for admin approval');
+      setLeaveForm({ leave_date: '', reason: '' });
+    } catch (error) {
+      message(error);
+    }
+  };
+
   return (
     <>
       {activeSection === 'snapshot' && <section className="panel-section">
@@ -481,6 +563,17 @@ function DoctorDashboard({ activeSection }) {
           ))}
           {!slots.length && <EmptyState title="No availability added" copy="Add your first start and end time so patients can book you." />}
         </div>
+        <form className="inline profile-form leave-form" onSubmit={requestLeave}>
+          <label>
+            Leave date
+            <input type="date" required value={leaveForm.leave_date} onChange={(event) => setLeaveForm({ ...leaveForm, leave_date: event.target.value })} />
+          </label>
+          <label>
+            Reason
+            <textarea required minLength="3" value={leaveForm.reason} onChange={(event) => setLeaveForm({ ...leaveForm, reason: event.target.value })} />
+          </label>
+          <button type="submit">Request leave</button>
+        </form>
       </section>}
       {activeSection === 'patients' && <section className="panel-section">
         <div className="section-heading">
@@ -488,7 +581,7 @@ function DoctorDashboard({ activeSection }) {
           <h2>Patient appointments</h2>
         </div>
         <div className="filters">
-          {['ALL', 'BOOKED', 'COMPLETED', 'CANCELLED', 'NO_SHOW', 'PENDING_PAYMENT'].map((status) => (
+          {['ALL', 'BOOKED', 'COMPLETED', 'CANCELLED', 'PENDING_PAYMENT'].map((status) => (
             <button className={appointmentFilter === status ? 'active-filter' : 'secondary'} key={status} onClick={() => setAppointmentFilter(status)}>{status}</button>
           ))}
         </div>
@@ -500,10 +593,19 @@ function DoctorDashboard({ activeSection }) {
               <p>{new Date(item.starts_at).toLocaleString()}</p>
               <span className="status">{item.status}</span>
               {item.status === 'BOOKED' && (
-                <div className="actions">
-                  <button onClick={() => updateStatus(item.id, 'COMPLETED')}>Complete</button>
-                  <button className="secondary" onClick={() => updateStatus(item.id, 'NO_SHOW')}>No show</button>
-                </div>
+                <>
+                  <div className="actions">
+                    <button onClick={() => updateStatus(item.id, 'COMPLETED')}>Complete</button>
+                  </div>
+                  <div className="cancel-request-box">
+                    <textarea
+                      placeholder="Cancellation reason"
+                      value={cancelReasons[item.id] || ''}
+                      onChange={(event) => setCancelReasons({ ...cancelReasons, [item.id]: event.target.value })}
+                    />
+                    <button className="secondary" onClick={() => requestAppointmentCancel(item.id)}>Request cancel</button>
+                  </div>
+                </>
               )}
             </article>
           ))}
@@ -520,12 +622,22 @@ function AdminDashboard({ activeSection }) {
   const [stats, setStats] = useState({});
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [cancellationRequests, setCancellationRequests] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
 
-  const load = () => Promise.all([api.get('/admin/statistics'), api.get('/admin/doctors'), api.get('/admin/appointments')])
-    .then(([statsResponse, doctorsResponse, appointmentsResponse]) => {
+  const load = () => Promise.all([
+    api.get('/admin/statistics'),
+    api.get('/admin/doctors'),
+    api.get('/admin/appointments'),
+    api.get('/admin/appointments/cancellation-requests'),
+    api.get('/admin/doctors/leave-requests'),
+  ])
+    .then(([statsResponse, doctorsResponse, appointmentsResponse, cancellationResponse, leaveResponse]) => {
       setStats(statsResponse.data);
       setDoctors(doctorsResponse.data);
       setAppointments(appointmentsResponse.data);
+      setCancellationRequests(cancellationResponse.data);
+      setLeaveRequests(leaveResponse.data);
     })
     .catch(message);
 
@@ -548,6 +660,26 @@ function AdminDashboard({ activeSection }) {
       return 'Approve';
     }
     return doctor.active ? 'Deactivate' : 'Activate';
+  };
+
+  const reviewCancellation = async (appointmentId, action) => {
+    try {
+      await api.patch(`/admin/appointments/${appointmentId}/cancellation-request/${action}`);
+      toast.success(`Cancellation request ${action}ed`);
+      load();
+    } catch (error) {
+      message(error);
+    }
+  };
+
+  const reviewLeave = async (requestId, action) => {
+    try {
+      await api.patch(`/admin/doctors/leave-requests/${requestId}/${action}`);
+      toast.success(`Leave request ${action}ed`);
+      load();
+    } catch (error) {
+      message(error);
+    }
   };
 
   return (
@@ -590,6 +722,42 @@ function AdminDashboard({ activeSection }) {
           <p className="eyebrow">Live activity</p>
           <h2>Monitor appointments</h2>
         </div>
+        <div className="admin-review-grid">
+          <section>
+            <h3>Cancellation requests</h3>
+            <div className="grid timeline-grid">
+              {cancellationRequests.map((appointment) => (
+                <article className="timeline-card" key={appointment.id}>
+                  <h3>{appointment.patient?.name}{' -> '}Dr. {appointment.doctor?.name}</h3>
+                  <p>{new Date(appointment.starts_at).toLocaleString()}</p>
+                  <p>{appointment.doctor_cancellation_reason}</p>
+                  <div className="actions">
+                    <button onClick={() => reviewCancellation(appointment.id, 'accept')}>Approve</button>
+                    <button className="secondary" onClick={() => reviewCancellation(appointment.id, 'reject')}>Reject</button>
+                  </div>
+                </article>
+              ))}
+              {!cancellationRequests.length && <EmptyState title="No cancellation requests" copy="Doctor cancellation requests will appear here." />}
+            </div>
+          </section>
+          <section>
+            <h3>Leave requests</h3>
+            <div className="grid timeline-grid">
+              {leaveRequests.map((request) => (
+                <article className="timeline-card" key={request.id}>
+                  <h3>Dr. {request.doctor?.name}</h3>
+                  <p>{request.leave_date}</p>
+                  <p>{request.reason}</p>
+                  <div className="actions">
+                    <button onClick={() => reviewLeave(request.id, 'accept')}>Approve</button>
+                    <button className="secondary" onClick={() => reviewLeave(request.id, 'reject')}>Reject</button>
+                  </div>
+                </article>
+              ))}
+              {!leaveRequests.length && <EmptyState title="No leave requests" copy="Doctor leave requests will appear here." />}
+            </div>
+          </section>
+        </div>
         <div className="grid timeline-grid">
           {appointments.map((appointment) => (
             <article className="timeline-card" key={appointment.id}>
@@ -608,7 +776,6 @@ function AdminDashboard({ activeSection }) {
 export default function DashboardPage() {
   const { user, logout, refreshUser } = useAuth();
   const [activeSection, setActiveSection] = useState(null);
-  const navigate = useNavigate();
 
   if (!user) {
     return <main className="auth-card"><p>Loading your dashboard...</p></main>;
@@ -644,7 +811,6 @@ export default function DashboardPage() {
 
     return (
       <div className={`app-shell role-${user.role.toLowerCase()}`}>
-        <button className="corner-back-button" type="button" onClick={() => navigate(-1)} aria-label="Go back">&larr;</button>
         <DashboardSidebar user={user} activeSection={selectedSection} onSectionChange={setActiveSection} logout={logout} />
         <header>
         <div>
@@ -675,17 +841,17 @@ export default function DashboardPage() {
         </section>}
         {user.role === 'PATIENT' && (
           <section className="role-dashboard patient-dashboard">
-            {selectedSection === 'profile' ? <ProfilePanel user={user} onRefresh={refreshUser} /> : <PatientDashboard activeSection={selectedSection} />}
+            {selectedSection === 'profile' ? <ProfilePanel user={user} onRefresh={refreshUser} onLogout={logout} /> : <PatientDashboard activeSection={selectedSection} />}
           </section>
         )}
         {user.role === 'DOCTOR' && (
           <section className="role-dashboard doctor-dashboard">
-            {selectedSection === 'profile' ? <ProfilePanel user={user} onRefresh={refreshUser} /> : <DoctorDashboard activeSection={selectedSection} />}
+            {selectedSection === 'profile' ? <ProfilePanel user={user} onRefresh={refreshUser} onLogout={logout} /> : <DoctorDashboard activeSection={selectedSection} />}
           </section>
         )}
         {user.role === 'ADMIN' && (
           <section className="role-dashboard admin-dashboard">
-            {selectedSection === 'profile' ? <ProfilePanel user={user} onRefresh={refreshUser} /> : <AdminDashboard activeSection={selectedSection} />}
+            {selectedSection === 'profile' ? <ProfilePanel user={user} onRefresh={refreshUser} onLogout={logout} /> : <AdminDashboard activeSection={selectedSection} />}
           </section>
         )}
       </main>

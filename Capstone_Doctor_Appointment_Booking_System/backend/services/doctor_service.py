@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 from uuid import uuid4
 
+from backend.enums.appointment import CancellationRequestStatus
 from backend.database import database as db_service
 from backend.services.shared_service import utcnow, parse, enrich
 from backend.constants import (
@@ -91,7 +92,7 @@ def delete_slot(doctor_id, slot_id):
 
 
 def request_doctor_cancellation(doctor_id, appointment_id, reason):
-    from backend.enums.appointment import AppointmentStatus, CancellationRequestStatus
+    from backend.enums.appointment import AppointmentStatus
     appointments = db_service.get_appointments()
     item = next((a for a in appointments if a["id"] == appointment_id and a["doctor_id"] == doctor_id), None)
     if not item:
@@ -106,6 +107,30 @@ def request_doctor_cancellation(doctor_id, appointment_id, reason):
     db_service.save_appointments(appointments)
     logger.info("Doctor cancellation requested appointment_id=%s doctor_id=%s", appointment_id, doctor_id)
     return enrich(item)
+
+
+def request_leave(doctor_id, payload):
+    leave_date = payload.leave_date.isoformat()
+    requests = db_service.get_leave_requests()
+    if any(
+        item["doctor_id"] == doctor_id
+        and item["leave_date"] == leave_date
+        and item["status"] == CancellationRequestStatus.PENDING.value
+        for item in requests
+    ):
+        raise ConflictException("Leave request is already pending for this date")
+    leave_request = {
+        "id": str(uuid4()),
+        "doctor_id": doctor_id,
+        "leave_date": leave_date,
+        "reason": payload.reason.strip(),
+        "status": CancellationRequestStatus.PENDING.value,
+        "requested_at": utcnow().isoformat(),
+    }
+    requests.append(leave_request)
+    db_service.save_leave_requests(requests)
+    logger.info("Doctor leave requested leave_request_id=%s doctor_id=%s leave_date=%s", leave_request["id"], doctor_id, leave_date)
+    return leave_request
 
 
 def set_status(doctor_id, appointment_id, status):

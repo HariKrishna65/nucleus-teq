@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -30,6 +30,11 @@ class SlotUpdate(BaseModel):
 
 
 class DoctorCancellationRequest(BaseModel):
+    reason: str = Field(min_length=3, max_length=500)
+
+
+class DoctorLeaveRequest(BaseModel):
+    leave_date: date
     reason: str = Field(min_length=3, max_length=500)
 
 

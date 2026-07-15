@@ -35,13 +35,13 @@ describe('RegisterPage', () => {
     api.post.mockResolvedValueOnce({ data: {} });
     renderPage();
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Jane Patient' } });
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'jane@example.com' } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'jane@gmail.com' } });
     fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: '9876543210' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'Secure@1' } });
     fireEvent.change(screen.getByLabelText(/date of birth/i), { target: { value: '1995-04-12' } });
     fireEvent.click(screen.getByRole('button', { name: /register/i }));
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/auth/patient/register', expect.objectContaining({
-      email: 'jane@example.com',
+      email: 'jane@gmail.com',
     })));
   });
 
@@ -49,7 +49,7 @@ describe('RegisterPage', () => {
     api.post.mockResolvedValueOnce({ data: {} });
     renderPage({ fixedRole: 'DOCTOR', title: 'Doctor registration' });
     fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'Dana Doctor' } });
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'doctor@example.com' } });
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'doctor@gmail.com' } });
     fireEvent.change(screen.getByLabelText(/phone/i), { target: { value: '9876543211' } });
     fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'Secure@1' } });
     fireEvent.change(screen.getByLabelText(/qualification/i), { target: { value: 'MBBS' } });
@@ -60,7 +60,7 @@ describe('RegisterPage', () => {
     fireEvent.change(screen.getByLabelText(/clinic address/i), { target: { value: 'Central Clinic' } });
     fireEvent.click(screen.getByRole('button', { name: /register/i }));
     await waitFor(() => expect(api.post).toHaveBeenCalledWith('/auth/doctor/register', expect.objectContaining({
-      email: 'doctor@example.com',
+      email: 'doctor@gmail.com',
       qualification: 'MBBS',
     })));
   });

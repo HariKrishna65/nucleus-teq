@@ -11,6 +11,7 @@ DOCTORS_FILE = DATA_DIR / "doctors.json"
 SLOTS_FILE = DATA_DIR / "slots.json"
 APPOINTMENTS_FILE = DATA_DIR / "appointments.json"
 PAYMENTS_FILE = DATA_DIR / "payments.json"
+LEAVE_REQUESTS_FILE = DATA_DIR / "leave_requests.json"
 
 COLLECTIONS = {
     USERS_FILE: "users",
@@ -18,6 +19,7 @@ COLLECTIONS = {
     SLOTS_FILE: "slots",
     APPOINTMENTS_FILE: "appointments",
     PAYMENTS_FILE: "payments",
+    LEAVE_REQUESTS_FILE: "leave_requests",
 }
 _mongo_client = None
 _indexes_ready = False
@@ -64,7 +66,7 @@ def ensure_data_dir() -> None:
         USERS_FILE.write_text(json.dumps([], indent=2), encoding="utf-8")
     if not DOCTORS_FILE.exists():
         DOCTORS_FILE.write_text(json.dumps([], indent=2), encoding="utf-8")
-    for path in (SLOTS_FILE, APPOINTMENTS_FILE, PAYMENTS_FILE):
+    for path in (SLOTS_FILE, APPOINTMENTS_FILE, PAYMENTS_FILE, LEAVE_REQUESTS_FILE):
         if not path.exists():
             path.write_text(json.dumps([], indent=2), encoding="utf-8")
 
@@ -129,4 +131,12 @@ def get_payments():
 
 def save_payments(items):
     return save_json(PAYMENTS_FILE, items)
+
+
+def get_leave_requests():
+    return load_json(LEAVE_REQUESTS_FILE, [])
+
+
+def save_leave_requests(items):
+    return save_json(LEAVE_REQUESTS_FILE, items)
 

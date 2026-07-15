@@ -2,13 +2,20 @@ import re
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 from backend.enums.user import UserRole
 
 
 NAME_PATTERN = re.compile(r"^[A-Za-z' -]+$")
 PASSWORD_PATTERN = re.compile(r"^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,12}$")
+GMAIL_DOMAIN_MESSAGE = "Email must end with @gmail.com"
+
+
+def validate_gmail_email(value: EmailStr) -> EmailStr:
+    if not value.lower().endswith("@gmail.com"):
+        raise ValueError(GMAIL_DOMAIN_MESSAGE)
+    return value
 
 
 class AccountCreate(BaseModel):
@@ -28,10 +35,8 @@ class AccountCreate(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
-        if not v.lower().endswith("@gmail.com"):
-            raise ValueError("Email must end with @gmail.com")
-        return v
+    def email_must_be_gmail(cls, value: EmailStr) -> EmailStr:
+        return validate_gmail_email(value)
 
     @model_validator(mode="after")
     def validate_registration(self):
@@ -63,10 +68,8 @@ class PatientCreate(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
-        if not v.lower().endswith("@gmail.com"):
-            raise ValueError("Email must end with @gmail.com")
-        return v
+    def email_must_be_gmail(cls, value: EmailStr) -> EmailStr:
+        return validate_gmail_email(value)
 
     @model_validator(mode="after")
     def validate_patient_registration(self):
@@ -93,10 +96,8 @@ class DoctorCreate(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
-        if not v.lower().endswith("@gmail.com"):
-            raise ValueError("Email must end with @gmail.com")
-        return v
+    def email_must_be_gmail(cls, value: EmailStr) -> EmailStr:
+        return validate_gmail_email(value)
 
     @model_validator(mode="after")
     def validate_doctor_registration(self):
@@ -113,7 +114,6 @@ class LoginRequest(BaseModel):
 
     @field_validator("email")
     @classmethod
-    def validate_gmail_email(cls, v: EmailStr) -> EmailStr:
-        if not v.lower().endswith("@gmail.com"):
-            raise ValueError("Email must end with @gmail.com")
-        return v
+    def email_must_be_gmail(cls, value: EmailStr) -> EmailStr:
+        return validate_gmail_email(value)
+

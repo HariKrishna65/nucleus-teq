@@ -53,6 +53,21 @@ def reject_cancellation_request(appointment_id: str, user=Depends(require_role(U
     return admin_service.reject_doctor_cancellation(appointment_id)
 
 
+@router.get("/admin/doctors/leave-requests")
+def leave_requests(user=Depends(require_role(UserRole.ADMIN.value))):
+    return admin_service.pending_doctor_leave_requests()
+
+
+@router.patch("/admin/doctors/leave-requests/{request_id}/accept")
+def accept_leave_request(request_id: str, user=Depends(require_role(UserRole.ADMIN.value))):
+    return admin_service.accept_doctor_leave_request(request_id)
+
+
+@router.patch("/admin/doctors/leave-requests/{request_id}/reject")
+def reject_leave_request(request_id: str, user=Depends(require_role(UserRole.ADMIN.value))):
+    return admin_service.reject_doctor_leave_request(request_id)
+
+
 @router.get("/admin/doctors")
 def admin_doctors(user=Depends(require_role(UserRole.ADMIN.value))):
     from backend.services import patient_service

@@ -9,6 +9,7 @@ from backend.schemas.request.doctor import (
     SlotCreate,
     SlotUpdate,
     DoctorCancellationRequest,
+    DoctorLeaveRequest,
     StatusUpdate,
     DoctorProfileUpdate,
 )
@@ -41,6 +42,11 @@ def remove_slot(slot_id: str, user=Depends(require_role(UserRole.DOCTOR.value)))
 @router.post("/doctor/appointments/{appointment_id}/cancel-request")
 def request_doctor_cancel(appointment_id: str, payload: DoctorCancellationRequest, user=Depends(require_role(UserRole.DOCTOR.value))):
     return doctor_service.request_doctor_cancellation(user["id"], appointment_id, payload.reason)
+
+
+@router.post("/doctor/leave-requests", status_code=201)
+def request_doctor_leave(payload: DoctorLeaveRequest, user=Depends(require_role(UserRole.DOCTOR.value))):
+    return doctor_service.request_leave(user["id"], payload)
 
 
 @router.patch("/appointments/{appointment_id}/status")
