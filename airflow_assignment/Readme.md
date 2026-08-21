@@ -66,7 +66,7 @@ To bypass the web interface and save laptop battery levels, the workflow is laun
 The following five image assets are attached to document the successful endpoint call, control board state updates, and verification of the system logs:
 
 1. **`airflow_assignment/api_request.png**  
-   Shows the active parameter interface configuration inside Swagger UI, passing the targeted `zombie_survival_protocol` path parameter and staging the execution layout context.
+   Shows the active parameter interface configuration inside Swagger UI, passing the targeted zombie_survival_protocol path parameter and staging the execution layout context.
 
 2. **airflow_assignment/api_response.png**  
    Captures the raw terminal/server communication payload returned directly beneath the request block, verifying authorization parameters and processing handshakes.
